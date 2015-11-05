@@ -48,16 +48,25 @@ public final class RegisterVector
     this(new ModuleVector(deviceName, moduleName), registerName);
   }
 
+  @NotNull
   public ModuleVector getModule()
   {
     return module;
   }
 
+  @NotNull
   public String getRegisterName()
   {
     return registerName;
   }
 
+  @NotNull
+  public RegisterBitGrpVector withBitGrp(@NotNull String groupName)
+  {
+    return new RegisterBitGrpVector(this, groupName);
+  }
+
+  @NotNull
   public RegisterVector withRegister(@NotNull String registerName)
   {
     return new RegisterVector(module, registerName);

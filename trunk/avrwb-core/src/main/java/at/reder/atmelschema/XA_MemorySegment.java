@@ -22,8 +22,8 @@
 package at.reder.atmelschema;
 
 import at.reder.avrwb.annotations.XmlEntity;
-import at.reder.avrwb.core.MemoryAccessSet;
-import at.reder.avrwb.core.MemoryType;
+import at.reder.avrwb.avr8.MemoryAccessSet;
+import at.reder.avrwb.avr8.MemoryType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlSchemaType;
 

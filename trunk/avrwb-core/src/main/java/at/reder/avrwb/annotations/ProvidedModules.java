@@ -28,14 +28,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ThreadSave
+public @interface ProvidedModules
 {
+
+  ProvidedModule[] value();
 
 }

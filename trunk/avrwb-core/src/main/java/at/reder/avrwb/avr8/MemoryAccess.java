@@ -19,10 +19,8 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.atmelschema.util;
+package at.reder.avrwb.avr8;
 
-import at.reder.avrwb.avr8.MemoryAccess;
-import at.reder.avrwb.avr8.MemoryAccessSet;
 import at.reder.avrwb.annotations.Stateless;
 import at.reder.avrwb.annotations.ThreadSave;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
@@ -31,40 +29,68 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  *
  * @author Wolfgang Reder
  */
-@ThreadSave
-@Stateless
-public final class NoExecuteMemoryAccessAdapter extends XmlAdapter<String, MemoryAccessSet>
+public enum MemoryAccess
 {
+  READ('R'),
+  WRITE('W'),
+  EXECUTE('X');
 
-  @Override
-  public MemoryAccessSet unmarshal(String v) throws IllegalArgumentException
+  @Stateless
+  @ThreadSave
+  public static final class Adapter extends XmlAdapter<String, MemoryAccess>
   {
-    if (v == null) {
-      return null;
-    }
-    MemoryAccessSet result = new MemoryAccessSet();
-    for (char ch : v.toCharArray()) {
-      MemoryAccess tmp = MemoryAccess.valueOf(ch);
-      if (tmp != MemoryAccess.EXECUTE) {
-        result.add(tmp);
+
+    @Override
+    public MemoryAccess unmarshal(String v)
+    {
+      if (v == null) {
+        return null;
+      }
+      switch (v) {
+        case "R":
+          return READ;
+        case "W":
+          return WRITE;
+        case "X":
+          return EXECUTE;
+        default:
+          return valueOf(v);
       }
     }
-    return result;
+
+    @Override
+    public String marshal(MemoryAccess v)
+    {
+      if (v == null) {
+        return null;
+      }
+      return Character.toString(v.sign());
+    }
+
+  }
+  private final char sign;
+
+  private MemoryAccess(char sign)
+  {
+    this.sign = sign;
   }
 
-  @Override
-  public String marshal(MemoryAccessSet v)
+  public char sign()
   {
-    if (v == null) {
-      return null;
+    return sign;
+  }
+
+  public static MemoryAccess valueOf(char ch)
+  {
+    switch (ch) {
+      case 'R':
+        return READ;
+      case 'W':
+        return WRITE;
+      case 'X':
+        return EXECUTE;
     }
-    StringBuilder b = new StringBuilder();
-    for (MemoryAccess a : v) {
-      if (a != MemoryAccess.EXECUTE) {
-        b.append(a.sign());
-      }
-    }
-    return b.toString();
+    throw new IllegalArgumentException();
   }
 
 }

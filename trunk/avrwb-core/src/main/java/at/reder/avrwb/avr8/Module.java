@@ -19,23 +19,52 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.api.ClockSink;
+import at.reder.avrwb.avr8.api.Resetable;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Die Klasse ist ThreadSave.
+ * Basiseigenschaften und funktionalität für Untermodule.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface Module extends Resetable, ClockSink
 {
+
+  /**
+   * Kurzname des Moduls (z.B CPU).
+   *
+   * @return name
+   */
+  @NotNull
+  public String getName();
+
+  /**
+   * Vollständiger name des Moduls.
+   *
+   * @return caption;
+   */
+  @NotNull
+  public String getCaption();
+
+  /**
+   * Paramter des Moduls.
+   *
+   * @return paramMap
+   */
+  @NotNull
+  public Map<String, String> getParam();
+
+  /**
+   * Liste der Register des Moduls.
+   *
+   * @return
+   */
+  @NotNull
+  public List<Register> getRegister();
 
 }

@@ -19,23 +19,23 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8.helper;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.logging.Logger;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public final class AVRWBDefaults
 {
 
+  public static final Logger LOGGER = Logger.getLogger("at.reder.avrwb");
+  public static final double VOLTAGE_MIN = 2.7;
+  public static final double VOLTAGE_MAX = 5.5;
+  public static final long SPEED_MAX = 20_000_000;
+  public static final double TEMP_MIN = -40;
+  public static final double TEMP_MAX = 85;
+
+  public static final String MODULENAME_CPU = "CPU";
 }

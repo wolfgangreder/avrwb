@@ -21,21 +21,26 @@
  */
 package at.reder.avrwb.annotations;
 
+import at.reder.avrwb.avr8.AVRCoreVersion;
+import at.reder.avrwb.avr8.Architecture;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Die Klasse ist ThreadSave.
- *
- * @author Wolfgang Reder
- */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface ThreadSave
+@Repeatable(ProvidedModules.class)
+public @interface ProvidedModule
 {
+
+  Architecture architecture();
+
+  AVRCoreVersion[] core();
+
+  String[] value();
 
 }

@@ -28,14 +28,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Die Klasse ist ThreadSave.
+ * Für diesem Parameter ist {@code null} erlaubt. Der optionale Parameter {@code value} beschreibt das Verhalten oder den
+ * Standardwert wenn {@code null} übergeben wird (z.B. Wildcard bei Suche,...)
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
+@Target({ElementType.PARAMETER, ElementType.METHOD})
+@Retention(RetentionPolicy.CLASS)
 @Documented
-public @interface ThreadSave
+public @interface NullAllowed
 {
+
+  public String value() default "";
 
 }

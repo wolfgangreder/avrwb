@@ -19,23 +19,22 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.io;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface MemoryChunkOutputStream extends Closeable
 {
+
+  public void write(@NotNull MemoryChunk chunk) throws IOException;
+
+  @Override
+  public void close() throws IOException;
 
 }

@@ -19,23 +19,49 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8.api;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
 
 /**
- * Die Klasse ist ThreadSave.
+ * Bestimmt den aktuellen Zustand des Taktsignals seit Reset. Für die Taktphasen {@link ClockPhase#FALLING} und
+ * {@link ClockPhase#RISING}.
+ *
+ * @see ClockPhase
+ * @see ClockSink
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface ClockState
 {
+
+  /**
+   * Bestimmt den aktuellen zustand des Taktsignals.
+   *
+   * @return aktulle Taktphase
+   */
+  @NotNull
+  public ClockPhase getPhase();
+
+  /**
+   * Bestimmt der wievielte Taktzyklus gerade läuft.
+   *
+   * @return Anzahl der takte seit letztem Reset
+   */
+  public long getCycleCount();
+
+  /**
+   * Bestimmt die eingestellte Taktfrequenz in Herz.
+   *
+   * @return Aktuelle Taktfrequenz
+   */
+  public long getClockFrequency();
+
+  /**
+   * Bestimmt die Zeit in Nanosekunden seit Reset.
+   *
+   * @return Zeit seit letztem Reset
+   */
+  public long getCurrentNanos();
 
 }

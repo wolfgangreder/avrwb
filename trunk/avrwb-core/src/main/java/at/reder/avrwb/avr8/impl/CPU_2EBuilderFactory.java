@@ -19,23 +19,32 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8.impl;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.ProvidedModule;
+import at.reder.avrwb.annotations.ProvidedModules;
+import at.reder.avrwb.avr8.AVRCoreVersion;
+import at.reder.avrwb.avr8.Architecture;
+import at.reder.avrwb.avr8.CPUBuilder;
+import at.reder.avrwb.avr8.CPUBuilderFactory;
+import at.reder.avrwb.avr8.ModuleBuilderFactory;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+@ServiceProvider(service = ModuleBuilderFactory.class, path = "avrwb")
+@ProvidedModules({
+  @ProvidedModule(core = AVRCoreVersion.V2E, architecture = Architecture.AVR8, value = "CPU")
+})
+public final class CPU_2EBuilderFactory implements CPUBuilderFactory
 {
+
+  @Override
+  public CPUBuilder createBuilder()
+  {
+    return new CPU_2EBuilder();
+  }
 
 }

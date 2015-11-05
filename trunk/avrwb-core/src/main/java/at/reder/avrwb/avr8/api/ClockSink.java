@@ -19,20 +19,25 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8.api;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface AVRCoreProvider
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public interface ClockSink
 {
 
-  String[] value();
+  /**
+   * Wird bei einem Taktereignis aufgerufen. {@code clockState.getPhase()} ist immer entwender {@code ClockPhase.RISING} oder
+   * {@code ClockPhase.FALLING}.
+   *
+   * @see ClockState
+   * @see ClockPhase
+   * @param clockState aktueller Takt
+   */
+  public void onClock(@NotNull ClockState clockState);
 
 }
