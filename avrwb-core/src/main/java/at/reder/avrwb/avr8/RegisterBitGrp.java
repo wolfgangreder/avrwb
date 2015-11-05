@@ -19,23 +19,51 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.annotations.NotThreadSave;
+import java.util.List;
 
 /**
- * Die Klasse ist ThreadSave.
+ * Beschreibt ein Bit(feld) eines Registers. Wenn es sich um ein Bitfeld handelt, kann mit {@link #getValues()} ein Liste der
+ * möglich Bitkombinationen und deren Bedeutung erfragt werden.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+@NotThreadSave
+public interface RegisterBitGrp
 {
+
+  /**
+   * Der Kurzame des Bit(felde)s.
+   *
+   * @return name
+   */
+  @NotNull
+  public String getName();
+
+  /**
+   * Der vollständige Name des Bit(felde)s
+   *
+   * @return caption
+   */
+  @NotNull
+  public String getCaption();
+
+  /**
+   * Maske der Bits innerhalb des Registers.
+   *
+   * @return mask
+   */
+  public int getMask();
+
+  /**
+   * Liste mit den möglichen Bitkombinationen
+   *
+   * @return values
+   */
+  @NotNull
+  public List<RegisterBitGrpValue> getValues();
 
 }

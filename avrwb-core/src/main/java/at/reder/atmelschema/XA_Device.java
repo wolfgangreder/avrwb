@@ -22,8 +22,8 @@
 package at.reder.atmelschema;
 
 import at.reder.avrwb.annotations.XmlEntity;
-import at.reder.avrwb.core.Architecture;
-import at.reder.avrwb.core.Family;
+import at.reder.avrwb.avr8.Architecture;
+import at.reder.avrwb.avr8.Family;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;

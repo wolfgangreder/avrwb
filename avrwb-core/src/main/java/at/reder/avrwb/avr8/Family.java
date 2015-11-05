@@ -19,23 +19,38 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public enum Family
 {
+  tinyAVR,
+  megaAVR,
+  AVR_XMEGA;
 
+  public static final class Adapter extends XmlAdapter<String, Family>
+  {
+
+    @Override
+    public Family unmarshal(String v)
+    {
+      if (v == null) {
+        return null;
+      }
+      String tmp = v.replace(' ', '_');
+      return valueOf(tmp);
+    }
+
+    @Override
+    public String marshal(Family v)
+    {
+      return v.name();
+    }
+
+  }
 }

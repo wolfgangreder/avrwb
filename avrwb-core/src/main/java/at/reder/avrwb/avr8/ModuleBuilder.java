@@ -19,23 +19,26 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.atmelschema.XA_AvrToolsDeviceFile;
+import at.reder.atmelschema.XA_Module;
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
+ * @param <B> implementierende Klasse
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface ModuleBuilder<B extends ModuleBuilder>
 {
+
+  @NotNull
+  public B fromDescriptor(@NotNull XA_AvrToolsDeviceFile file,
+                          @NotNull XA_Module module) throws NullPointerException, IllegalArgumentException;
+
+  @NotNull
+  public Module build() throws IllegalStateException, ItemNotFoundException;
 
 }

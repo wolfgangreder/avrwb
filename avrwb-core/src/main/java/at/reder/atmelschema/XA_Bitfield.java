@@ -72,7 +72,6 @@ public final class XA_Bitfield
 
   @XmlAttribute(name = "values")
   @XmlSchemaType(name = "xs:string")
-
   public String getValues()
   {
     return values;

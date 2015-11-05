@@ -19,23 +19,28 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package at.reder.avrwb.avr8.api;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public enum ClockPhase
 {
-
+  /**
+   * Steigende Flanke
+   */
+  RISING,
+  /**
+   * HI
+   */
+  HI,
+  /**
+   * Fallende Flanke
+   */
+  FALLING,
+  /**
+   * LO
+   */
+  LO;
 }

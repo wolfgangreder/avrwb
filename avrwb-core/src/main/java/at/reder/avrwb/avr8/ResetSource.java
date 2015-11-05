@@ -19,23 +19,12 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-/**
- * Die Klasse ist ThreadSave.
- *
- * @author Wolfgang Reder
- */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public enum ResetSource
 {
-
+  POWER_UP,
+  EXTERNAL,
+  WATCHDOG,
+  BROWN_OUT;
 }

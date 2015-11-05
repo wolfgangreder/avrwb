@@ -19,23 +19,30 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8.impl;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.atmelschema.XA_AvrToolsDeviceFile;
+import at.reder.atmelschema.XA_Module;
+import at.reder.avrwb.avr8.CPU;
+import at.reder.avrwb.avr8.CPUBuilder;
+import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+final class CPU_2EBuilder implements CPUBuilder
 {
+
+  @Override
+  public CPUBuilder fromDescriptor(XA_AvrToolsDeviceFile file,
+                                   XA_Module module) throws NullPointerException, IllegalArgumentException
+  {
+  }
+
+  @Override
+  public CPU build() throws IllegalStateException, ItemNotFoundException
+  {
+  }
 
 }

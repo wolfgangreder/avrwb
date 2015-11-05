@@ -72,6 +72,7 @@
           <detectLinks>true</detectLinks>
           <includeDependencySources>false</includeDependencySources>     
           <links>
+            <link>http://testng.org/javadocs</link>
             <link>http://bits.netbeans.org/dev/javadoc/org-openide-util-lookup</link>
             <link>http://bits.netbeans.org/dev/javadoc/org-openide-util</link>
           </links>

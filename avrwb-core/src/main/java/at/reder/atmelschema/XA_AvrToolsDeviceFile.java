@@ -211,7 +211,7 @@ public final class XA_AvrToolsDeviceFile
   }
 
   @NotNull
-  public List<XA_ValueGroup> findValueGroup(@NotNull RegisterVector registerVector)
+  public List<XA_ValueGroup> findValueGroups(@NotNull RegisterVector registerVector)
   {
     XA_Register register = findRegister(registerVector);
     if (register == null) {
@@ -219,6 +219,35 @@ public final class XA_AvrToolsDeviceFile
     }
     XA_Module module = findModule(registerVector.getModule());
     return module.getValueGroups();
+  }
+
+  public XA_Bitfield findBitField(@NotNull RegisterBitGrpVector grp)
+  {
+    XA_Module module = findModule(grp.getRegister().getModule());
+    if (module != null) {
+      for (XA_RegisterGroup rg : module.getRegisterGroups()) {
+        for (XA_Register reg : rg.getRegister()) {
+          if (grp.getRegister().getRegisterName().equals(reg.getName())) {
+            for (XA_Bitfield bf : reg.getBitfields()) {
+              if (grp.getName().equals(bf.getName())) {
+                return bf;
+              }
+            }
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  public XA_ValueGroup findValueGroup(@NotNull RegisterBitGrpVector registerBitGrpVector)
+  {
+    for (XA_ValueGroup g : findValueGroups(registerBitGrpVector.getRegister())) {
+      if (registerBitGrpVector.getName().equals(g.getName())) {
+        return g;
+      }
+    }
+    return null;
   }
 
 }

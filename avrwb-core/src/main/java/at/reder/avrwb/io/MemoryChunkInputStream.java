@@ -19,23 +19,30 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.io;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.Closeable;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface MemoryChunkInputStream extends Closeable
 {
+
+  public void setMaxChunkSize(int maxChunkSite) throws IllegalArgumentException;
+
+  public int getMaxChunkSize();
+
+  public MemoryChunk read() throws IOException;
+
+  public MemoryChunk read(int maxChunkSize) throws IOException, IllegalArgumentException;
+
+  public MemoryChunk read(ByteBuffer buffer) throws IOException;
+
+  @Override
+  public void close() throws IOException;
 
 }

@@ -19,23 +19,20 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 
 /**
- * Die Klasse ist ThreadSave.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface CPUBuilder extends ModuleBuilder<CPUBuilder>
 {
+
+  @NotNull
+  @Override
+  public CPU build() throws IllegalStateException, ItemNotFoundException;
 
 }

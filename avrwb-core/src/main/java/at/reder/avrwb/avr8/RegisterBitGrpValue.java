@@ -19,23 +19,39 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.annotations;
+package at.reder.avrwb.avr8;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import at.reder.avrwb.annotations.NotNull;
 
 /**
- * Die Klasse ist ThreadSave.
+ * Möglicher Wert eines Bitfeldes.
  *
  * @author Wolfgang Reder
  */
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.SOURCE)
-@Documented
-public @interface ThreadSave
+public interface RegisterBitGrpValue
 {
+
+  /**
+   * Kurzname des Werts.
+   *
+   * @return name
+   */
+  @NotNull
+  public String getName();
+
+  /**
+   * Vollständiger Name des Werts.
+   *
+   * @return caption
+   */
+  @NotNull
+  public String getCaption();
+
+  /**
+   * Wert innerhal des Registers.
+   *
+   * @return value
+   */
+  public int getValue();
 
 }

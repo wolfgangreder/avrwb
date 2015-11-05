@@ -17,12 +17,13 @@
                 <configuration>
                     <useOSGiDependencies>true</useOSGiDependencies>
                     <publicPackages>
-                        <publicPackage>at.reder.avrwb.core</publicPackage>
-                        <publicPackage>at.reder.avrwb.annotations</publicPackage>
                         <publicPackage>at.reder.atmelschema</publicPackage>
                         <publicPackage>at.reder.atmelschema.util</publicPackage>
-                        <publicPackage>at.reder.avrwb.core.api</publicPackage>
-                        <publicPackage>at.reder.avrwb.core.io</publicPackage>
+                        <publicPackage>at.reder.avrwb.annotations</publicPackage>
+                        <publicPackage>at.reder.avrwb.avr8</publicPackage>
+                        <publicPackage>at.reder.avrwb.avr8.api</publicPackage>
+                        <publicPackage>at.reder.avrwb.io</publicPackage>
+                        <publicPackage>at.reder.avrwb.avr8.helper</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -42,11 +43,6 @@
     </build>
     <dependencies>
         <dependency>
-            <groupId>org.netbeans.api</groupId>
-            <artifactId>org-netbeans-api-annotations-common</artifactId>
-            <version>${netbeans.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.1</version>
@@ -56,6 +52,12 @@
             <groupId>org.netbeans.api</groupId>
             <artifactId>org-openide-util-lookup</artifactId>
             <version>RELEASE81-BETA</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.netbeans.api</groupId>
+            <artifactId>org-openide-util</artifactId>
+            <version>RELEASE81</version>
             <type>jar</type>
         </dependency>
     </dependencies>
