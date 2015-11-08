@@ -29,5 +29,7 @@ package at.reder.avrwb.avr8;
 public enum AVRCoreVersion
 {
   ANY,
+  V1,
+  V2,
   V2E;
 }

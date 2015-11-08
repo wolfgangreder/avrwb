@@ -21,7 +21,7 @@
  */
 package at.reder.avrwb.avr8.impl;
 
-import at.reder.atmelschema.RegisterBitGrpVector;
+import at.reder.atmelschema.RegisterVector;
 import at.reder.atmelschema.XA_AvrToolsDeviceFile;
 import at.reder.atmelschema.XA_Bitfield;
 import at.reder.atmelschema.XA_Value;
@@ -50,41 +50,49 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   private String name;
   private String caption;
   private int mask;
+  private XA_AvrToolsDeviceFile deviceFile;
   private final List<RegisterBitGrpValue> bitValues = new ArrayList<>();
 
   @Override
-  @NotNull
   public RegisterBitGrpBuilder fromDescriptor(@NotNull XA_AvrToolsDeviceFile descriptor,
-                                              @NotNull RegisterBitGrpVector registerVector) throws NullPointerException,
-                                                                                                   IllegalArgumentException
+                                              @NotNull XA_Bitfield bitField,
+                                              @NotNull RegisterVector registerVector) throws NullPointerException
   {
-    Objects.requireNonNull(descriptor, "descriptor==null");
-    Objects.requireNonNull(registerVector, "registerVector==null");
-    XA_Bitfield bf = descriptor.findBitField(registerVector);
-    String newName = bf.getName();
-    String newCaption = bf.getCaption();
-    if (bf == null) {
-      throw new IllegalArgumentException("bitfield not found");
+    Objects.requireNonNull(descriptor,
+                           "descriptor==null");
+    Objects.requireNonNull(registerVector,
+                           "registerVector==null");
+    Objects.requireNonNull(bitField,
+                           "bitField==null");
+    String newName = bitField.getName();
+    String newCaption = bitField.getCaption();
+    List<RegisterBitGrpValue> newBitValues = null;
+    if (bitField.getValues() != null && !bitField.getValues().trim().isEmpty()) {
+      XA_ValueGroup vg = descriptor.findValueGroup(registerVector.withBitGrp(bitField.getValues()));
+      if (vg != null) {
+        newBitValues = new LinkedList<>();
+        RegisterBitGrpValueBuilder builder = new RegisterBitGrpValueBuilderImpl();
+        for (XA_Value v : vg.getValues()) {
+          newBitValues.add(builder.fromDescriptor(v).build());
+        }
+      }
+
     }
-    XA_ValueGroup vg = descriptor.findValueGroup(registerVector);
-    if (vg == null) {
-      throw new IllegalArgumentException("valuegroup not found");
-    }
-    RegisterBitGrpValueBuilder builder = new RegisterBitGrpValueBuilderImpl();
-    List<RegisterBitGrpValue> newBitValues = new LinkedList<>();
-    for (XA_Value v : vg.getValues()) {
-      newBitValues.add(builder.fromDescriptor(v).build());
-    }
-    Objects.requireNonNull(newName, "name==null");
+    Objects.requireNonNull(newName,
+                           "name==null");
     if (newName.trim().isEmpty()) {
       throw new IllegalArgumentException("name is empty");
     }
-    Objects.requireNonNull(newCaption, "caption==null");
+
+    Objects.requireNonNull(newCaption,
+                           "caption==null");
     name = newName;
     caption = newCaption;
-    mask = bf.getMask();
+    mask = bitField.getMask();
     bitValues.clear();
-    bitValues.addAll(newBitValues);
+    if (newBitValues != null) {
+      bitValues.addAll(newBitValues);
+    }
     return this;
   }
 
@@ -93,7 +101,8 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   public RegisterBitGrpBuilder name(@NotNull @Invariants(emptyAllowed = false) String name) throws NullPointerException,
                                                                                                    IllegalArgumentException
   {
-    Objects.requireNonNull(name, "name is null");
+    Objects.requireNonNull(name,
+                           "name is null");
     if (name.trim().isEmpty()) {
       throw new IllegalArgumentException("name is empty");
     }
@@ -105,7 +114,8 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   @NotNull
   public RegisterBitGrpBuilder caption(@NotNull String caption) throws NullPointerException
   {
-    Objects.requireNonNull(caption, "caption is null");
+    Objects.requireNonNull(caption,
+                           "caption is null");
     this.caption = caption;
     return this;
   }
@@ -122,7 +132,8 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   @NotNull
   public RegisterBitGrpBuilder addBitValue(@NotNull RegisterBitGrpValue bitValue) throws NullPointerException
   {
-    Objects.requireNonNull(bitValue, "bitValue==null");
+    Objects.requireNonNull(bitValue,
+                           "bitValue==null");
     bitValues.add(bitValue);
     return this;
   }
@@ -139,12 +150,20 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   @NotNull
   public RegisterBitGrp build() throws NullPointerException, IllegalStateException
   {
-    Objects.requireNonNull(name, "name is null");
+    if (deviceFile != null) {
+
+    }
+    Objects.requireNonNull(name,
+                           "name is null");
     if (name.trim().isEmpty()) {
       throw new IllegalStateException("name is empty");
     }
-    Objects.requireNonNull(caption, "caption is null");
-    return new RegisterBitGrpImpl(name, caption, mask, bitValues);
+    Objects.requireNonNull(caption,
+                           "caption is null");
+    return new RegisterBitGrpImpl(name,
+                                  caption,
+                                  mask,
+                                  bitValues);
   }
 
 }

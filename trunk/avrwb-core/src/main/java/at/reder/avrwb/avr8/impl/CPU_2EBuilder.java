@@ -21,8 +21,6 @@
  */
 package at.reder.avrwb.avr8.impl;
 
-import at.reder.atmelschema.XA_AvrToolsDeviceFile;
-import at.reder.atmelschema.XA_Module;
 import at.reder.avrwb.avr8.CPU;
 import at.reder.avrwb.avr8.CPUBuilder;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
@@ -31,18 +29,19 @@ import at.reder.avrwb.avr8.helper.ItemNotFoundException;
  *
  * @author Wolfgang Reder
  */
-final class CPU_2EBuilder implements CPUBuilder
+final class CPU_2EBuilder extends AbstractModuleBuilder<CPU_2EBuilder> implements CPUBuilder<CPU_2EBuilder>
 {
 
   @Override
-  public CPUBuilder fromDescriptor(XA_AvrToolsDeviceFile file,
-                                   XA_Module module) throws NullPointerException, IllegalArgumentException
+  protected CPU_2EBuilder getThis()
   {
+    return this;
   }
 
   @Override
-  public CPU build() throws IllegalStateException, ItemNotFoundException
+  public CPU build() throws IllegalStateException, ItemNotFoundException, NullPointerException
   {
+    return new CPU_2E(file, moduleVector, module, nfStrategy);
   }
 
 }

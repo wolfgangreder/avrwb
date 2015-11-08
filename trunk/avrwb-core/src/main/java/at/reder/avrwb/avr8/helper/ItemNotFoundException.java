@@ -43,8 +43,10 @@ public class ItemNotFoundException extends Exception
         return;
       case WARNING:
         AVRWBDefaults.LOGGER.log(Level.WARNING, Bundle.DeviceImpl_msg_item_not_found(itemName, deviceName));
+        break;
       case ERROR:
       default:
+        AVRWBDefaults.LOGGER.log(Level.WARNING, Bundle.DeviceImpl_msg_item_not_found(itemName, deviceName));
         throw new ItemNotFoundException(Bundle.DeviceImpl_msg_item_not_found(itemName, deviceName));
     }
 

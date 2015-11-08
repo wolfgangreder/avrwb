@@ -21,8 +21,9 @@
  */
 package at.reder.avrwb.avr8;
 
-import at.reder.atmelschema.RegisterBitGrpVector;
+import at.reder.atmelschema.RegisterVector;
 import at.reder.atmelschema.XA_AvrToolsDeviceFile;
+import at.reder.atmelschema.XA_Bitfield;
 import at.reder.avrwb.annotations.Invariants;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
@@ -40,13 +41,15 @@ public interface RegisterBitGrpBuilder
    * Initialisiert den Builder mit den Werten aus dem Descriptor.
    *
    * @param descriptor descriptorDate
-   * @param registerBitGrpVector register
+   * @param bitField register
+   * @param registerVector
    * @return {@code this}
-   * @throws NullPointerException wenn {@code descriptor} oder {@code registerBitGrpVector} gleich {@code null}
+   * @throws NullPointerException wenn {@code descriptor}, {@code bitField} oder {@code registerVecotor==null} gleich {@code null}
    */
   @NotNull
   public RegisterBitGrpBuilder fromDescriptor(@NotNull XA_AvrToolsDeviceFile descriptor,
-                                              @NotNull RegisterBitGrpVector registerBitGrpVector) throws NullPointerException;
+                                              @NotNull XA_Bitfield bitField,
+                                              @NotNull RegisterVector registerVector) throws NullPointerException;
 
   /**
    * Setzt den Kurznamen des Registerbits.

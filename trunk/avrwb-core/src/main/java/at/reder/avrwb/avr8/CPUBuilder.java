@@ -27,12 +27,13 @@ import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 /**
  *
  * @author Wolfgang Reder
+ * @param <C> actual Builder class
  */
-public interface CPUBuilder extends ModuleBuilder<CPUBuilder>
+public interface CPUBuilder<C extends CPUBuilder> extends ModuleBuilder<C>
 {
 
   @NotNull
   @Override
-  public CPU build() throws IllegalStateException, ItemNotFoundException;
+  public CPU build() throws IllegalStateException, ItemNotFoundException, NullPointerException;
 
 }

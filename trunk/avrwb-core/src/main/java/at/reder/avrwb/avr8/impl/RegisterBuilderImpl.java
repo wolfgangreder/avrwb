@@ -57,8 +57,10 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   public RegisterBuilder fromDescritpor(XA_AvrToolsDeviceFile descriptorFile,
                                         RegisterVector vector) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(descriptorFile, "descriptorFile==null");
-    Objects.requireNonNull(vector, "vector==null");
+    Objects.requireNonNull(descriptorFile,
+                           "descriptorFile==null");
+    Objects.requireNonNull(vector,
+                           "vector==null");
     XA_Register register = descriptorFile.findRegister(vector);
     if (register == null) {
       throw new IllegalArgumentException("cannot find register " + vector);
@@ -71,7 +73,9 @@ public final class RegisterBuilderImpl implements RegisterBuilder
     size = register.getSize();
     RegisterBitGrpBuilder builder = new RegisterBitBuilderImpl();
     for (XA_Bitfield bf : register.getBitfields()) {
-      registerBits.add(builder.fromDescriptor(descriptorFile, vector.withBitGrp(bf.getName())).build());
+      registerBits.add(builder.fromDescriptor(descriptorFile,
+                                              bf,
+                                              vector).build());
     }
     return this;
   }
@@ -79,7 +83,8 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   @Override
   public RegisterBuilder name(String name) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(name, "name==null");
+    Objects.requireNonNull(name,
+                           "name==null");
     if (name.trim().length() == 0) {
       throw new IllegalArgumentException("name is empty");
     }
@@ -90,7 +95,8 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   @Override
   public RegisterBuilder caption(String caption) throws NullPointerException
   {
-    Objects.requireNonNull(caption, "caption==null");
+    Objects.requireNonNull(caption,
+                           "caption==null");
     this.caption = caption;
     return this;
   }
@@ -135,7 +141,8 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   @Override
   public RegisterBuilder addRegisterBit(RegisterBitGrp bit) throws NullPointerException
   {
-    Objects.requireNonNull(bit, "bit==null");
+    Objects.requireNonNull(bit,
+                           "bit==null");
     registerBits.add(bit);
     return this;
   }
@@ -150,11 +157,13 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   @Override
   public Register build() throws NullPointerException, IllegalStateException
   {
-    Objects.requireNonNull(name, "name==null");
+    Objects.requireNonNull(name,
+                           "name==null");
     if (name.trim().length() == 0) {
       throw new IllegalStateException("name is empty");
     }
-    Objects.requireNonNull(caption, "caption==null");
+    Objects.requireNonNull(caption,
+                           "caption==null");
     if (memoryAddress < 0) {
       throw new IllegalStateException("memoryAddress<0");
     }
@@ -164,7 +173,13 @@ public final class RegisterBuilderImpl implements RegisterBuilder
     if (size < 1) {
       throw new IllegalStateException("size<1");
     }
-    return new RegisterImpl(name, caption, memoryAddress, ioAddress, mask, size, registerBits);
+    return new RegisterImpl(name,
+                            caption,
+                            memoryAddress,
+                            ioAddress,
+                            mask,
+                            size,
+                            registerBits);
   }
 
 }
