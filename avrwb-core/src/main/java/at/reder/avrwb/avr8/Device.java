@@ -50,4 +50,6 @@ public interface Device
 
   public Memory getFlash();
 
+  public Memory getSRAM();
+
 }

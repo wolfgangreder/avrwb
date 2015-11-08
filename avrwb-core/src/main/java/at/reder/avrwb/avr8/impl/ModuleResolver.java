@@ -101,10 +101,14 @@ public final class ModuleResolver
   {
     List<ProvidedModule> m = getProviedModules(mf.getClass());
     for (ProvidedModule pm : m) {
-      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.architecture(), (Architecture a) -> new HashMap<>());
+      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.architecture(),
+                                                                        (Architecture a) -> new HashMap<>());
       for (String n : pm.value()) {
         for (AVRCoreVersion c : pm.core()) {
-          am.put(new ModuleKey(n, c, pm.architecture()), mf);
+          am.put(new ModuleKey(n,
+                               c,
+                               pm.architecture()),
+                 mf);
         }
       }
     }
@@ -130,13 +134,18 @@ public final class ModuleResolver
   @NullAllowed("not found")
   public ModuleBuilderFactory findModuleBuilder(@NotNull ModuleKey moduleKey)
   {
-    Objects.requireNonNull(moduleKey, "moduleKey==null");
+    Objects.requireNonNull(moduleKey,
+                           "moduleKey==null");
     checkMap();
     Map<ModuleKey, ModuleBuilderFactory> map = modules.get(moduleKey.getArchitecture());
+    ModuleBuilderFactory result = null;
     if (map != null) {
-      return map.get(moduleKey);
+      result = map.get(moduleKey);
+      if (result == null) {
+        result = map.get(moduleKey.withVersion(AVRCoreVersion.ANY));
+      }
     }
-    return null;
+    return result;
   }
 
 }

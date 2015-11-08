@@ -21,10 +21,12 @@
  */
 package at.reder.avrwb.avr8;
 
+import at.reder.atmelschema.ModuleVector;
 import at.reder.atmelschema.XA_AvrToolsDeviceFile;
 import at.reder.atmelschema.XA_Module;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
+import at.reder.avrwb.avr8.helper.NotFoundStrategy;
 
 /**
  *
@@ -35,10 +37,18 @@ public interface ModuleBuilder<B extends ModuleBuilder>
 {
 
   @NotNull
-  public B fromDescriptor(@NotNull XA_AvrToolsDeviceFile file,
-                          @NotNull XA_Module module) throws NullPointerException, IllegalArgumentException;
+  public B moduleVector(@NotNull ModuleVector mv) throws NullPointerException;
 
   @NotNull
-  public Module build() throws IllegalStateException, ItemNotFoundException;
+  public B notFoundStrategy(@NotNull NotFoundStrategy nfStrategy) throws NullPointerException;
+
+  @NotNull
+  public B descriptor(@NotNull XA_AvrToolsDeviceFile file) throws NullPointerException, IllegalArgumentException;
+
+  @NotNull
+  public B moduleDescriptor(XA_Module module);
+
+  @NotNull
+  public Module build() throws IllegalStateException, ItemNotFoundException, NullPointerException;
 
 }

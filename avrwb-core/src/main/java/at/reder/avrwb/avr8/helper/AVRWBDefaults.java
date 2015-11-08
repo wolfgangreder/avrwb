@@ -37,5 +37,10 @@ public final class AVRWBDefaults
   public static final double TEMP_MIN = -40;
   public static final double TEMP_MAX = 85;
 
+  public static final String MEMNAME_FLASH = "prog";
+  public static final String MEMNAME_SRAM = "data";
+
   public static final String MODULENAME_CPU = "CPU";
+
+  public static final String PROP_CORE_VERSION = "CORE_VERSION";
 }

@@ -96,6 +96,7 @@ public final class DeviceBuilderImpl implements DeviceBuilder
         return vc.isEmpty() ? vc.iterator().next() : null;
       };
     }
+    this.file = file;
     variant = pv.apply(file.getVariants());
     return this;
   }
@@ -114,7 +115,8 @@ public final class DeviceBuilderImpl implements DeviceBuilder
       } else {
         dev = deviceSelector.apply(file.getDevices());
       }
-    } else {
+    }
+    if (dev == null) {
       for (XA_Device d : file.getDevices()) {
         if (deviceName.equals(d.getName())) {
           dev = d;
