@@ -23,6 +23,7 @@ package at.reder.avrwb.avr8;
 
 import at.reder.avrwb.annotations.Invariants;
 import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.api.Instruction;
 
 public interface CPU extends Module
 {
@@ -47,7 +48,7 @@ public interface CPU extends Module
    * @return sreg
    */
   @NotNull
-  public Register getSREG();
+  public SREG getSREG();
 
   /**
    * Der Stackpointer
@@ -56,5 +57,13 @@ public interface CPU extends Module
    */
   @NotNull
   public Register getStackPointer();
+
+  /**
+   * Der aktuell abzuarbeitende Befehl.
+   *
+   * @return current Instruction
+   */
+  @NotNull
+  public Instruction getCurrentInstruction();
 
 }

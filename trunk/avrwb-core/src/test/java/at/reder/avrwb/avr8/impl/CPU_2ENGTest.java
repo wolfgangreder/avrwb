@@ -73,6 +73,10 @@ public class CPU_2ENGTest
     int actual = cpu.getIP();
     assertEquals(expected,
                  actual);
+    cpu.setIP(0);
+    actual = cpu.getIP();
+    assertEquals(0,
+                 actual);
   }
 
   @Test
@@ -126,9 +130,16 @@ public class CPU_2ENGTest
     }
   }
 
-  @Test
+  @Test(expectedExceptions = {UnsupportedOperationException.class})
   public void testOnClock()
   {
+    cpu.onClock(null);
+  }
+
+  @Test(expectedExceptions = {UnsupportedOperationException.class})
+  public void testGetCurrentInstruction()
+  {
+    cpu.getCurrentInstruction();
   }
 
 }

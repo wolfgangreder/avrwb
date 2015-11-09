@@ -98,17 +98,28 @@ public class AvrToolsDevice_mega8_NGTest
   {
     List<XA_Variant> varList = mega8.getVariants();
     assertNotNull(varList);
-    assertEquals(1, varList.size());
+    assertEquals(1,
+                 varList.size());
     XA_Variant var = varList.get(0);
     assertNotNull(var);
-    assertEquals("standard", var.getOrdercode());
-    assertEquals("", var.getPackage());
-    assertEquals("", var.getPinout());
-    assertEquals(0, var.getSpeedMax());
-    assertEquals(0, var.getTempMax());
-    assertEquals(0, var.getTempMin());
-    assertEquals(5.5f, var.getVccMax(), 1e-6);
-    assertEquals(2.7f, var.getVccMin(), 1e-6);
+    assertEquals("standard",
+                 var.getOrdercode());
+    assertEquals("",
+                 var.getPackage());
+    assertEquals("",
+                 var.getPinout());
+    assertEquals(0,
+                 var.getSpeedMax());
+    assertEquals(0,
+                 var.getTempMax());
+    assertEquals(0,
+                 var.getTempMin());
+    assertEquals(5.5f,
+                 var.getVccMax(),
+                 1e-6);
+    assertEquals(2.7f,
+                 var.getVccMin(),
+                 1e-6);
   }
 
   @Test(dependsOnMethods = {"testStreaming"})
@@ -116,13 +127,17 @@ public class AvrToolsDevice_mega8_NGTest
   {
     List<XA_Device> devList = mega8.getDevices();
     assertNotNull(devList);
-    assertEquals(1, devList.size());
+    assertEquals(1,
+                 devList.size());
     assertFalse(devList.contains(null));
     XA_Device dev = devList.get(0);
     assertNotNull(dev);
-    assertEquals(Family.megaAVR, dev.getFamily());
-    assertEquals(Architecture.AVR8, dev.getArchitecture());
-    assertEquals("ATmega8", dev.getName());
+    assertEquals(Family.megaAVR,
+                 dev.getFamily());
+    assertEquals(Architecture.AVR8,
+                 dev.getArchitecture());
+    assertEquals("ATmega8",
+                 dev.getName());
   }
 
   private void assertSpace(XA_AddressSpace space,
@@ -134,15 +149,21 @@ public class AvrToolsDevice_mega8_NGTest
                            int numSegements)
   {
     assertNotNull(space);
-    assertEquals(byteOrder, space.getByteOrder());
-    assertEquals(id, space.getId());
-    assertEquals(name, space.getName());
+    assertEquals(byteOrder,
+                 space.getByteOrder());
+    assertEquals(id,
+                 space.getId());
+    assertEquals(name,
+                 space.getName());
     assertNotNull(space.getStart());
-    assertEquals(start, space.getStart());
+    assertEquals(start,
+                 space.getStart());
     assertNotNull(space.getSize());
-    assertEquals(size, space.getSize());
+    assertEquals(size,
+                 space.getSize());
     assertNotNull(space.getSegments());
-    assertEquals(numSegements, space.getSegments().size());
+    assertEquals(numSegements,
+                 space.getSegments().size());
     assertFalse(space.getSegments().contains(null));
   }
 
@@ -157,20 +178,28 @@ public class AvrToolsDevice_mega8_NGTest
                              Boolean external)
   {
     assertNotNull(seg);
-    assertEquals(name, seg.getName());
-    assertEquals(access, seg.getMemoryAccess());
+    assertEquals(name,
+                 seg.getName());
+    assertEquals(access,
+                 seg.getMemoryAccess());
     assertNotNull(seg.getStart());
-    assertEquals(start, seg.getStart());
+    assertEquals(start,
+                 seg.getStart());
     assertNotNull(seg.getSize());
-    assertEquals(size, seg.getSize());
+    assertEquals(size,
+                 seg.getSize());
     assertNotNull(seg.isExecuteable());
-    assertEquals(exec, seg.isExecuteable());
+    assertEquals(exec,
+                 seg.isExecuteable());
     assertNotNull(seg.getType());
-    assertEquals(type, seg.getType());
+    assertEquals(type,
+                 seg.getType());
     assertNotNull(seg.getPageSize());
-    assertEquals(pageSize, seg.getPageSize());
+    assertEquals(pageSize,
+                 seg.getPageSize());
     assertNotNull(seg.isExternal());
-    assertEquals(external, seg.isExternal());
+    assertEquals(external,
+                 seg.isExternal());
   }
 
   private void assertDeviceModule(XA_DeviceModule module,
@@ -178,9 +207,11 @@ public class AvrToolsDevice_mega8_NGTest
                                   int numInstances)
   {
     assertNotNull(module);
-    assertEquals(name, module.getName());
+    assertEquals(name,
+                 module.getName());
     assertNotNull(module.getInstances());
-    assertEquals(numInstances, module.getInstances().size());
+    assertEquals(numInstances,
+                 module.getInstances().size());
     assertFalse(module.getInstances().contains(null));
   }
 
@@ -189,9 +220,11 @@ public class AvrToolsDevice_mega8_NGTest
                                           int numGroups)
   {
     assertNotNull(inst);
-    assertEquals(name, inst.getName());
+    assertEquals(name,
+                 inst.getName());
     assertNotNull(inst.getRegisterGroup());
-    assertEquals(numGroups, inst.getRegisterGroup().size());
+    assertEquals(numGroups,
+                 inst.getRegisterGroup().size());
     assertFalse(inst.getRegisterGroup().contains(null));
   }
 
@@ -202,11 +235,15 @@ public class AvrToolsDevice_mega8_NGTest
                                          Integer offset)
   {
     assertNotNull(grp);
-    assertEquals(name, grp.getName());
-    assertEquals(addressSpace, grp.getAddressSpace());
-    assertEquals(nameInModule, grp.getNameInModule());
+    assertEquals(name,
+                 grp.getName());
+    assertEquals(addressSpace,
+                 grp.getAddressSpace());
+    assertEquals(nameInModule,
+                 grp.getNameInModule());
     assertNotNull(grp.getOffset());
-    assertEquals(offset, grp.getOffset());
+    assertEquals(offset,
+                 grp.getOffset());
   }
 
   @Test(dependsOnMethods = {"testStreaming", "testDevices"})
@@ -214,27 +251,106 @@ public class AvrToolsDevice_mega8_NGTest
   {
     XA_Device device = mega8.getDevices().get(0);
     List<XA_AddressSpace> spaces = device.getAdressSpaces();
-    final MemoryAccessSet rw = new MemoryAccessSet(Arrays.asList(MemoryAccess.READ, MemoryAccess.WRITE));
+    final MemoryAccessSet rw = new MemoryAccessSet(Arrays.asList(MemoryAccess.READ,
+                                                                 MemoryAccess.WRITE));
     final MemoryAccessSet r = new MemoryAccessSet(Collections.singleton(MemoryAccess.READ));
     assertNotNull(spaces);
-    assertEquals(8, spaces.size());
-    assertSpace(spaces.get(0), ByteOrder.LITTLE_ENDIAN, "prog", "prog", 0, 0x2000, 5);
-    assertSegment(spaces.get(0).getSegments().get(0), "FLASH", rw, 0, 0x2000, true, MemoryType.flash, 0x40, false);
-    assertSegment(spaces.get(0).getSegments().get(3), "BOOT_SECTION_3", rw, 0x1c00, 0x0400, true, MemoryType.flash, 0x40, false);
-    assertSpace(spaces.get(1), ByteOrder.LITTLE_ENDIAN, "signatures", "signatures", 0, 0x3, 1);
-    assertSegment(spaces.get(1).getSegments().get(0), "SIGNATURES", r, 0, 3, false, MemoryType.signatures, 0, false);
-    assertSpace(spaces.get(2), ByteOrder.LITTLE_ENDIAN, "fuses", "fuses", 0, 0x2, 1);
-    assertSpace(spaces.get(3), ByteOrder.LITTLE_ENDIAN, "lockbits", "lockbits", 0, 1, 1);
-    assertSpace(spaces.get(4), ByteOrder.LITTLE_ENDIAN, "data", "data", 0, 0x460, 3);
-    assertSpace(spaces.get(5), ByteOrder.LITTLE_ENDIAN, "eeprom", "eeprom", 0, 0x200, 1);
-    assertSpace(spaces.get(6), ByteOrder.LITTLE_ENDIAN, "io", "io", 0, 0x40, 0);
-    assertSpace(spaces.get(7), ByteOrder.LITTLE_ENDIAN, "osccal", "osccal", 0, 0x4, 1);
+    assertEquals(8,
+                 spaces.size());
+    assertSpace(spaces.get(0),
+                ByteOrder.LITTLE_ENDIAN,
+                "prog",
+                "prog",
+                0,
+                0x2000,
+                5);
+    assertSegment(spaces.get(0).getSegments().get(0),
+                  "FLASH",
+                  rw,
+                  0,
+                  0x2000,
+                  true,
+                  MemoryType.flash,
+                  0x40,
+                  false);
+    assertSegment(spaces.get(0).getSegments().get(3),
+                  "BOOT_SECTION_3",
+                  rw,
+                  0x1c00,
+                  0x0400,
+                  true,
+                  MemoryType.flash,
+                  0x40,
+                  false);
+    assertSpace(spaces.get(1),
+                ByteOrder.LITTLE_ENDIAN,
+                "signatures",
+                "signatures",
+                0,
+                0x3,
+                1);
+    assertSegment(spaces.get(1).getSegments().get(0),
+                  "SIGNATURES",
+                  r,
+                  0,
+                  3,
+                  false,
+                  MemoryType.signatures,
+                  0,
+                  false);
+    assertSpace(spaces.get(2),
+                ByteOrder.LITTLE_ENDIAN,
+                "fuses",
+                "fuses",
+                0,
+                0x2,
+                1);
+    assertSpace(spaces.get(3),
+                ByteOrder.LITTLE_ENDIAN,
+                "lockbits",
+                "lockbits",
+                0,
+                1,
+                1);
+    assertSpace(spaces.get(4),
+                ByteOrder.LITTLE_ENDIAN,
+                "data",
+                "data",
+                0,
+                0x460,
+                3);
+    assertSpace(spaces.get(5),
+                ByteOrder.LITTLE_ENDIAN,
+                "eeprom",
+                "eeprom",
+                0,
+                0x200,
+                1);
+    assertSpace(spaces.get(6),
+                ByteOrder.LITTLE_ENDIAN,
+                "io",
+                "io",
+                0,
+                0x40,
+                0);
+    assertSpace(spaces.get(7),
+                ByteOrder.LITTLE_ENDIAN,
+                "osccal",
+                "osccal",
+                0,
+                0x4,
+                1);
     List<XA_DeviceModule> modules = device.getModules();
     assertNotNull(modules);
     assertFalse(modules.contains(null));
-    assertEquals(17, modules.size());
-    assertDeviceModule(modules.get(0), "ANALOG_COMPARATOR", 1);
-    assertDeviceModuleInstance(modules.get(0).getInstances().get(0), "ANALOG_COMPARATOR", 1);
+    assertEquals(17,
+                 modules.size());
+    assertDeviceModule(modules.get(0),
+                       "ANALOG_COMPARATOR",
+                       1);
+    assertDeviceModuleInstance(modules.get(0).getInstances().get(0),
+                               "ANALOG_COMPARATOR",
+                               1);
     assertDeviceRegisterGroup(modules.get(0).getInstances().get(0).getRegisterGroup().get(0),
                               "ANALOG_COMPARATOR",
                               "data",
@@ -249,14 +365,18 @@ public class AvrToolsDevice_mega8_NGTest
                             int numValueGroup)
   {
     assertNotNull(module);
-    assertEquals(name, module.getName());
-    assertEquals(caption, module.getCaption());
+    assertEquals(name,
+                 module.getName());
+    assertEquals(caption,
+                 module.getCaption());
     assertNotNull(module.getRegisterGroups());
     assertFalse(module.getRegisterGroups().contains(null));
-    assertEquals(numRegisterGroup, module.getRegisterGroups().size());
+    assertEquals(numRegisterGroup,
+                 module.getRegisterGroups().size());
     assertNotNull(module.getValueGroups());
     assertFalse(module.getValueGroups().contains(null));
-    assertEquals(numValueGroup, module.getValueGroups().size());
+    assertEquals(numValueGroup,
+                 module.getValueGroups().size());
   }
 
   @Test(dependsOnMethods = {"testStreaming"})
@@ -265,8 +385,13 @@ public class AvrToolsDevice_mega8_NGTest
     List<XA_Module> modules = mega8.getModules();
     assertNotNull(modules);
     assertFalse(modules.contains(null));
-    assertEquals(17, modules.size());
-    assertModule(modules.get(3), "SPI", "", 1, 1);
+    assertEquals(17,
+                 modules.size());
+    assertModule(modules.get(3),
+                 "SPI",
+                 "",
+                 1,
+                 1);
   }
 
   private void assertRegisterGroup(XA_RegisterGroup grp,
@@ -275,11 +400,14 @@ public class AvrToolsDevice_mega8_NGTest
                                    int numRegister)
   {
     assertNotNull(grp);
-    assertEquals(name, grp.getName());
-    assertEquals(caption, grp.getCaption());
+    assertEquals(name,
+                 grp.getName());
+    assertEquals(caption,
+                 grp.getCaption());
     assertNotNull(grp.getRegister());
     assertFalse(grp.getRegister().contains(null));
-    assertEquals(numRegister, grp.getRegister().size());
+    assertEquals(numRegister,
+                 grp.getRegister().size());
   }
 
   private void assertRegister(XA_Register reg,
@@ -292,17 +420,24 @@ public class AvrToolsDevice_mega8_NGTest
                               Integer mask)
   {
     assertNotNull(reg);
-    assertEquals(name, reg.getName());
-    assertEquals(caption, reg.getCaption());
+    assertEquals(name,
+                 reg.getName());
+    assertEquals(caption,
+                 reg.getCaption());
     assertNotNull(reg.getOffset());
-    assertEquals(offset, reg.getOffset());
+    assertEquals(offset,
+                 reg.getOffset());
     assertNotNull(reg.getSize());
-    assertEquals(size, reg.getSize());
+    assertEquals(size,
+                 reg.getSize());
     assertNotNull(reg.getBitfields());
     assertFalse(reg.getBitfields().contains(null));
-    assertEquals(numBitfields, reg.getBitfields().size());
-    assertEquals(ocd_rw, reg.getOcd_rw());
-    assertEquals(mask, reg.getMask());
+    assertEquals(numBitfields,
+                 reg.getBitfields().size());
+    assertEquals(ocd_rw,
+                 reg.getOcd_rw());
+    assertEquals(mask,
+                 reg.getMask());
   }
 
   private void assertBitfield(XA_Bitfield field,
@@ -312,11 +447,15 @@ public class AvrToolsDevice_mega8_NGTest
                               String values)
   {
     assertNotNull(field);
-    assertEquals(name, field.getName());
-    assertEquals(caption, field.getCaption());
+    assertEquals(name,
+                 field.getName());
+    assertEquals(caption,
+                 field.getCaption());
     assertNotNull(field.getMask());
-    assertEquals(mask, field.getMask());
-    assertEquals(values, field.getValues());
+    assertEquals(mask,
+                 field.getMask());
+    assertEquals(values,
+                 field.getValues());
   }
 
   private void assertValueGroup(XA_ValueGroup grp,
@@ -325,11 +464,14 @@ public class AvrToolsDevice_mega8_NGTest
                                 int numValues)
   {
     assertNotNull(grp);
-    assertEquals(caption, grp.getCaption());
-    assertEquals(name, grp.getName());
+    assertEquals(caption,
+                 grp.getCaption());
+    assertEquals(name,
+                 grp.getName());
     assertNotNull(grp.getValues());
     assertFalse(grp.getValues().contains(null));
-    assertEquals(numValues, grp.getValues().size());
+    assertEquals(numValues,
+                 grp.getValues().size());
   }
 
   private void assertValue(XA_Value val,
@@ -338,55 +480,112 @@ public class AvrToolsDevice_mega8_NGTest
                            Integer value)
   {
     assertNotNull(val);
-    assertEquals(caption, val.getCaption());
-    assertEquals(name, val.getName());
+    assertEquals(caption,
+                 val.getCaption());
+    assertEquals(name,
+                 val.getName());
     assertNotNull(val.getValue());
-    assertEquals(value, val.getValue());
+    assertEquals(value,
+                 val.getValue());
   }
 
   @Test(dependsOnMethods = {"testStreaming", "testModules"})
   public void testFUSE()
   {
     final XA_Module fuse = mega8.getModules().get(0);
-    assertModule(fuse, "FUSE", "", 1, 3);
+    assertModule(fuse,
+                 "FUSE",
+                 "",
+                 1,
+                 3);
     final XA_RegisterGroup grp = fuse.getRegisterGroups().get(0);
-    assertRegisterGroup(grp, "FUSE", "", 2);
+    assertRegisterGroup(grp,
+                        "FUSE",
+                        "",
+                        2);
     XA_Register reg = grp.getRegister().get(0);
-    assertRegister(reg, "HIGH", "", 1, 1, 7, null, 0xff);
-    assertBitfield(reg.getBitfields().get(0), "Reset Disabled (Enable PC6 as i/o pin)", "RSTDISBL", 0x80, null);
+    assertRegister(reg,
+                   "HIGH",
+                   "",
+                   1,
+                   1,
+                   7,
+                   null,
+                   0xff);
+    assertBitfield(reg.getBitfields().get(0),
+                   "Reset Disabled (Enable PC6 as i/o pin)",
+                   "RSTDISBL",
+                   0x80,
+                   null);
     reg = grp.getRegister().get(1);
-    assertRegister(reg, "LOW", "", 0, 1, 3, null, 0xff);
-    assertBitfield(reg.getBitfields().get(2), "Select Clock Source", "SUT_CKSEL", 0x3F, "ENUM_SUT_CKSEL");
+    assertRegister(reg,
+                   "LOW",
+                   "",
+                   0,
+                   1,
+                   3,
+                   null,
+                   0xff);
+    assertBitfield(reg.getBitfields().get(2),
+                   "Select Clock Source",
+                   "SUT_CKSEL",
+                   0x3F,
+                   "ENUM_SUT_CKSEL");
     XA_ValueGroup valGroup = fuse.getValueGroups().get(0);
-    assertValueGroup(valGroup, "", "ENUM_BODLEVEL", 2);
-    assertValue(valGroup.getValues().get(0), "Brown-out detection at VCC=4.0 V", "4V0", 0);
-    assertValue(valGroup.getValues().get(1), "Brown-out detection at VCC=2.7 V", "2V7", 1);
+    assertValueGroup(valGroup,
+                     "",
+                     "ENUM_BODLEVEL",
+                     2);
+    assertValue(valGroup.getValues().get(0),
+                "Brown-out detection at VCC=4.0 V",
+                "4V0",
+                0);
+    assertValue(valGroup.getValues().get(1),
+                "Brown-out detection at VCC=2.7 V",
+                "2V7",
+                1);
   }
 
   @Test(dependsOnMethods = {"testStreaming", "testModules"})
   public void testSPI()
   {
     final XA_Module spi = mega8.getModules().get(3);
-    assertModule(spi, "SPI", "", 1, 1);
+    assertModule(spi,
+                 "SPI",
+                 "",
+                 1,
+                 1);
     final XA_RegisterGroup grp = spi.getRegisterGroups().get(0);
-    assertRegisterGroup(grp, "SPI", "", 3);
+    assertRegisterGroup(grp,
+                        "SPI",
+                        "",
+                        3);
     XA_Register reg = grp.getRegister().get(0);
-    assertRegister(reg, "SPDR", "SPI Data Register", 0x2f, 1, 0, "", 0xff);
+    assertRegister(reg,
+                   "SPDR",
+                   "SPI Data Register",
+                   0x2f,
+                   1,
+                   0,
+                   "",
+                   0xff);
     reg = grp.getRegister().get(1);
-    assertRegister(reg, "SPSR", "SPI Status Register", 0x2e, 1, 3, "R", 0xff);
-  }
-
-  @Test(dependsOnMethods = {"testStreaming"})
-  public void testStreamOut() throws IOException
-  {
-    mega8.store(System.out);
+    assertRegister(reg,
+                   "SPSR",
+                   "SPI Status Register",
+                   0x2e,
+                   1,
+                   3,
+                   "R",
+                   0xff);
   }
 
   @Test(dependsOnMethods = {"testStreaming"})
   public void testFileOut() throws IOException
   {
     File file = new File(mega8URL.getPath()).getParentFile();
-    file = new File(file, "m8.xml.gz");
+    file = new File(file,
+                    "m8.xml.gz");
     try (OutputStream fos = new GZIPOutputStream(new FileOutputStream(file))) {
       mega8.store(fos);
     }
@@ -395,14 +594,22 @@ public class AvrToolsDevice_mega8_NGTest
   @Test(dependsOnMethods = {"testStreaming"})
   public void testFindRegister()
   {
-    XA_Register register = mega8.findRegister(new RegisterVector("ATmega8", "CPU", "SREG"));
+    XA_Register register = mega8.findRegister(new RegisterVector("ATmega8",
+                                                                 "CPU",
+                                                                 "SREG"));
     assertNotNull(register);
-    assertEquals("SREG", register.getName());
-    assertEquals(0x5f, (int) register.getOffset());
-    register = mega8.findRegister(new RegisterVector("ATmega8", "PORTB", "DDRB"));
+    assertEquals("SREG",
+                 register.getName());
+    assertEquals(0x5f,
+                 (int) register.getOffset());
+    register = mega8.findRegister(new RegisterVector("ATmega8",
+                                                     "PORTB",
+                                                     "DDRB"));
     assertNotNull(register);
-    assertEquals("DDRB", register.getName());
-    assertEquals(0x37, (int) register.getOffset());
+    assertEquals("DDRB",
+                 register.getName());
+    assertEquals(0x37,
+                 (int) register.getOffset());
   }
 
   @Test(dependsOnMethods = {"testStreaming"})
@@ -421,7 +628,8 @@ public class AvrToolsDevice_mega8_NGTest
     assertNotNull(cpu.getParameter());
     String expected = "V2E";
     String actual = cpu.getParameter().get("CORE_VERSION");
-    assertEquals(expected, actual);
+    assertEquals(expected,
+                 actual);
   }
 
 }

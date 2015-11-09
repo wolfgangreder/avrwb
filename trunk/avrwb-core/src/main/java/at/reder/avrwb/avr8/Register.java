@@ -23,6 +23,7 @@ package at.reder.avrwb.avr8;
 
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
+import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import java.util.List;
 
 /**
@@ -100,5 +101,61 @@ public interface Register
    */
   @NotNull
   public List<RegisterBitGrp> getBits();
+
+  /**
+   * <p>
+   * Liefert den aktuellen Wert der Bits in Bitgruppe {@code bitGrp}.</p>
+   * Die Bits werden entsprechen der Maske nach rechtes verschoben.
+   *
+   * @param bitGrp bitGruppe
+   * @return aktueller Wert der Registergruppe
+   * @throws ItemNotFoundException wenn die Bitgruppe {@code bitGrp} nicht im Register vorhanden ist.
+   * @throws NullPointerException wenn {@code bitGrp==null}
+   */
+  public int getBitGrpValue(@NotNull RegisterBitGrp bitGrp) throws ItemNotFoundException, NullPointerException;
+
+  /**
+   * Set den Wert der Bitgruppe {@code bitGrp}.
+   *
+   * @param bitGrp bitGruppe
+   * @param value neuerWert
+   * @return alter Wert der bitGruppe
+   * @throws ItemNotFoundException wenn {@code bitGrp} oder {@code value} nicht im Register vorhanden ist.
+   * @throws NullPointerException wenn {@code bitGrp} oder {@code value} gleich {@code null}.
+   */
+  public int setBitGrpValue(@NotNull RegisterBitGrp bitGrp,
+                            @NotNull RegisterBitGrpValue value) throws ItemNotFoundException, NullPointerException;
+
+  /**
+   * Set den Wert der Bitgruppe {@code bitGrp}.
+   *
+   * @param bitGrp bitGruppe
+   * @param value neuerWert
+   * @return alter Wert der bitGruppe
+   * @throws ItemNotFoundException wenn {@code bitGrp} nicht im Register vorhanden ist.
+   * @throws NullPointerException wenn {@code bitGrp==null}.
+   */
+  public int setBitGrpValue(@NotNull RegisterBitGrp bitGrp,
+                            int value) throws ItemNotFoundException, NullPointerException;
+
+  /**
+   * Liefert den Wert des Bits {@code bit}.
+   *
+   * @param bit Index des Bits ({@code 0...7})
+   * @return {@code true} wenn das Bit gesetzt ist.
+   * @throws IllegalArgumentException wenn {@code bit&lt;0} oder {@code bit&gt;7}.
+   */
+  public boolean getBit(int bit) throws IllegalArgumentException;
+
+  /**
+   * Setzt das Bit {@code bit} auf den Wert {@code state}.
+   *
+   * @param bit zu veränderndes Bit
+   * @param state neuer Zustand
+   * @return alter Zustand
+   * @throws IllegalArgumentException wenn {@code bit&lt;0} oder {@code bit&gt;7}.
+   */
+  public boolean setBit(int bit,
+                        boolean state) throws IllegalArgumentException;
 
 }

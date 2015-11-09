@@ -19,58 +19,40 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.avr8;
+package at.reder.avrwb.avr8.api;
 
 import at.reder.avrwb.annotations.NotNull;
-import at.reder.avrwb.annotations.NotThreadSave;
 import java.util.List;
 
 /**
- * Beschreibt ein Bit(feld) eines Registers. Wenn es sich um ein Bitfeld handelt, kann mit {@link #getValues()} ein Liste der
- * möglich Bitkombinationen und deren Bedeutung erfragt werden.
+ * Ergebnis der Befehlsausführung
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-@NotThreadSave
-public interface RegisterBitGrp
+public interface InstructionResult
 {
 
   /**
-   * Der Kurzame des Bit(felde)s.
    *
-   * @return name
+   * @return {@code true} wenn die Ausführung beendet ist.
+   */
+  public boolean isExecutionFinished();
+
+  /**
+   * Die Adresse des nächste Befehls.
+   *
+   * @return next IP
+   */
+  public int getNextIP();
+
+  /**
+   * <p>
+   * Die Adressen der veränderten Daten im SRAM.</p> Es können auch Adressen verändert worden sein, ohne dass
+   * {@link #isExecutionFinished() } {@code true} liefert.
+   *
+   * @return list of modified addresses.
    */
   @NotNull
-  public String getName();
-
-  /**
-   * Der vollständige Name des Bit(felde)s
-   *
-   * @return caption
-   */
-  @NotNull
-  public String getCaption();
-
-  /**
-   * Maske der Bits innerhalb des Registers.
-   *
-   * @return mask
-   */
-  public int getMask();
-
-  /**
-   * Die Anzahl von Bits die die Maske nach rechts geschoben werden muss, ob mit dem LSB zu beginnen.
-   *
-   * @return bits to shift
-   */
-  public int getRightShift();
-
-  /**
-   * Liste mit den möglichen Bitkombinationen
-   *
-   * @return values
-   */
-  @NotNull
-  public List<RegisterBitGrpValue> getValues();
+  public List<Integer> getModifiedDataAddresses();
 
 }
