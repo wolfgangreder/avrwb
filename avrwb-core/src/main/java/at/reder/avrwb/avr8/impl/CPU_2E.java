@@ -32,8 +32,10 @@ import at.reder.avrwb.avr8.CPU;
 import at.reder.avrwb.avr8.Register;
 import at.reder.avrwb.avr8.RegisterBuilder;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.SREG;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstanceFactories;
+import at.reder.avrwb.avr8.api.Instruction;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import at.reder.avrwb.avr8.helper.NotFoundStrategy;
 import java.util.ArrayList;
@@ -55,7 +57,7 @@ public class CPU_2E implements CPU
   private final String caption;
   private final Map<String, String> params;
   private int ip;
-  private final Register sreg;
+  private final SREG sreg;
   private final Register sp;
   private final List<Register> register;
 
@@ -64,9 +66,12 @@ public class CPU_2E implements CPU
          XA_Module mod,
          @NotNull NotFoundStrategy nfStrategy) throws NullPointerException, ItemNotFoundException
   {
-    Objects.requireNonNull(file, "file==null");
-    Objects.requireNonNull(moduleVector, "moduleVector==null");
-    Objects.requireNonNull(nfStrategy, "nfStrategy==null");
+    Objects.requireNonNull(file,
+                           "file==null");
+    Objects.requireNonNull(moduleVector,
+                           "moduleVector==null");
+    Objects.requireNonNull(nfStrategy,
+                           "nfStrategy==null");
     XA_Module module = mod != null ? mod : file.findModule(moduleVector);
     if (module == null) {
       ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
@@ -87,16 +92,28 @@ public class CPU_2E implements CPU
     }
     final RegisterBuilder registerBuilder = InstanceFactories.getRegisterBuilder();
     final List<Register> tmpRegister = new ArrayList<>();
-    Register tmpSREG = null;
+    SREG tmpSREG = null;
     Register tmpSP = null;
     for (XA_RegisterGroup rg : module.getRegisterGroups()) {
       for (XA_Register r : rg.getRegister()) {
-        Register reg = registerBuilder.fromDescritpor(file, moduleVector.withRegister(r.getName())).build();
-        tmpRegister.add(reg);
-        if ("SREG".equals(reg.getName())) {
-          tmpSREG = reg;
-        } else if ("SP".equals(reg.getName())) {
-          tmpSP = reg;
+        Register reg = registerBuilder.fromDescritpor(file,
+                                                      moduleVector.withRegister(r.getName())).build();
+        switch (reg.getName()) {
+          case "SREG":
+            if (reg instanceof SREG) {
+              tmpSREG = (SREG) reg;
+            } else {
+              tmpSREG = new SREGImpl(reg);
+            }
+            tmpRegister.add(tmpSREG);
+            break;
+          case "SP":
+            tmpSP = reg;
+            tmpRegister.add(reg);
+            break;
+          default:
+            tmpRegister.add(reg);
+            break;
         }
       }
     }
@@ -104,10 +121,14 @@ public class CPU_2E implements CPU
     this.sreg = tmpSREG;
     this.sp = tmpSP;
     if (sreg == null) {
-      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(), "SREG", nfStrategy);
+      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
+                                                "SREG",
+                                                nfStrategy);
     }
     if (sp == null) {
-      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(), "SP", nfStrategy);
+      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
+                                                "SP",
+                                                nfStrategy);
     }
   }
 
@@ -127,7 +148,7 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public Register getSREG()
+  public SREG getSREG()
   {
     return sreg;
   }
@@ -172,6 +193,12 @@ public class CPU_2E implements CPU
 
   @Override
   public void onClock(ClockState clockState)
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  @Override
+  public Instruction getCurrentInstruction()
   {
     throw new UnsupportedOperationException("Not supported yet.");
   }

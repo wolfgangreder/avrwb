@@ -28,6 +28,10 @@ package at.reder.avrwb.avr8.api;
 public enum ClockPhase
 {
   /**
+   * LO
+   */
+  LO,
+  /**
    * Steigende Flanke
    */
   RISING,
@@ -38,9 +42,5 @@ public enum ClockPhase
   /**
    * Fallende Flanke
    */
-  FALLING,
-  /**
-   * LO
-   */
-  LO;
+  FALLING;
 }

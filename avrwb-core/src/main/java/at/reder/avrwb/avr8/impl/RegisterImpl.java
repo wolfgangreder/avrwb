@@ -23,11 +23,15 @@ package at.reder.avrwb.avr8.impl;
 
 import at.reder.atmelschema.util.HexIntAdapter;
 import at.reder.avrwb.avr8.Register;
+import at.reder.avrwb.avr8.RegisterBitGrp;
+import at.reder.avrwb.avr8.RegisterBitGrpValue;
+import at.reder.avrwb.avr8.helper.ItemNotFoundException;
+import at.reder.avrwb.avr8.helper.NotFoundStrategy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import at.reder.avrwb.avr8.RegisterBitGrp;
+import java.util.Objects;
 
 /**
  * StandardImplementierung eines Registers
@@ -35,7 +39,7 @@ import at.reder.avrwb.avr8.RegisterBitGrp;
  * @see at.reder.avrwb.avr8.Register
  * @author Wolfgang Reder
  */
-final class RegisterImpl implements Register
+class RegisterImpl implements Register
 {
 
   private final String name;
@@ -123,10 +127,96 @@ final class RegisterImpl implements Register
   }
 
   @Override
+  public int setBitGrpValue(RegisterBitGrp bitGrp,
+                            RegisterBitGrpValue value) throws ItemNotFoundException, NullPointerException
+  {
+    Objects.requireNonNull(bitGrp,
+                           "bitGrp==null");
+    Objects.requireNonNull(value,
+                           "value==null");
+    if (!registerBits.contains(bitGrp)) {
+      ItemNotFoundException.processItemNotFound(name,
+                                                bitGrp.getName(),
+                                                NotFoundStrategy.ERROR);
+      assert false;
+    }
+    if (!bitGrp.getValues().contains(value)) {
+      ItemNotFoundException.processItemNotFound(name,
+                                                value.getName(),
+                                                NotFoundStrategy.ERROR);
+      assert false;
+    }
+    return setBitGrpValue(bitGrp,
+                          value.getValue());
+  }
+
+  @Override
+  public int setBitGrpValue(RegisterBitGrp bitGrp,
+                            int value) throws ItemNotFoundException, NullPointerException
+  {
+    Objects.requireNonNull(bitGrp,
+                           "bitGrp==null");
+    if (!registerBits.contains(bitGrp)) {
+      ItemNotFoundException.processItemNotFound(name,
+                                                bitGrp.getName(),
+                                                NotFoundStrategy.ERROR);
+      assert false;
+    }
+    int newBits = (value << bitGrp.getRightShift()) & bitGrp.getMask();
+    int oldValue = getBitGrpValue(bitGrp);
+    this.value &= ~bitGrp.getMask();
+    this.value |= newBits;
+    return oldValue;
+  }
+
+  @Override
+  public boolean getBit(int bit) throws IllegalArgumentException
+  {
+    if (bit < 0 || bit > 7) {
+      throw new IllegalArgumentException("bitindex out of range");
+    }
+    return (value & (1 << bit)) != 0;
+  }
+
+  @Override
+  public boolean setBit(int bit,
+                        boolean state) throws IllegalArgumentException
+  {
+    if (bit < 0 || bit > 7) {
+      throw new IllegalArgumentException("bitindex out of range");
+    }
+    final int m = 1 << bit;
+    boolean old = (value & m) != 0;
+    if (state) {
+      value |= m;
+    } else {
+      value &= ~m;
+    }
+    return old;
+  }
+
+  @Override
+  public int getBitGrpValue(RegisterBitGrp bitGrp) throws ItemNotFoundException, NullPointerException
+  {
+    Objects.requireNonNull(bitGrp,
+                           "bitGrp==null");
+    if (!registerBits.contains(bitGrp)) {
+      ItemNotFoundException.processItemNotFound(name,
+                                                bitGrp.getName(),
+                                                NotFoundStrategy.ERROR);
+      assert false;
+    }
+    int tmp = value & bitGrp.getMask();
+    return tmp >> bitGrp.getRightShift();
+  }
+
+  @Override
   public String toString()
   {
-    return "Register{" + "name=" + name + ", address(" + HexIntAdapter.toHexString(memoryAddress, 2) + ","
-                   + HexIntAdapter.toHexString(ioAddress, 2) + ")}";
+    return "Register{" + "name=" + name + ", address(" + HexIntAdapter.toHexString(memoryAddress,
+                                                                                   2) + ","
+                   + HexIntAdapter.toHexString(ioAddress,
+                                               2) + ")}";
   }
 
 }

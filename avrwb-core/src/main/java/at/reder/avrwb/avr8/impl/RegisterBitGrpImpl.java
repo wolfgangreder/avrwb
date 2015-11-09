@@ -21,12 +21,13 @@
  */
 package at.reder.avrwb.avr8.impl;
 
+import at.reder.avrwb.avr8.RegisterBitGrp;
+import at.reder.avrwb.avr8.RegisterBitGrpValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import at.reder.avrwb.avr8.RegisterBitGrp;
-import at.reder.avrwb.avr8.RegisterBitGrpValue;
+import java.util.Objects;
 
 /**
  * Standardimplementierung von RegisterBitGrp
@@ -41,12 +42,13 @@ final class RegisterBitGrpImpl implements RegisterBitGrp
   private final String name;
   private final String caption;
   private final int mask;
+  private final int bitShift;
   private final List<RegisterBitGrpValue> bitValues;
 
   RegisterBitGrpImpl(String name,
-                  String caption,
-                  int mask,
-                  Collection<? extends RegisterBitGrpValue> bitValues)
+                     String caption,
+                     int mask,
+                     Collection<? extends RegisterBitGrpValue> bitValues)
   {
     this.name = name;
     this.caption = caption;
@@ -56,6 +58,7 @@ final class RegisterBitGrpImpl implements RegisterBitGrp
     } else {
       this.bitValues = Collections.unmodifiableList(new ArrayList<>(bitValues));
     }
+    bitShift = Integer.numberOfTrailingZeros(mask) % 32;
   }
 
   @Override
@@ -77,9 +80,44 @@ final class RegisterBitGrpImpl implements RegisterBitGrp
   }
 
   @Override
+  public int getRightShift()
+  {
+    return bitShift;
+  }
+
+  @Override
   public List<RegisterBitGrpValue> getValues()
   {
     return bitValues;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 7;
+    hash = 29 * hash + Objects.hashCode(this.name);
+    hash = 29 * hash + this.mask;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final RegisterBitGrpImpl other = (RegisterBitGrpImpl) obj;
+    if (this.mask != other.mask) {
+      return false;
+    }
+    return Objects.equals(this.name,
+                          other.name);
   }
 
   @Override
