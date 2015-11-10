@@ -22,6 +22,7 @@
 package at.reder.avrwb.avr8.api;
 
 import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.annotations.NotThreadSave;
 import at.reder.avrwb.avr8.AVRCoreVersion;
 import at.reder.avrwb.avr8.Device;
 import java.util.Set;
@@ -31,6 +32,7 @@ import java.util.Set;
  *
  * @author wolfi
  */
+@NotThreadSave
 public interface Instruction
 {
 

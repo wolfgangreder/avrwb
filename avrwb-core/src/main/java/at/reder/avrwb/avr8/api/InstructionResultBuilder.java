@@ -19,40 +19,32 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.avr8;
+package at.reder.avrwb.avr8.api;
 
-import java.util.List;
-import java.util.logging.Logger;
+import at.reder.avrwb.annotations.Invariants;
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.annotations.NotThreadSave;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public interface Device
+@NotThreadSave
+public interface InstructionResultBuilder
 {
 
-  public Logger getLogger();
+  @NotNull
+  public InstructionResultBuilder finished(boolean finished);
 
-  public String getName();
+  @NotNull
+  public InstructionResultBuilder nextIp(@Invariants(minValue = "0", maxValue = "FLASH_END") int nextIP) throws
+          IllegalArgumentException;
 
-  public Architecture getArchitecture();
+  @NotNull
+  public InstructionResultBuilder addModifiedDataAddresses(@Invariants(minValue = "0", maxValue = "RAM_END") int modifiedAddress)
+          throws IllegalArgumentException;
 
-  public Family getFamily();
-
-  public double getVoltageMin();
-
-  public double getVoltageMax();
-
-  public long getSpeedMax();
-
-  public List<Memory> getMemories();
-
-  public List<Module> getModules();
-
-  public CPU getCPU();
-
-  public Memory getFlash();
-
-  public Memory getSRAM();
+  @NotNull
+  public InstructionResult build() throws IllegalStateException;
 
 }

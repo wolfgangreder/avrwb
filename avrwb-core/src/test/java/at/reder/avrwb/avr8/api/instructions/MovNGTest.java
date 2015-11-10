@@ -19,40 +19,37 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.avr8;
+package at.reder.avrwb.avr8.api.instructions;
 
-import java.util.List;
-import java.util.logging.Logger;
+import static org.testng.AssertJUnit.fail;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public interface Device
+public class MovNGTest
 {
 
-  public Logger getLogger();
+  public MovNGTest()
+  {
+  }
 
-  public String getName();
+  @BeforeClass
+  public static void setUpClass() throws Exception
+  {
+    fail("Implement me !!");
+  }
 
-  public Architecture getArchitecture();
+  @Test
+  public void testDoExecute()
+  {
+  }
 
-  public Family getFamily();
-
-  public double getVoltageMin();
-
-  public double getVoltageMax();
-
-  public long getSpeedMax();
-
-  public List<Memory> getMemories();
-
-  public List<Module> getModules();
-
-  public CPU getCPU();
-
-  public Memory getFlash();
-
-  public Memory getSRAM();
+  @Test
+  public void testToString()
+  {
+  }
 
 }

@@ -29,6 +29,7 @@ import at.reder.atmelschema.XA_DeviceModule;
 import at.reder.atmelschema.XA_Module;
 import at.reder.atmelschema.XA_Variant;
 import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.annotations.NullAllowed;
 import at.reder.avrwb.avr8.AVRCoreVersion;
 import at.reder.avrwb.avr8.Architecture;
 import at.reder.avrwb.avr8.CPU;
@@ -47,6 +48,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
 /**
@@ -56,6 +58,8 @@ import org.openide.util.Exceptions;
 final class DeviceImpl implements Device
 {
 
+  @SuppressWarnings("NonConstantLogger")
+  private final Logger deviceLogger;
   private final String name;
   private final Architecture architecture;
   private final Family family;
@@ -71,8 +75,11 @@ final class DeviceImpl implements Device
   DeviceImpl(@NotNull XA_AvrToolsDeviceFile file,
              XA_Variant variant,
              @NotNull XA_Device device,
-             @NotNull NotFoundStrategy nfStrategy) throws ItemNotFoundException, NullPointerException
+             @NotNull NotFoundStrategy nfStrategy,
+             @NullAllowed Logger deviceLogger) throws ItemNotFoundException, NullPointerException
   {
+    this.deviceLogger = deviceLogger != null ? deviceLogger : Logger.getLogger(AVRWBDefaults.LOGGER.getName() + ".dev." + device.
+            getName());
     Objects.requireNonNull(file,
                            "file==null");
     Objects.requireNonNull(device,
@@ -126,6 +133,12 @@ final class DeviceImpl implements Device
     }
     flash = tmpFlash;
     sram = tmpSRAM;
+  }
+
+  @Override
+  public Logger getLogger()
+  {
+    return deviceLogger;
   }
 
   private AVRCoreVersion extractCoreVersion(XA_AvrToolsDeviceFile file,
