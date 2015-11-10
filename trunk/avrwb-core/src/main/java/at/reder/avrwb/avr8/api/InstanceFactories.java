@@ -21,12 +21,15 @@
  */
 package at.reder.avrwb.avr8.api;
 
+import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.Stateless;
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.DeviceBuilder;
 import at.reder.avrwb.avr8.MemoryBuilder;
 import at.reder.avrwb.avr8.RegisterBitGrpBuilder;
 import at.reder.avrwb.avr8.RegisterBitGrpValueBuilder;
 import at.reder.avrwb.avr8.RegisterBuilder;
+import at.reder.avrwb.avr8.api.instructions.InstructionResultBuilderImpl;
 import at.reder.avrwb.avr8.impl.DeviceBuilderImpl;
 import at.reder.avrwb.avr8.impl.MemoryBuilderImpl;
 import at.reder.avrwb.avr8.impl.RegisterBitBuilderImpl;
@@ -64,6 +67,11 @@ public final class InstanceFactories
   public static DeviceBuilder getDeviceBuilder()
   {
     return new DeviceBuilderImpl();
+  }
+
+  public static InstructionResultBuilder getInstructionResultBuilder(@NotNull Device device) throws NullPointerException
+  {
+    return new InstructionResultBuilderImpl(device);
   }
 
   private InstanceFactories()

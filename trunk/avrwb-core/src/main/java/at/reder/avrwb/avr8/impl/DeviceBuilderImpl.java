@@ -24,6 +24,7 @@ package at.reder.avrwb.avr8.impl;
 import at.reder.atmelschema.XA_AvrToolsDeviceFile;
 import at.reder.atmelschema.XA_Device;
 import at.reder.atmelschema.XA_Variant;
+import at.reder.avrwb.annotations.NullAllowed;
 import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.DeviceBuilder;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
@@ -33,6 +34,7 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import org.openide.util.NbBundle.Messages;
 
 /**
@@ -48,6 +50,15 @@ public final class DeviceBuilderImpl implements DeviceBuilder
   private XA_AvrToolsDeviceFile file;
   private String deviceName;
   private Function<Collection<? extends XA_Device>, XA_Device> deviceSelector;
+  @SuppressWarnings("NonConstantLogger")
+  private Logger deviceLogger;
+
+  @Override
+  public DeviceBuilder deviceLogger(@NullAllowed Logger deviceLogger)
+  {
+    this.deviceLogger = deviceLogger;
+    return this;
+  }
 
   @Override
   public DeviceBuilder deviceSelector(Function<Collection<? extends XA_Device>, XA_Device> ds)
@@ -66,7 +77,8 @@ public final class DeviceBuilderImpl implements DeviceBuilder
   @Override
   public DeviceBuilder notFoundStrategy(NotFoundStrategy strategy) throws NullPointerException
   {
-    Objects.requireNonNull(strategy, "strategy==null");
+    Objects.requireNonNull(strategy,
+                           "strategy==null");
     this.strategy = strategy;
     return this;
   }
@@ -78,7 +90,8 @@ public final class DeviceBuilderImpl implements DeviceBuilder
           IllegalArgumentException,
           IOException
   {
-    return fromDescriptor(XA_AvrToolsDeviceFile.load(strm), pickVariant);
+    return fromDescriptor(XA_AvrToolsDeviceFile.load(strm),
+                          pickVariant);
   }
 
   @Override
@@ -87,7 +100,8 @@ public final class DeviceBuilderImpl implements DeviceBuilder
           NullPointerException,
           IllegalArgumentException
   {
-    Objects.requireNonNull(file, "file==null");
+    Objects.requireNonNull(file,
+                           "file==null");
     Function<Collection<? extends XA_Variant>, XA_Variant> pv;
     if (pickVariant != null) {
       pv = pickVariant;
@@ -104,8 +118,10 @@ public final class DeviceBuilderImpl implements DeviceBuilder
   @Override
   public Device build() throws NullPointerException, IllegalStateException, ItemNotFoundException
   {
-    Objects.requireNonNull(file, "file==null");
-    Objects.requireNonNull(strategy, "strategy==null");
+    Objects.requireNonNull(file,
+                           "file==null");
+    Objects.requireNonNull(strategy,
+                           "strategy==null");
     XA_Device dev = null;
     if (deviceName == null || deviceName.trim().isEmpty()) {
       if (deviceSelector == null) {
@@ -127,7 +143,11 @@ public final class DeviceBuilderImpl implements DeviceBuilder
     if (dev == null) {
       throw new ItemNotFoundException(Bundle.DeviceBuilderImpl_no_device());
     }
-    return new DeviceImpl(file, variant, dev, strategy);
+    return new DeviceImpl(file,
+                          variant,
+                          dev,
+                          strategy,
+                          deviceLogger);
   }
 
 }

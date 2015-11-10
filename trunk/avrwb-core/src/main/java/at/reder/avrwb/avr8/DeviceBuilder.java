@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 /**
  *
@@ -39,6 +40,9 @@ import java.util.function.Function;
  */
 public interface DeviceBuilder
 {
+
+  @NotNull
+  public DeviceBuilder deviceLogger(@NullAllowed("sublogger .dev.<devname> to global logger") Logger deviceLogger);
 
   @NotNull
   public DeviceBuilder deviceSelector(Function<Collection<? extends XA_Device>, XA_Device> ds);
@@ -61,6 +65,7 @@ public interface DeviceBuilder
                                       @NullAllowed("first") Function<Collection<? extends XA_Variant>, XA_Variant> pickVariant)
           throws NullPointerException, IllegalArgumentException;
 
+  @NotNull
   public Device build() throws NullPointerException, IllegalStateException, ItemNotFoundException;
 
 }

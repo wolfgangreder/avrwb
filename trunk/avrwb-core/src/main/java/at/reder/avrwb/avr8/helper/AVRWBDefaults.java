@@ -31,6 +31,14 @@ public final class AVRWBDefaults
 {
 
   public static final Logger LOGGER = Logger.getLogger("at.reder.avrwb");
+
+  private static final boolean DEBUG_LOGGING = Boolean.getBoolean("at.avrwb.debuglogging");
+
+  public static boolean isDebugLoggingActive()
+  {
+    return DEBUG_LOGGING;
+  }
+
   public static final double VOLTAGE_MIN = 2.7;
   public static final double VOLTAGE_MAX = 5.5;
   public static final long SPEED_MAX = 20_000_000;

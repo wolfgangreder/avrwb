@@ -21,6 +21,7 @@
  */
 package at.reder.avrwb.avr8.api;
 
+import at.reder.avrwb.annotations.Immutable;
 import at.reder.avrwb.annotations.NotNull;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import java.util.List;
  *
  * @author wolfi
  */
+@Immutable
 public interface InstructionResult
 {
 
