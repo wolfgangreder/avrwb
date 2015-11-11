@@ -22,42 +22,40 @@
 package at.reder.avrwb.avr8.api.instructions;
 
 import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
+import static org.testng.AssertJUnit.fail;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /**
  *
  * @author wolfi
  */
-public final class Mov extends Instruction_Rd_Rr
+public class OrNGTest
 {
 
-  public Mov(int opcode)
+  public OrNGTest()
   {
-    super(opcode,
-          "mov");
   }
 
-  @Override
-  protected void doExecute(ClockState clockState,
-                           Device device,
-                           InstructionResultBuilder resultBuilder)
+  @BeforeClass
+  public static void setUpClass() throws Exception
   {
-    int rdAddress = getRdAddress();
-    Memory sram = device.getSRAM();
-    int oldValue = sram.getByteAt(rdAddress);
-    resultBuilder.finished(true);
-    if (oldValue != rrVal) {
-      sram.setByteAt(rdAddress,
-                     rrVal);
-      resultBuilder.addModifiedDataAddresses(rdAddress);
-    }
-    resultBuilder.nextIp(device.getCPU().getIP() + 1);
-    logExecutionResult(clockState,
+  }
+
+  @Test
+  public void testDoExecute()
+  {
+    System.out.println("doExecute");
+    ClockState clockState = null;
+    Device device = null;
+    InstructionResultBuilder resultBuilder = null;
+    Or instance = null;
+    instance.doExecute(clockState,
                        device,
-                       rrVal,
-                       rdAddress);
+                       resultBuilder);
+    fail("The test case is a prototype.");
   }
 
 }

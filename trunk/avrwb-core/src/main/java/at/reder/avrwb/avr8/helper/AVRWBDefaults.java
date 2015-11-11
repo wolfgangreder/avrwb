@@ -21,6 +21,8 @@
  */
 package at.reder.avrwb.avr8.helper;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -30,13 +32,30 @@ import java.util.logging.Logger;
 public final class AVRWBDefaults
 {
 
-  public static final Logger LOGGER = Logger.getLogger("at.reder.avrwb");
+  public static final Logger LOGGER;
 
-  private static final boolean DEBUG_LOGGING = Boolean.getBoolean("at.avrwb.debuglogging");
+  static {
+    LOGGER = Logger.getLogger("at.reder.avrwb");
+    String levelProperty = System.getProperty(LOGGER.getName() + ".level");
+    if (levelProperty != null) {
+      try {
+        Level newLevel = Level.parse(levelProperty);
+        LOGGER.setLevel(newLevel);
+      } catch (IllegalArgumentException ex) {
+      }
+    }
+  }
+
+  private static final AtomicBoolean DEBUG_LOGGING = new AtomicBoolean(Boolean.getBoolean("at.avrwb.debuglogging"));
 
   public static boolean isDebugLoggingActive()
   {
-    return DEBUG_LOGGING;
+    return DEBUG_LOGGING.get();
+  }
+
+  public static void setDebugLoggingActive(boolean active)
+  {
+    DEBUG_LOGGING.set(active);
   }
 
   public static final double VOLTAGE_MIN = 2.7;

@@ -23,6 +23,7 @@ package at.reder.avrwb.avr8.api.instructions;
 
 import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Memory;
+import at.reder.avrwb.avr8.SREG;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 
@@ -30,13 +31,18 @@ import at.reder.avrwb.avr8.api.InstructionResultBuilder;
  *
  * @author wolfi
  */
-public final class Mov extends Instruction_Rd_Rr
+public abstract class AbstractSub extends Instruction_Rd_Rr
 {
 
-  public Mov(int opcode)
+  private final boolean withCarry;
+
+  protected AbstractSub(int opcode,
+                        String mnemoic,
+                        boolean withCarry)
   {
     super(opcode,
-          "mov");
+          mnemoic);
+    this.withCarry = withCarry;
   }
 
   @Override
@@ -45,18 +51,28 @@ public final class Mov extends Instruction_Rd_Rr
                            InstructionResultBuilder resultBuilder)
   {
     int rdAddress = getRdAddress();
-    Memory sram = device.getSRAM();
-    int oldValue = sram.getByteAt(rdAddress);
-    resultBuilder.finished(true);
-    if (oldValue != rrVal) {
-      sram.setByteAt(rdAddress,
-                     rrVal);
+    SREG sreg = device.getCPU().getSREG();
+    int oldSreg = sreg.getValue();
+    int result = performSub(sreg,
+                            rdVal,
+                            rrVal,
+                            withCarry);
+    if (result != rdVal) {
+      Memory sram = device.getSRAM();
       resultBuilder.addModifiedDataAddresses(rdAddress);
+      sram.setByteAt(rdAddress,
+                     result);
     }
+    if (oldSreg != sreg.getValue()) {
+      resultBuilder.addModifiedDataAddresses(sreg.getMemoryAddress());
+    }
+    device.getSRAM().setByteAt(rdAddress,
+                               result);
+    resultBuilder.finished(true);
     resultBuilder.nextIp(device.getCPU().getIP() + 1);
     logExecutionResult(clockState,
                        device,
-                       rrVal,
+                       result,
                        rdAddress);
   }
 

@@ -26,7 +26,9 @@ import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
 import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.api.ClockState;
+import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 import at.reder.avrwb.avr8.helper.AVRWBDefaults;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,6 +43,7 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
   public static final int MASK = 0xfc00;
   protected int rdVal;
   protected int rrVal;
+  private final String toStringVal;
 
   public Instruction_Rd_Rr(int opcode,
                            String mnemonic)
@@ -48,6 +51,10 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
     super(opcode,
           MASK,
           mnemonic);
+    toStringVal = MessageFormat.format("{0} r{1,number,0}, r{2,number,0}",
+                                       getMnemonic(),
+                                       getRdAddress(),
+                                       getRrAddress());
   }
 
   public final int getRdAddress()
@@ -92,6 +99,38 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
                               HexIntAdapter.toHexString(rrVal,
                                                         2)});
     }
+  }
+
+  @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder)
+  {
+    readValues(clockState,
+               device);
+  }
+
+  protected void logExecutionResult(ClockState clockState,
+                                    Device device,
+                                    int result,
+                                    int rdAddress)
+  {
+    if (AVRWBDefaults.isDebugLoggingActive()) {
+      device.getLogger().log(Level.FINEST,
+                             ()
+                             -> MessageFormat.format("{0} Writing result {1} to r{2,number,00}",
+                                                     getCurrentDeviceMessage(clockState,
+                                                                             device),
+                                                     HexIntAdapter.toHexString(result,
+                                                                               2),
+                                                     rdAddress));
+    }
+  }
+
+  @Override
+  public String toString()
+  {
+    return toStringVal;
   }
 
 }

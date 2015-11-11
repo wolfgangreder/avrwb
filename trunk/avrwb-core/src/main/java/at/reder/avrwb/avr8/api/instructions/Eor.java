@@ -22,7 +22,7 @@
 package at.reder.avrwb.avr8.api.instructions;
 
 import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.Memory;
+import at.reder.avrwb.avr8.SREG;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 
@@ -30,13 +30,15 @@ import at.reder.avrwb.avr8.api.InstructionResultBuilder;
  *
  * @author wolfi
  */
-public final class Mov extends Instruction_Rd_Rr
+public class Eor extends Instruction_Rd_Rr
 {
 
-  public Mov(int opcode)
+  public static final int OPCODE = 0x2400;
+
+  public Eor(int opcode)
   {
     super(opcode,
-          "mov");
+          "eor");
   }
 
   @Override
@@ -44,20 +46,29 @@ public final class Mov extends Instruction_Rd_Rr
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
-    int rdAddress = getRdAddress();
-    Memory sram = device.getSRAM();
-    int oldValue = sram.getByteAt(rdAddress);
+    final SREG sreg = device.getCPU().getSREG();
+    final int oldValue = rdVal;
+    final int oldSREG = sreg.getValue();
+
+    rdVal = rdVal ^ rrVal;
+    sreg.setV(false);
+    sreg.setN((rdVal & 0x80) != 0);
+    sreg.setZ(rdVal == 0);
+    sreg.fixSignBit();
     resultBuilder.finished(true);
-    if (oldValue != rrVal) {
-      sram.setByteAt(rdAddress,
-                     rrVal);
+    if (oldValue != rdVal) {
+      int rdAddress = getRdAddress();
+      device.getSRAM().setByteAt(getRdAddress(),
+                                 rdVal);
       resultBuilder.addModifiedDataAddresses(rdAddress);
     }
-    resultBuilder.nextIp(device.getCPU().getIP() + 1);
+    if (oldSREG != sreg.getValue()) {
+      resultBuilder.addModifiedDataAddresses(sreg.getMemoryAddress());
+    }
     logExecutionResult(clockState,
                        device,
-                       rrVal,
-                       rdAddress);
+                       rdVal,
+                       oldSREG);
   }
 
 }

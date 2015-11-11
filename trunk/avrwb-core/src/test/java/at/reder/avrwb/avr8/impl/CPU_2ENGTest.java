@@ -24,9 +24,12 @@ package at.reder.avrwb.avr8.impl;
 import at.reder.atmelschema.ModuleVector;
 import at.reder.atmelschema.XA_AvrToolsDeviceFile;
 import at.reder.atmelschema.XA_Module;
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Register;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.api.instructions.DummyDevice;
 import at.reder.avrwb.avr8.helper.NotFoundStrategy;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.util.List;
 import java.util.Random;
 import static org.testng.AssertJUnit.*;
@@ -66,20 +69,6 @@ public class CPU_2ENGTest
   }
 
   @Test
-  public void testSetIP()
-  {
-    int expected = RANDOM.nextInt(Integer.MAX_VALUE);
-    cpu.setIP(expected);
-    int actual = cpu.getIP();
-    assertEquals(expected,
-                 actual);
-    cpu.setIP(0);
-    actual = cpu.getIP();
-    assertEquals(0,
-                 actual);
-  }
-
-  @Test
   public void testGetSREG()
   {
     assertNotNull("sreg==null",
@@ -115,13 +104,17 @@ public class CPU_2ENGTest
   }
 
   @Test(dependsOnMethods = "testGetRegister")
-  public void testReset()
+  public void testReset() throws SimulationException
   {
+    Device device = new DummyDevice(cpu,
+                                    32,
+                                    1024);
     for (ResetSource rs : ResetSource.values()) {
       for (Register r : cpu.getRegister()) {
         r.setValue(rs.ordinal());
       }
-      cpu.reset(rs);
+      cpu.reset(device,
+                rs);
       for (Register r : cpu.getRegister()) {
         assertEquals("Resetvalue for resetsource " + rs.name() + " and register " + r.getName() + " is not zero",
                      0,
@@ -130,13 +123,14 @@ public class CPU_2ENGTest
     }
   }
 
-  @Test(expectedExceptions = {UnsupportedOperationException.class})
-  public void testOnClock()
+  @Test(enabled = false)
+  public void testOnClock() throws SimulationException
   {
-    cpu.onClock(null);
+    cpu.onClock(null,
+                null);
   }
 
-  @Test(expectedExceptions = {UnsupportedOperationException.class})
+  @Test(enabled = false)
   public void testGetCurrentInstruction()
   {
     cpu.getCurrentInstruction();

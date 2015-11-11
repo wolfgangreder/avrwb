@@ -42,7 +42,7 @@ public final class HexIntAdapter extends XmlAdapter<String, Integer>
     String tmp = Integer.toHexString(i);
     if (tmp.length() < minDigits) {
       StringBuilder b = new StringBuilder(minDigits);
-      for (int n = tmp.length(); n < minDigits; ++i) {
+      for (int n = tmp.length(); n < minDigits; ++n) {
         b.append("0");
       }
       tmp = b.append(tmp).toString();
@@ -76,7 +76,8 @@ public final class HexIntAdapter extends XmlAdapter<String, Integer>
     if (v == null) {
       return null;
     }
-    return toHexString(v, minDigits);
+    return toHexString(v,
+                       minDigits);
   }
 
 }

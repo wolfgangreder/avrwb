@@ -37,6 +37,8 @@ import java.lang.annotation.Target;
 public @interface Invariants
 {
 
+  public String value() default "";
+
   public boolean emptyAllowed() default true;
 
   public String minValue() default "";

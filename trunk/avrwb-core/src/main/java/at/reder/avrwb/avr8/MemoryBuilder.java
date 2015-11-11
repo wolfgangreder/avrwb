@@ -30,8 +30,6 @@ import java.nio.ByteOrder;
 public interface MemoryBuilder
 {
 
-  public MemoryBuilder initValue(int init);
-
   public MemoryBuilder id(@NotNull String id) throws NullPointerException;
 
   public MemoryBuilder name(@NotNull String name) throws NullPointerException;

@@ -21,11 +21,15 @@
  */
 package at.reder.avrwb.avr8.api;
 
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.helper.SimulationException;
 
 public interface Resetable
 {
 
-  public void reset(ResetSource source);
+  public void reset(@NotNull Device device,
+                    @NotNull ResetSource source) throws SimulationException;
 
 }
