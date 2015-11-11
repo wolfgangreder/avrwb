@@ -34,7 +34,6 @@ import java.util.Objects;
 public final class MemoryBuilderImpl implements MemoryBuilder
 {
 
-  private int initValue;
   private String id;
   private String name;
   private ByteOrder byteOrder;
@@ -42,16 +41,10 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   private int start;
 
   @Override
-  public MemoryBuilder initValue(int init)
-  {
-    this.initValue = init;
-    return this;
-  }
-
-  @Override
   public MemoryBuilder id(String id) throws NullPointerException
   {
-    Objects.requireNonNull(id, "id==null");
+    Objects.requireNonNull(id,
+                           "id==null");
     this.id = id;
     return this;
   }
@@ -59,7 +52,8 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   @Override
   public MemoryBuilder name(String name) throws NullPointerException
   {
-    Objects.requireNonNull(name, "name==null");
+    Objects.requireNonNull(name,
+                           "name==null");
     this.name = name;
     return this;
   }
@@ -67,7 +61,8 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   @Override
   public MemoryBuilder endianess(ByteOrder byteOrder) throws NullPointerException
   {
-    Objects.requireNonNull(byteOrder, "byteOrder==null");
+    Objects.requireNonNull(byteOrder,
+                           "byteOrder==null");
     this.byteOrder = byteOrder;
     return this;
   }
@@ -95,7 +90,8 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   @Override
   public MemoryBuilder fromAddressSpace(XA_AddressSpace space) throws NullPointerException
   {
-    Objects.requireNonNull(space, "space==null");
+    Objects.requireNonNull(space,
+                           "space==null");
     this.byteOrder = space.getByteOrder();
     this.name = space.getName();
     this.id = space.getId();
@@ -107,18 +103,24 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   @Override
   public Memory build() throws NullPointerException, IllegalStateException
   {
-    Objects.requireNonNull(id, "id==null");
+    Objects.requireNonNull(id,
+                           "id==null");
     if (name == null) {
       name = id;
     }
-    Objects.requireNonNull(byteOrder, "byteOrder==null");
+    Objects.requireNonNull(byteOrder,
+                           "byteOrder==null");
     if (size <= 0) {
       throw new IllegalStateException("size<=0");
     }
     if (start < 0) {
       throw new IllegalStateException("start<0");
     }
-    return new MemoryImpl(id, name, byteOrder, size, start, initValue);
+    return new MemoryImpl(id,
+                          name,
+                          byteOrder,
+                          size,
+                          start);
   }
 
 }

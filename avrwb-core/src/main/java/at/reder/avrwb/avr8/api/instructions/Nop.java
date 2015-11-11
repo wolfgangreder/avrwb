@@ -22,21 +22,24 @@
 package at.reder.avrwb.avr8.api.instructions;
 
 import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.Memory;
+import at.reder.avrwb.avr8.api.ClockPhase;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
+import at.reder.avrwb.avr8.helper.AVRWBDefaults;
+import java.util.logging.Level;
 
 /**
  *
  * @author wolfi
  */
-public final class Mov extends Instruction_Rd_Rr
+public final class Nop extends AbstractInstruction
 {
 
-  public Mov(int opcode)
+  public Nop()
   {
-    super(opcode,
-          "mov");
+    super(0x0,
+          0xffff,
+          "nop");
   }
 
   @Override
@@ -44,20 +47,16 @@ public final class Mov extends Instruction_Rd_Rr
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
-    int rdAddress = getRdAddress();
-    Memory sram = device.getSRAM();
-    int oldValue = sram.getByteAt(rdAddress);
-    resultBuilder.finished(true);
-    if (oldValue != rrVal) {
-      sram.setByteAt(rdAddress,
-                     rrVal);
-      resultBuilder.addModifiedDataAddresses(rdAddress);
+    if (clockState.getPhase() == ClockPhase.FALLING) {
+      resultBuilder.finished(true);
+      resultBuilder.nextIp(device.getCPU().getIP() + 1);
+      if (AVRWBDefaults.isDebugLoggingActive()) {
+        device.getLogger().log(Level.FINEST,
+                               getCurrentDeviceMessage(clockState,
+                                                       device));
+      }
+
     }
-    resultBuilder.nextIp(device.getCPU().getIP() + 1);
-    logExecutionResult(clockState,
-                       device,
-                       rrVal,
-                       rdAddress);
   }
 
 }

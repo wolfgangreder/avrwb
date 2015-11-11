@@ -134,4 +134,11 @@ public interface Memory extends Resetable
    */
   public boolean initialize(@NotNull MemoryChunk chunk);
 
+  /**
+   * Initialisiert alle Adressen mit {@code initVal}.
+   *
+   * @param intVal defaultValue
+   */
+  public void initialize(int intVal);
+
 }

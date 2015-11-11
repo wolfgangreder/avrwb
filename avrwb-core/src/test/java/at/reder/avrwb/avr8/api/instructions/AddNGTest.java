@@ -19,43 +19,32 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.avr8;
+package at.reder.avrwb.avr8.api.instructions;
 
-import at.reder.avrwb.avr8.helper.SimulationException;
-import java.util.List;
-import java.util.logging.Logger;
+import static org.testng.AssertJUnit.fail;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public interface Device
+public class AddNGTest
 {
 
-  public Logger getLogger();
+  public AddNGTest()
+  {
+  }
 
-  public String getName();
+  @BeforeClass
+  public static void setUpClass() throws Exception
+  {
+    fail("implement me");
+  }
 
-  public Architecture getArchitecture();
-
-  public Family getFamily();
-
-  public double getVoltageMin();
-
-  public double getVoltageMax();
-
-  public long getSpeedMax();
-
-  public List<Memory> getMemories();
-
-  public List<Module> getModules();
-
-  public CPU getCPU();
-
-  public Memory getFlash();
-
-  public Memory getSRAM();
-
-  public void reset(ResetSource source) throws SimulationException;
+  @Test
+  public void testSomeMethod()
+  {
+  }
 
 }

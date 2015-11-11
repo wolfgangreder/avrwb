@@ -39,15 +39,18 @@ import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.MemoryBuilder;
 import at.reder.avrwb.avr8.Module;
 import at.reder.avrwb.avr8.ModuleBuilderFactory;
+import at.reder.avrwb.avr8.ResetSource;
 import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.helper.AVRWBDefaults;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import at.reder.avrwb.avr8.helper.ModuleKey;
 import at.reder.avrwb.avr8.helper.NotFoundStrategy;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
 
@@ -78,8 +81,7 @@ final class DeviceImpl implements Device
              @NotNull NotFoundStrategy nfStrategy,
              @NullAllowed Logger deviceLogger) throws ItemNotFoundException, NullPointerException
   {
-    this.deviceLogger = deviceLogger != null ? deviceLogger : Logger.getLogger(AVRWBDefaults.LOGGER.getName() + ".dev." + device.
-            getName());
+    this.deviceLogger = deviceLogger != null ? deviceLogger : createDeviceLogger(device.getName());
     Objects.requireNonNull(file,
                            "file==null");
     Objects.requireNonNull(device,
@@ -126,6 +128,7 @@ final class DeviceImpl implements Device
       for (Memory m : memories) {
         if (AVRWBDefaults.MEMNAME_FLASH.equals(m.getId())) {
           tmpFlash = m;
+          m.initialize(0xff);
         } else if (AVRWBDefaults.MEMNAME_SRAM.equals(m.getId())) {
           tmpSRAM = m;
         }
@@ -133,6 +136,20 @@ final class DeviceImpl implements Device
     }
     flash = tmpFlash;
     sram = tmpSRAM;
+  }
+
+  private Logger createDeviceLogger(String deviceName)
+  {
+    Logger result = Logger.getLogger(AVRWBDefaults.LOGGER.getName() + ".dev." + deviceName);
+    String levelProperty = System.getProperty(result.getName() + ".level");
+    if (levelProperty != null) {
+      try {
+        Level newLevel = Level.parse(levelProperty);
+        result.setLevel(newLevel);
+      } catch (IllegalArgumentException ex) {
+      }
+    }
+    return result;
   }
 
   @Override
@@ -277,6 +294,19 @@ final class DeviceImpl implements Device
   public Memory getSRAM()
   {
     return sram;
+  }
+
+  @Override
+  public void reset(ResetSource source) throws SimulationException
+  {
+    for (Memory mem : memories) {
+      mem.reset(this,
+                source);
+    }
+    for (Module mod : modules) {
+      mod.reset(this,
+                source);
+    }
   }
 
   @Override

@@ -24,6 +24,8 @@ package at.reder.avrwb.avr8;
 import at.reder.avrwb.annotations.Invariants;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.avr8.api.Instruction;
+import at.reder.avrwb.avr8.api.InstructionDecoder;
+import at.reder.avrwb.avr8.helper.InstructionNotAvailableException;
 
 public interface CPU extends Module
 {
@@ -38,9 +40,13 @@ public interface CPU extends Module
   /**
    * Setzt den Instruction Pointer.
    *
+   * @param device device
    * @param newIP newIP
+   * @throws at.reder.avrwb.avr8.helper.InstructionNotAvailableException wenn der Befehl in dieser CPU nicht implementiert ist.
    */
-  public void setIP(@Invariants(minValue = "0") int newIP) throws IllegalArgumentException;
+  public void setIP(@NotNull Device device,
+                    @Invariants(minValue = "0") int newIP) throws IllegalArgumentException, NullPointerException,
+                                                                  InstructionNotAvailableException;
 
   /**
    * Das Statusregister
@@ -65,5 +71,8 @@ public interface CPU extends Module
    */
   @NotNull
   public Instruction getCurrentInstruction();
+
+  @NotNull
+  public InstructionDecoder getInstructionDecoder();
 
 }

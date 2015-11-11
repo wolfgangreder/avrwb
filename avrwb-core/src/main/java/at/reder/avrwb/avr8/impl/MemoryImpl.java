@@ -21,8 +21,10 @@
  */
 package at.reder.avrwb.avr8.impl;
 
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import at.reder.avrwb.io.MemoryChunk;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -44,44 +46,46 @@ final class MemoryImpl implements Memory
   private final int size;
   private final int start;
   private final ByteBuffer data;
-  private final int initValue;
 
   MemoryImpl(String id,
              String name,
              ByteOrder byteOrder,
              int size,
-             int start,
-             int initValue)
+             int start)
   {
     this.id = id;
     this.name = name;
     this.byteOrder = byteOrder;
     this.size = size;
     this.start = start;
-    this.initValue = initValue;
     this.data = ByteBuffer.allocate(size).order(byteOrder);
-    for (int i = 0; i < size; ++i) {
-      data.put(i, (byte) initValue);
-    }
   }
 
   @Override
-  public void reset(ResetSource source)
+  public void reset(Device device,
+                    ResetSource source) throws SimulationException
   {
-    if (source == ResetSource.POWER_UP) {
-      for (int i = 0; i < size; ++i) {
-        data.put(i, (byte) initValue);
-      }
+  }
+
+  @Override
+  public void initialize(int initVal)
+  {
+    data.position(0);
+    while (data.hasRemaining()) {
+      data.put((byte) initVal);
     }
   }
 
   @Override
   public boolean initialize(MemoryChunk chunk)
   {
-    Objects.requireNonNull(chunk, "chunk==null");
+    Objects.requireNonNull(chunk,
+                           "chunk==null");
     ByteBuffer byteBuffer = chunk.getData();
     data.position(chunk.getStartAddress());
-    int limit = Math.min(chunk.getSize(), Math.min(data.remaining(), byteBuffer.remaining()));
+    int limit = Math.min(chunk.getSize(),
+                         Math.min(data.remaining(),
+                                  byteBuffer.remaining()));
     byteBuffer.mark();
     try {
       for (int i = 0; i < limit; ++i) {
@@ -143,7 +147,8 @@ final class MemoryImpl implements Memory
   @Override
   public int getByteAt(int address)
   {
-    return data.get(checkAddress(address));
+    int tmp = data.get(checkAddress(address));
+    return tmp & 0xff;
   }
 
   @Override
@@ -151,7 +156,8 @@ final class MemoryImpl implements Memory
                         int value)
   {
     final int ra = checkAddress(address);
-    data.put(ra, (byte) value);
+    data.put(ra,
+             (byte) value);
   }
 
   @Override
@@ -164,7 +170,8 @@ final class MemoryImpl implements Memory
   public void setWordAt(int address,
                         int value)
   {
-    data.putShort(checkAddress(address), (short) value);
+    data.putShort(checkAddress(address),
+                  (short) value);
   }
 
   @Override
@@ -177,7 +184,8 @@ final class MemoryImpl implements Memory
   public void setDWordAt(int address,
                          long value)
   {
-    data.putInt(checkAddress(address), (int) value);
+    data.putInt(checkAddress(address),
+                (int) value);
   }
 
   @Override
@@ -190,7 +198,8 @@ final class MemoryImpl implements Memory
   public void setQWordAt(int address,
                          long value)
   {
-    data.putLong(checkAddress(address), value);
+    data.putLong(checkAddress(address),
+                 value);
   }
 
   @Override
@@ -203,7 +212,8 @@ final class MemoryImpl implements Memory
   public void setFloatAt(int address,
                          float f)
   {
-    data.putFloat(checkAddress(address), f);
+    data.putFloat(checkAddress(address),
+                  f);
   }
 
   private int readCharacters(char[] buffer,
@@ -212,7 +222,8 @@ final class MemoryImpl implements Memory
                              Charset charSet,
                              ByteBuffer dataView)
   {
-    Objects.requireNonNull(buffer, "buffer==null");
+    Objects.requireNonNull(buffer,
+                           "buffer==null");
     if (charSet == null) {
       charSet = StandardCharsets.US_ASCII;
     }
@@ -220,9 +231,14 @@ final class MemoryImpl implements Memory
             onMalformedInput(CodingErrorAction.REPLACE).
             onUnmappableCharacter(CodingErrorAction.REPLACE).
             replaceWith("?");
-    int maxLen = numCharacters >= 0 ? Math.min(numCharacters, buffer.length - offset) : buffer.length - offset;
-    CharBuffer charBuffer = CharBuffer.wrap(buffer, offset, maxLen);
-    decoder.decode(dataView, charBuffer, true);
+    int maxLen = numCharacters >= 0 ? Math.min(numCharacters,
+                                               buffer.length - offset) : buffer.length - offset;
+    CharBuffer charBuffer = CharBuffer.wrap(buffer,
+                                            offset,
+                                            maxLen);
+    decoder.decode(dataView,
+                   charBuffer,
+                   true);
     int read = charBuffer.position();
     if (numCharacters == -1) {
       int zeroPos = -1;
@@ -247,7 +263,11 @@ final class MemoryImpl implements Memory
                             int numCharacters,
                             Charset charSet)
   {
-    return readCharacters(buffer, offset, numCharacters, charSet, getBufferAtAddress(address));
+    return readCharacters(buffer,
+                          offset,
+                          numCharacters,
+                          charSet,
+                          getBufferAtAddress(address));
   }
 
   StringBuilder readString(int address,
@@ -257,17 +277,26 @@ final class MemoryImpl implements Memory
     if (charSet == null) {
       charSet = StandardCharsets.US_ASCII;
     }
-    Objects.requireNonNull(charSet, "charSet==null");
+    Objects.requireNonNull(charSet,
+                           "charSet==null");
     StringBuilder result = new StringBuilder();
     char[] buffer = new char[bufSize];
     int read = -1;
     ByteBuffer dataView = getBufferAtAddress(address);
-    while ((dataView.hasRemaining() && (read = readCharacters(buffer, 0, -1, charSet, dataView)) == buffer.length)) {
-      result.append(buffer, 0, read);
+    while ((dataView.hasRemaining() && (read = readCharacters(buffer,
+                                                              0,
+                                                              -1,
+                                                              charSet,
+                                                              dataView)) == buffer.length)) {
+      result.append(buffer,
+                    0,
+                    read);
       read = -1;
     }
     if (read > 0) {
-      result.append(buffer, 0, read);
+      result.append(buffer,
+                    0,
+                    read);
     }
     return result;
   }
@@ -276,7 +305,9 @@ final class MemoryImpl implements Memory
   public StringBuilder readString(int address,
                                   Charset charSet)
   {
-    return readString(address, charSet, 1024);
+    return readString(address,
+                      charSet,
+                      1024);
   }
 
   @Override
@@ -286,7 +317,8 @@ final class MemoryImpl implements Memory
                              int toWrite,
                              Charset charSet)
   {
-    Objects.requireNonNull(buffer, "buffer==null");
+    Objects.requireNonNull(buffer,
+                           "buffer==null");
     if (charSet == null) {
       charSet = StandardCharsets.US_ASCII;
     }
@@ -294,7 +326,8 @@ final class MemoryImpl implements Memory
     final ByteBuffer dataView = getBufferAtAddress(address);
     CharsetEncoder encoder = charSet.newEncoder().onMalformedInput(CodingErrorAction.REPLACE).onUnmappableCharacter(
             CodingErrorAction.REPLACE).replaceWith(new byte[]{0});
-    int maxLen = toWrite >= 0 ? Math.min(toWrite, buffer.length - offset) : buffer.length - offset;
+    int maxLen = toWrite >= 0 ? Math.min(toWrite,
+                                         buffer.length - offset) : buffer.length - offset;
     if (toWrite == -1) {
       for (int i = offset; i < buffer.length; ++i) {
         if (buffer[i] == 0) {
@@ -303,12 +336,22 @@ final class MemoryImpl implements Memory
         }
       }
     }
-    CharBuffer charBuffer = CharBuffer.wrap(buffer, offset, maxLen);
-    if (encoder.encode(charBuffer, dataView, true) == CoderResult.UNDERFLOW) {
+    CharBuffer charBuffer = CharBuffer.wrap(buffer,
+                                            offset,
+                                            maxLen);
+    if (encoder.encode(charBuffer,
+                       dataView,
+                       true) == CoderResult.UNDERFLOW) {
       return dataView.position() - ra;
     } else {
       return size - address;
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return "MemoryImpl{" + "id=" + id + '}';
   }
 
 }

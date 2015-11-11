@@ -22,6 +22,8 @@
 package at.reder.avrwb.avr8.api;
 
 import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.Device;
+import at.reder.avrwb.avr8.helper.SimulationException;
 
 /**
  *
@@ -34,10 +36,11 @@ public interface ClockSink
    * Wird bei einem Taktereignis aufgerufen. {@code clockState.getPhase()} ist immer entwender {@code ClockPhase.RISING} oder
    * {@code ClockPhase.FALLING}.
    *
-   * @see ClockState
-   * @see ClockPhase
    * @param clockState aktueller Takt
+   * @param device device
+   * @throws at.reder.avrwb.avr8.helper.SimulationException if any
    */
-  public void onClock(@NotNull ClockState clockState);
+  public void onClock(@NotNull ClockState clockState,
+                      @NotNull Device device) throws SimulationException;
 
 }

@@ -93,7 +93,7 @@ public abstract class AbstractInstruction implements Instruction
                            int rr,
                            boolean withCarry)
   {
-    int v = rd + rr + (withCarry && sreg.getC() ? 1 : 0);
+    int v = (rd + rr + (withCarry && sreg.getC() ? 1 : 0)) & 0xff;
     boolean c = (rd & rr & 0x80) != 0 || ((rr & ~v) & 0x80) != 0 || ((rd & ~v) & 0x80) != 0;
     sreg.setC(c);
     sreg.setZ(v == 0);
@@ -118,7 +118,7 @@ public abstract class AbstractInstruction implements Instruction
                            int rr,
                            boolean withCarry)
   {
-    int v = rd - rr - (withCarry && sreg.getC() ? 1 : 0);
+    int v = (rd - rr - (withCarry && sreg.getC() ? 1 : 0)) & 0xff;
     sreg.setC(((~rd & rr & 0x80) != 0) || ((rr & v & 0x80) != 0) || ((~rd & v & 0x80) != 0));
     sreg.setZ((v == 0) && sreg.getZ());
     sreg.setN((v & 0x80) != 0);
@@ -156,6 +156,12 @@ public abstract class AbstractInstruction implements Instruction
                                     @NotNull Device device,
                                     @NotNull InstructionResultBuilder resultBuilder);
 
+  protected void doPrepare(@NotNull ClockState clockState,
+                           @NotNull Device device,
+                           @NotNull InstructionResultBuilder resultBuilder)
+  {
+  }
+
   @Override
   @NotNull
   public final InstructionResult execute(@NotNull ClockState clockState,
@@ -165,9 +171,17 @@ public abstract class AbstractInstruction implements Instruction
                            "clockState==null");
     currentDeviceStateMessage = null;
     InstructionResultBuilder resultBuilder = InstanceFactories.getInstructionResultBuilder(device);
-    doExecute(clockState,
-              device,
-              resultBuilder);
+    switch (clockState.getPhase()) {
+      case RISING:
+        doPrepare(clockState,
+                  device,
+                  resultBuilder);
+        break;
+      case FALLING:
+        doExecute(clockState,
+                  device,
+                  resultBuilder);
+    }
     return resultBuilder.build();
   }
 
@@ -188,7 +202,7 @@ public abstract class AbstractInstruction implements Instruction
                              "clockState==null");
       Objects.requireNonNull(device,
                              "device==null");
-      currentDeviceStateMessage = MessageFormat.format("Exec {0} @ {1}| IP={2}, #CYCL={5,number,#.###}, PH={3}|",
+      currentDeviceStateMessage = MessageFormat.format("Exec {0} @ {1}| IP={2}, #CY={5,number,#.###}, PH={3}|",
                                                        toString(),
                                                        device.getName(),
                                                        HexIntAdapter.toHexString(device.getCPU().getIP(),

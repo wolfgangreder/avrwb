@@ -29,6 +29,7 @@ import at.reder.atmelschema.XA_RegisterGroup;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
 import at.reder.avrwb.avr8.CPU;
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Register;
 import at.reder.avrwb.avr8.RegisterBuilder;
 import at.reder.avrwb.avr8.ResetSource;
@@ -36,8 +37,12 @@ import at.reder.avrwb.avr8.SREG;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.api.Instruction;
+import at.reder.avrwb.avr8.api.InstructionDecoder;
+import at.reder.avrwb.avr8.api.InstructionResult;
+import at.reder.avrwb.avr8.helper.InstructionNotAvailableException;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import at.reder.avrwb.avr8.helper.NotFoundStrategy;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,9 +62,11 @@ public class CPU_2E implements CPU
   private final String caption;
   private final Map<String, String> params;
   private int ip;
+  private Instruction currentInstruction;
   private final SREG sreg;
   private final Register sp;
   private final List<Register> register;
+  private final CPU_2EInstructionDecoder instructionDecoder;
 
   CPU_2E(@NotNull XA_AvrToolsDeviceFile file,
          @NotNull ModuleVector moduleVector,
@@ -130,6 +137,7 @@ public class CPU_2E implements CPU
                                                 "SP",
                                                 nfStrategy);
     }
+    instructionDecoder = new CPU_2EInstructionDecoder();
   }
 
   @Override
@@ -139,12 +147,17 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public void setIP(int newIP) throws IllegalArgumentException
+  public void setIP(Device device,
+                    int newIP) throws IllegalArgumentException, NullPointerException, InstructionNotAvailableException
   {
+    Objects.requireNonNull(device,
+                           "device==null");
     if (newIP < 0) {
       throw new IllegalArgumentException("ip<0");
     }
     this.ip = newIP;
+    currentInstruction = instructionDecoder.getInstruction(device,
+                                                           newIP * 2);
   }
 
   @Override
@@ -184,23 +197,42 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public void reset(ResetSource source)
+  public void reset(Device device,
+                    ResetSource source) throws SimulationException
   {
+    Objects.requireNonNull(device,
+                           "device==null");
+    Objects.requireNonNull(source,
+                           "source==null");
     for (Register r : register) {
       r.setValue(0);
     }
+    setIP(device,
+          0);
   }
 
   @Override
-  public void onClock(ClockState clockState)
+  public InstructionDecoder getInstructionDecoder()
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return instructionDecoder;
+  }
+
+  @Override
+  public void onClock(ClockState clockState,
+                      Device device) throws SimulationException
+  {
+    InstructionResult result = currentInstruction.execute(clockState,
+                                                          device);
+    if (result.isExecutionFinished()) {
+      setIP(device,
+            result.getNextIP());
+    }
   }
 
   @Override
   public Instruction getCurrentInstruction()
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    return currentInstruction;
   }
 
 }

@@ -19,43 +19,22 @@
  * MA 02110-1301  USA
  *
  */
-package at.reder.avrwb.avr8;
-
-import at.reder.avrwb.avr8.helper.SimulationException;
-import java.util.List;
-import java.util.logging.Logger;
+package at.reder.avrwb.avr8.api.instructions;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public interface Device
+public class Sbc extends AbstractSub
 {
 
-  public Logger getLogger();
+  public static final int OPCODE = 0x0800;
 
-  public String getName();
-
-  public Architecture getArchitecture();
-
-  public Family getFamily();
-
-  public double getVoltageMin();
-
-  public double getVoltageMax();
-
-  public long getSpeedMax();
-
-  public List<Memory> getMemories();
-
-  public List<Module> getModules();
-
-  public CPU getCPU();
-
-  public Memory getFlash();
-
-  public Memory getSRAM();
-
-  public void reset(ResetSource source) throws SimulationException;
+  public Sbc(int opcode)
+  {
+    super(opcode,
+          "sbc",
+          true);
+  }
 
 }
