@@ -39,6 +39,25 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.15</version>
             </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>exec-maven-plugin</artifactId>
+              <version>1.4.0</version>
+              <executions>
+                <execution>
+                  <goals>
+                    <goal>exec</goal>
+                  </goals>
+                </execution>
+              </executions>
+              <configuration>
+                <executable>${basedir}/src/test/app/avrasm</executable>
+                <basedir>${basedir}/src/test/app</basedir>
+                <arguments>
+                  <argument>${basedir}/target/test-classes</argument>
+                </arguments>
+              </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
