@@ -1,0 +1,27 @@
+#!/bin/bash
+WINEDEBUG=-all
+AVRASM="AvrAssembler2/avrasm2.exe -fI -W+ie -C V2E -I AvrAssembler2/Appnotes"
+SRCBASE=../resources/testprojects
+
+echo $1
+for file in $SRCBASE/*
+do
+  if [ -d $file ] 
+  then
+    for asmfile in $(ls $file/*.asm)
+    do
+      asmdir=$(dirname $asmfile)
+      asmfilename=$(basename $asmfile)
+      asmname=${asmfilename%.*}
+      outfile=$1/testprojects/${asmdir#$SRCBASE/}
+      mkdir -p $outfile
+      outfile=$outfile/$asmname
+      WINEDEBUG=-all /usr/bin/wine $AVRASM -l $outfile.lst -o $outfile.hex $asmfile
+    done
+  fi   
+done
+
+#rem FULLFILENAME=$(basename $1)
+#rem FILENAME=${FULLFILENAME%.*}
+#rem SRCPATH=$(dirname $1)
+#rem WINEDEBUG=-all /usr/bin/wine $AVRASM -fI -W+ie -C V2E -I AvrAssembler2/Appnotes -l $SRCDIR/$SRCPATH/$FILENAME.lst -o $SRCDIR/$SRCPATH/$FILENAME.hex $SRCDIR/$1
