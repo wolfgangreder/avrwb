@@ -27,17 +27,17 @@ import org.testng.annotations.BeforeClass;
  *
  * @author wolfi
  */
-public class SerNGTest extends AbstractInstructionTest
+public class LdiNGTest extends AbstractInstructionTest
 {
 
-  public SerNGTest()
+  public LdiNGTest()
   {
   }
 
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Ser.class);
+    testClass(Ldi.class);
   }
 
 }

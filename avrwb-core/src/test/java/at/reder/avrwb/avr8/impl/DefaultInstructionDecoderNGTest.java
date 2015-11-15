@@ -56,6 +56,7 @@ import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
 import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_b;
 import at.reder.avrwb.avr8.api.instructions.Jmp;
 import at.reder.avrwb.avr8.api.instructions.Ld;
+import at.reder.avrwb.avr8.api.instructions.Ldi;
 import at.reder.avrwb.avr8.api.instructions.Mov;
 import at.reder.avrwb.avr8.api.instructions.Mul;
 import at.reder.avrwb.avr8.api.instructions.Neg;
@@ -70,7 +71,6 @@ import at.reder.avrwb.avr8.api.instructions.Sbc;
 import at.reder.avrwb.avr8.api.instructions.Sbci_Subi;
 import at.reder.avrwb.avr8.api.instructions.Sbiw;
 import at.reder.avrwb.avr8.api.instructions.Sbr;
-import at.reder.avrwb.avr8.api.instructions.Ser;
 import at.reder.avrwb.avr8.api.instructions.SetClearIOBit;
 import at.reder.avrwb.avr8.api.instructions.Sub;
 import at.reder.avrwb.avr8.api.instructions.Swap;
@@ -286,17 +286,24 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
-  public void testSer()
+  @Test
+  public void testLdi()
   {
-    int opcode = 0xef0f;
+    int opcode = constructOpcodeRdK8(Ldi.OPCODE,
+                                     16,
+                                     0xff);
     DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
-    assertTrue(result instanceof Ser);
-    assertEquals("ser r16",
+    assertTrue(result instanceof Ldi);
+    assertEquals("ldi r16, 0xff",
                  result.toString());
+    assertRdK8(instance,
+               Ldi.OPCODE,
+               Ldi.class,
+               "ldi");
+
   }
 
   @Test(enabled = false)
@@ -646,7 +653,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
+  @Test
   public void testRcall()
   {
     int opcode = 0xd800;

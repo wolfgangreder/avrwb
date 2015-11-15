@@ -65,7 +65,7 @@ import at.reder.avrwb.avr8.api.instructions.Ret_i;
 import at.reder.avrwb.avr8.api.instructions.Ror;
 import at.reder.avrwb.avr8.api.instructions.Sbc;
 import at.reder.avrwb.avr8.api.instructions.Sbiw;
-import at.reder.avrwb.avr8.api.instructions.Ser;
+import at.reder.avrwb.avr8.api.instructions.Ldi;
 import at.reder.avrwb.avr8.api.instructions.SetClearIOBit;
 import at.reder.avrwb.avr8.api.instructions.Sub;
 import at.reder.avrwb.avr8.api.instructions.Swap;
@@ -430,10 +430,10 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
       case 0xd000:
         return new Rcall(opcode);
       case 0xe000:
-        if ((opcode & Ser.OPCODE) == Ser.OPCODE) {
-          return new Ser(opcode);
+        if ((opcode & Ldi.OPCODE) == Ldi.OPCODE) {
+          return new Ldi(opcode);
         }
-      //return Ldi.getOperation(opcode);
+      //return Ldi.getOperation(opcode);      //return Ldi.getOperation(opcode);
     }
     switch (opcode & 0xfc00) {
       case 0xf000:
