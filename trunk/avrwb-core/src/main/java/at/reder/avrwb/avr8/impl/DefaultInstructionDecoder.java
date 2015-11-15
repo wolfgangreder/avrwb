@@ -39,9 +39,11 @@ import at.reder.avrwb.avr8.api.instructions.Cpi;
 import at.reder.avrwb.avr8.api.instructions.Cpse;
 import at.reder.avrwb.avr8.api.instructions.Eor;
 import at.reder.avrwb.avr8.api.instructions.Ld;
+import at.reder.avrwb.avr8.api.instructions.Ldi;
 import at.reder.avrwb.avr8.api.instructions.Mov;
 import at.reder.avrwb.avr8.api.instructions.Nop;
 import at.reder.avrwb.avr8.api.instructions.Or;
+import at.reder.avrwb.avr8.api.instructions.Rcall;
 import at.reder.avrwb.avr8.api.instructions.Sbc;
 import at.reder.avrwb.avr8.api.instructions.Sbci_Subi;
 import at.reder.avrwb.avr8.api.instructions.Sbr;
@@ -238,11 +240,15 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   {
     switch (opcode & 0x3000) {
       case 0x0000:
-      // 1100 xxxx xxxx xxxx
+        // 1100 xxxx xxxx xxxx
+//        return new Rjmp(opcode);
+        return null;
       case 0x1000:
-      // 1101 xxxx xxxx xxxx
+        // 1101 xxxx xxxx xxxx
+        return new Rcall(opcode);
       case 0x2000:
-      // 1110 xxxx xxxx xxxx
+        // 1110 xxxx xxxx xxxx
+        return new Ldi(opcode);
       case 0x3000:
         // 1111 xxxx xxxx xxxx
         switch (opcode & 0x0c00) {
