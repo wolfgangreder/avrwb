@@ -28,6 +28,7 @@ import at.reder.atmelschema.XA_Register;
 import at.reder.atmelschema.XA_RegisterGroup;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
+import at.reder.avrwb.avr8.AVRCoreVersion;
 import at.reder.avrwb.avr8.CPU;
 import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Register;
@@ -39,6 +40,7 @@ import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.api.Instruction;
 import at.reder.avrwb.avr8.api.InstructionDecoder;
 import at.reder.avrwb.avr8.api.InstructionResult;
+import at.reder.avrwb.avr8.helper.AVRWBDefaults;
 import at.reder.avrwb.avr8.helper.InstructionNotAvailableException;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import at.reder.avrwb.avr8.helper.NotFoundStrategy;
@@ -67,6 +69,7 @@ public class CPU_2E implements CPU
   private final Register sp;
   private final List<Register> register;
   private final CPU_2EInstructionDecoder instructionDecoder;
+  private final AVRCoreVersion version;
 
   CPU_2E(@NotNull XA_AvrToolsDeviceFile file,
          @NotNull ModuleVector moduleVector,
@@ -138,6 +141,7 @@ public class CPU_2E implements CPU
                                                 nfStrategy);
     }
     instructionDecoder = new CPU_2EInstructionDecoder();
+    version = AVRCoreVersion.valueOf(module.getParameter().get(AVRWBDefaults.PROP_CORE_VERSION));
   }
 
   @Override
@@ -233,6 +237,12 @@ public class CPU_2E implements CPU
   public Instruction getCurrentInstruction()
   {
     return currentInstruction;
+  }
+
+  @Override
+  public AVRCoreVersion getCoreVersion()
+  {
+    return version;
   }
 
 }

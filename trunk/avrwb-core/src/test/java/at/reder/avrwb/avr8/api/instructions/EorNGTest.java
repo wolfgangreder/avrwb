@@ -21,18 +21,13 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
-import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.api.ClockState;
-import at.reder.avrwb.avr8.api.InstructionResultBuilder;
-import static org.testng.AssertJUnit.fail;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
  * @author wolfi
  */
-public class EorNGTest
+public class EorNGTest extends AbstractInstructionTest
 {
 
   public EorNGTest()
@@ -42,20 +37,7 @@ public class EorNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-  }
-
-  @Test
-  public void testDoExecute()
-  {
-    System.out.println("doExecute");
-    ClockState clockState = null;
-    Device device = null;
-    InstructionResultBuilder resultBuilder = null;
-    Eor instance = null;
-    instance.doExecute(clockState,
-                       device,
-                       resultBuilder);
-    fail("The test case is a prototype.");
+    testClass(Eor.class);
   }
 
 }

@@ -37,7 +37,7 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-final class MemoryImpl implements Memory
+class MemoryImpl implements Memory
 {
 
   private final String id;
@@ -46,6 +46,7 @@ final class MemoryImpl implements Memory
   private final int size;
   private final int start;
   private final ByteBuffer data;
+  private final int hexStringLen;
 
   MemoryImpl(String id,
              String name,
@@ -59,6 +60,7 @@ final class MemoryImpl implements Memory
     this.size = size;
     this.start = start;
     this.data = ByteBuffer.allocate(size).order(byteOrder);
+    hexStringLen = calculateHexStringLen();
   }
 
   @Override
@@ -352,6 +354,23 @@ final class MemoryImpl implements Memory
   public String toString()
   {
     return "MemoryImpl{" + "id=" + id + '}';
+  }
+
+  private int calculateHexStringLen()
+  {
+    int maxAddress = start + size;
+    int len = Integer.toHexString(maxAddress).length();
+    if (len % 2 == 0) {
+      return len;
+    } else {
+      return len + 1;
+    }
+  }
+
+  @Override
+  public int getHexAddressStringWidth()
+  {
+    return hexStringLen;
   }
 
 }

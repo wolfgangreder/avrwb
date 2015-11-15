@@ -25,7 +25,7 @@ package at.reder.avrwb.avr8.api.instructions;
  *
  * @author wolfi
  */
-public class Adc extends AbstractAdd
+public final class Adc extends AbstractAdd
 {
 
   public static final int OPCODE = 0x1c00;

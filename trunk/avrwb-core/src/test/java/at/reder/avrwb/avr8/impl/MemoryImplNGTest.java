@@ -512,4 +512,12 @@ public class MemoryImplNGTest
                  memory.getByteAt(0));
   }
 
+  @Test
+  public void testHexStringLen()
+  {
+    int len = memory.getHexAddressStringWidth();
+    assertEquals(4,
+                 len);
+  }
+
 }

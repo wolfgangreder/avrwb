@@ -28,8 +28,8 @@ import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 import at.reder.avrwb.avr8.helper.AVRWBDefaults;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.text.MessageFormat;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -40,31 +40,35 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rd_Rr extends AbstractInstruction
 {
 
-  public static final int MASK = 0xfc00;
+  public static final int OPCODE_MASK = 0xfc00;
   protected int rdVal;
   protected int rrVal;
   private final String toStringVal;
+  protected final int rdAddress;
+  protected final int rrAddress;
 
   public Instruction_Rd_Rr(int opcode,
                            String mnemonic)
   {
     super(opcode,
-          MASK,
+          OPCODE_MASK,
           mnemonic);
+    rdAddress = (opcode & 0x1f0) >> 4;
+    rrAddress = ((opcode & 0x200) >> 5) | (opcode & 0xf);
     toStringVal = MessageFormat.format("{0} r{1,number,0}, r{2,number,0}",
-                                       getMnemonic(),
-                                       getRdAddress(),
-                                       getRrAddress());
+                                       mnemonic,
+                                       rdAddress,
+                                       rrAddress);
   }
 
   public final int getRdAddress()
   {
-    return (getOpcode() & 0x1f0) >> 4;
+    return rdAddress;
   }
 
   public final int getRrAddress()
   {
-    return ((getOpcode() & 0x200) >> 5) | (getOpcode() & 0xf);
+    return rrAddress;
   }
 
   /**
@@ -76,26 +80,22 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
   protected void readValues(@NotNull ClockState clockState,
                             @NotNull Device device)
   {
-    final int rrAddress = getRrAddress();
-    final int rdAddress = getRdAddress();
     rdVal = device.getSRAM().getByteAt(rdAddress);
     rrVal = device.getSRAM().getByteAt(rrAddress);
     if (AVRWBDefaults.isDebugLoggingActive()) {
       Logger logger = device.getLogger();
-      logger.log(Level.FINEST,
-                 "{0} reading rdVal{1}={2}",
+      logger.log(AVRWBDefaults.getInstructionTraceLevel(),
+                 "{0} reading rdVal r{1,number,0}={2}",
                  new Object[]{getCurrentDeviceMessage(clockState,
                                                       device),
-                              HexIntAdapter.toHexString(rdAddress,
-                                                        2),
+                              rdAddress,
                               HexIntAdapter.toHexString(rdVal,
                                                         2)});
-      logger.log(Level.FINEST,
-                 "{0} reading rrVal{1}={2}",
+      logger.log(AVRWBDefaults.getInstructionTraceLevel(),
+                 "{0} reading rrVal r{1}={2}",
                  new Object[]{getCurrentDeviceMessage(clockState,
                                                       device),
-                              HexIntAdapter.toHexString(rrAddress,
-                                                        2),
+                              rrAddress,
                               HexIntAdapter.toHexString(rrVal,
                                                         2)});
     }
@@ -104,7 +104,7 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
   @Override
   protected void doPrepare(ClockState clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder)
+                           InstructionResultBuilder resultBuilder) throws SimulationException
   {
     readValues(clockState,
                device);
@@ -116,9 +116,9 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
                                     int rdAddress)
   {
     if (AVRWBDefaults.isDebugLoggingActive()) {
-      device.getLogger().log(Level.FINEST,
+      device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              ()
-                             -> MessageFormat.format("{0} Writing result {1} to r{2,number,00}",
+                             -> MessageFormat.format("{0} writing result {1} to r{2,number,0}",
                                                      getCurrentDeviceMessage(clockState,
                                                                              device),
                                                      HexIntAdapter.toHexString(result,

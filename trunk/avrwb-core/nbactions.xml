@@ -1,45 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <actions>
         <action>
-            <actionName>debug.test.single</actionName>
+            <actionName>build</actionName>
             <packagings>
                 <packaging>*</packaging>
             </packagings>
             <goals>
                 <goal>exec:exec</goal>
-                <goal>test-compile</goal>
-                <goal>surefire:test</goal>
-            </goals>
-            <properties>
-                <test>${packageClassName}</test>
-                <forkMode>once</forkMode>
-                <maven.surefire.debug>-Xdebug -Xrunjdwp:transport=dt_socket,server=n,address=${jpda.address}</maven.surefire.debug>
-                <jpda.listen>true</jpda.listen>
-                <at.avrwb.debuglogging>true</at.avrwb.debuglogging>
-                <at.reder.avrwb.level>FINEST</at.reder.avrwb.level>
-            </properties>
-        </action>
-        <action>
-            <actionName>test</actionName>
-            <packagings>
-                <packaging>*</packaging>
-            </packagings>
-            <goals>
-                <goal>exec:exec</goal>
-                <goal>test</goal>
+                <goal>install</goal>
+                
             </goals>
         </action>
         <action>
-            <actionName>test.single</actionName>
+            <actionName>rebuild</actionName>
+            <packagings>
+                <packaging>*</packaging>
+            </packagings>
+            <goals>
+                <goal>clean</goal>
+                <goal>exec:exec</goal>
+                <goal>install</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>build-with-dependencies</actionName>
+            <reactor>also-make</reactor>
             <packagings>
                 <packaging>*</packaging>
             </packagings>
             <goals>
                 <goal>exec:exec</goal>
-                <goal>surefire:test</goal>
+                <goal>install</goal>
             </goals>
-            <properties>
-                <test>${packageClassName}</test>
-            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-Compile Asm Files</actionName>
+            <displayName>Compile Asm Files</displayName>
+            <goals>
+                <goal>exec:exec</goal>
+            </goals>
         </action>
     </actions>

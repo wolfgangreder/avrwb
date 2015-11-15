@@ -34,6 +34,7 @@ import at.reder.avrwb.avr8.helper.SimulationException;
 import at.reder.avrwb.avr8.impl.DeviceImplTest;
 import at.reder.avrwb.io.IntelHexInputStream;
 import java.io.IOException;
+import java.util.logging.Level;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -42,7 +43,7 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class MovNGTest
+public class MovNGTest extends AbstractInstructionTest
 {
 
   private static XA_AvrToolsDeviceFile file;
@@ -55,7 +56,10 @@ public class MovNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
+    testClass(Mov.class);
     file = XA_AvrToolsDeviceFile.load(DeviceImplTest.class.getResource("/com/atmel/devices/ATmega8.xml"));
+    AVRWBDefaults.setDebugLoggingActive(true);
+    AVRWBDefaults.setInstructionTraceLvel(Level.INFO);
   }
 
   private Device initDevice(String deviceFile) throws NullPointerException, IllegalStateException, ItemNotFoundException,

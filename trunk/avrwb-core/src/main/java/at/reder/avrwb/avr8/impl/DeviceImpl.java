@@ -31,15 +31,16 @@ import at.reder.atmelschema.XA_Variant;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NullAllowed;
 import at.reder.avrwb.avr8.AVRCoreVersion;
-import at.reder.avrwb.avr8.Architecture;
+import at.reder.avrwb.avr8.AVRDeviceKey;
 import at.reder.avrwb.avr8.CPU;
 import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.Family;
 import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.MemoryBuilder;
 import at.reder.avrwb.avr8.Module;
 import at.reder.avrwb.avr8.ModuleBuilderFactory;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.SRAM;
+import at.reder.avrwb.avr8.Stack;
 import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.helper.AVRWBDefaults;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
@@ -64,8 +65,7 @@ final class DeviceImpl implements Device
   @SuppressWarnings("NonConstantLogger")
   private final Logger deviceLogger;
   private final String name;
-  private final Architecture architecture;
-  private final Family family;
+  private final AVRDeviceKey deviceKey;
   private final double voltageMin;
   private final double voltageMax;
   private final long speedMax;
@@ -73,7 +73,8 @@ final class DeviceImpl implements Device
   private final List<Module> modules;
   private final CPU cpu;
   private final Memory flash;
-  private final Memory sram;
+  private final SRAM sram;
+  private final Stack stack;
 
   DeviceImpl(@NotNull XA_AvrToolsDeviceFile file,
              XA_Variant variant,
@@ -98,8 +99,6 @@ final class DeviceImpl implements Device
       speedMax = AVRWBDefaults.SPEED_MAX;
     }
     name = device.getName();
-    architecture = device.getArchitecture();
-    family = device.getFamily();
     List<Module> tmpModules = initModules(file,
                                           device,
                                           nfStrategy);
@@ -120,7 +119,7 @@ final class DeviceImpl implements Device
                                             device,
                                             nfStrategy);
     Memory tmpFlash = null;
-    Memory tmpSRAM = null;
+    SRAM tmpSRAM = null;
     if (tmpMemories.isEmpty()) {
       memories = Collections.emptyList();
     } else {
@@ -130,12 +129,22 @@ final class DeviceImpl implements Device
           tmpFlash = m;
           m.initialize(0xff);
         } else if (AVRWBDefaults.MEMNAME_SRAM.equals(m.getId())) {
-          tmpSRAM = m;
+          tmpSRAM = (SRAM) m;
         }
       }
     }
     flash = tmpFlash;
     sram = tmpSRAM;
+    if (!"AT90S1200".equals(name)) {
+      stack = new MemoryStack(cpu.getStackPointer(),
+                              sram);
+    } else {
+      stack = new HardwareStack();
+    }
+    deviceKey = new AVRDeviceKey(device.getFamily(),
+                                 device.getArchitecture(),
+                                 cpu.getCoreVersion(),
+                                 device.getName());
   }
 
   private Logger createDeviceLogger(String deviceName)
@@ -158,8 +167,8 @@ final class DeviceImpl implements Device
     return deviceLogger;
   }
 
-  private AVRCoreVersion extractCoreVersion(XA_AvrToolsDeviceFile file,
-                                            String deviceName) throws ItemNotFoundException
+  private static AVRCoreVersion extractCoreVersion(XA_AvrToolsDeviceFile file,
+                                                   String deviceName) throws ItemNotFoundException
   {
     XA_Module modCPU = file.findModule(new ModuleVector(deviceName,
                                                         "CPU"));
@@ -178,20 +187,20 @@ final class DeviceImpl implements Device
     return result;
   }
 
-  private List<Module> initModules(XA_AvrToolsDeviceFile file,
-                                   XA_Device device,
-                                   NotFoundStrategy nfStrategy) throws ItemNotFoundException
+  private static List<Module> initModules(XA_AvrToolsDeviceFile file,
+                                          XA_Device device,
+                                          NotFoundStrategy nfStrategy) throws ItemNotFoundException
   {
     final AVRCoreVersion version = extractCoreVersion(file,
                                                       device.getName());
     final ModuleKey baseKey = new ModuleKey(".",
                                             version,
-                                            architecture);
+                                            device.getArchitecture());
     final ModuleResolver moduleResolver = ModuleResolver.getInstance();
     final List<Module> result = new ArrayList<>();
 
     for (XA_DeviceModule moduleDescriptor : device.getModules()) {
-      ModuleVector mv = new ModuleVector(name,
+      ModuleVector mv = new ModuleVector(device.getName(),
                                          moduleDescriptor.getName());
       XA_Module module = file.findModule(mv);
       if (module != null) {
@@ -218,9 +227,9 @@ final class DeviceImpl implements Device
     return result;
   }
 
-  private List<Memory> initMemories(XA_AvrToolsDeviceFile file,
-                                    XA_Device device,
-                                    NotFoundStrategy nfStrategy) throws ItemNotFoundException
+  private static List<Memory> initMemories(XA_AvrToolsDeviceFile file,
+                                           XA_Device device,
+                                           NotFoundStrategy nfStrategy) throws ItemNotFoundException
   {
     MemoryBuilder builder = InstanceFactories.getMemoryBuilder();
     List<Memory> result = new ArrayList<>();
@@ -237,15 +246,9 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public Architecture getArchitecture()
+  public AVRDeviceKey getDeviceKey()
   {
-    return architecture;
-  }
-
-  @Override
-  public Family getFamily()
-  {
-    return family;
+    return deviceKey;
   }
 
   @Override
@@ -291,7 +294,7 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public Memory getSRAM()
+  public SRAM getSRAM()
   {
     return sram;
   }
@@ -307,6 +310,12 @@ final class DeviceImpl implements Device
       mod.reset(this,
                 source);
     }
+  }
+
+  @Override
+  public Stack getStack()
+  {
+    return stack;
   }
 
   @Override

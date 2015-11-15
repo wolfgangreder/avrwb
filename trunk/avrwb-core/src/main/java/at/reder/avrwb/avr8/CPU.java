@@ -75,4 +75,7 @@ public interface CPU extends Module
   @NotNull
   public InstructionDecoder getInstructionDecoder();
 
+  @NotNull
+  public AVRCoreVersion getCoreVersion();
+
 }

@@ -21,7 +21,11 @@
  */
 package at.reder.avrwb.avr8.helper;
 
+import at.reder.avrwb.annotations.NotNull;
+import at.reder.avrwb.avr8.api.ClockPhase;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +48,20 @@ public final class AVRWBDefaults
       } catch (IllegalArgumentException ex) {
       }
     }
+  }
+
+  private static final AtomicReference<Level> INSTRUCTION_TRACE_LEVEL = new AtomicReference<>(Level.FINEST);
+
+  public static Level getInstructionTraceLevel()
+  {
+    return INSTRUCTION_TRACE_LEVEL.get();
+  }
+
+  @NotNull
+  public static void setInstructionTraceLvel(Level level)
+  {
+    Objects.requireNonNull(level);
+    INSTRUCTION_TRACE_LEVEL.set(level);
   }
 
   private static final AtomicBoolean DEBUG_LOGGING = new AtomicBoolean(Boolean.getBoolean("at.avrwb.debuglogging"));
@@ -70,4 +88,9 @@ public final class AVRWBDefaults
   public static final String MODULENAME_CPU = "CPU";
 
   public static final String PROP_CORE_VERSION = "CORE_VERSION";
+
+  public static final int PORT_ADDRESS_OFFSET = 0x20;
+  public static final ClockPhase PHASE_PREPARE = ClockPhase.HI;
+  public static final ClockPhase PHASE_EXECUTE = ClockPhase.LO;
+
 }
