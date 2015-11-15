@@ -141,4 +141,11 @@ public interface Memory extends Resetable
    */
   public void initialize(int intVal);
 
+  /**
+   * Liefert die Anzahl der hexadezimalen Stellen die erforderlich sind, um eine Adresse darstellen zu können.
+   *
+   * @return maxStringWidth
+   */
+  public int getHexAddressStringWidth();
+
 }

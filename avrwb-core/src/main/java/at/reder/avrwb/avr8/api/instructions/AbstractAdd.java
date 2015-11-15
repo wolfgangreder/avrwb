@@ -50,7 +50,6 @@ public abstract class AbstractAdd extends Instruction_Rd_Rr
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
-    int rdAddress = getRdAddress();
     SREG sreg = device.getCPU().getSREG();
     int oldSreg = sreg.getValue();
     int result = performAdd(sreg,
@@ -64,12 +63,12 @@ public abstract class AbstractAdd extends Instruction_Rd_Rr
                      result);
     }
     if (oldSreg != sreg.getValue()) {
-      resultBuilder.addModifiedDataAddresses(sreg.getMemoryAddress());
+      resultBuilder.addModifiedRegister(sreg);
     }
     device.getSRAM().setByteAt(rdAddress,
                                result);
-    resultBuilder.finished(true);
-    resultBuilder.nextIp(device.getCPU().getIP() + 1);
+    resultBuilder.finished(true,
+                           device.getCPU().getIP() + 1);
     logExecutionResult(clockState,
                        device,
                        result,

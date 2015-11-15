@@ -24,6 +24,7 @@ package at.reder.avrwb.avr8.impl;
 import at.reder.atmelschema.XA_AddressSpace;
 import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.MemoryBuilder;
+import at.reder.avrwb.avr8.helper.AVRWBDefaults;
 import java.nio.ByteOrder;
 import java.util.Objects;
 
@@ -116,11 +117,19 @@ public final class MemoryBuilderImpl implements MemoryBuilder
     if (start < 0) {
       throw new IllegalStateException("start<0");
     }
-    return new MemoryImpl(id,
+    if (AVRWBDefaults.MEMNAME_SRAM.equals(id)) {
+      return new SRAMImpl(id,
                           name,
                           byteOrder,
                           size,
                           start);
+    } else {
+      return new MemoryImpl(id,
+                            name,
+                            byteOrder,
+                            size,
+                            start);
+    }
   }
 
 }

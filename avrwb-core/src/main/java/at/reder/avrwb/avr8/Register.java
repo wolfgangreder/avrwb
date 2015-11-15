@@ -158,4 +158,16 @@ public interface Register
   public boolean setBit(int bit,
                         boolean state) throws IllegalArgumentException;
 
+  /**
+   * setValue(getValue()+1);
+   *
+   */
+  public void increment();
+
+  /**
+   * setValue(getValue()-1);
+   *
+   */
+  public void decrement();
+
 }

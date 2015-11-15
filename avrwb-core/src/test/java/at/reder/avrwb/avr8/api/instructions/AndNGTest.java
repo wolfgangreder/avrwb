@@ -21,10 +21,6 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
-import at.reder.avrwb.avr8.Device;
-import at.reder.avrwb.avr8.api.ClockState;
-import at.reder.avrwb.avr8.api.InstructionResultBuilder;
-import static org.testng.AssertJUnit.fail;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -32,7 +28,7 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class AndNGTest
+public class AndNGTest extends AbstractInstructionTest
 {
 
   public AndNGTest()
@@ -42,20 +38,12 @@ public class AndNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
+    testClass(And.class);
   }
 
   @Test
   public void testDoExecute()
   {
-    System.out.println("doExecute");
-    ClockState clockState = null;
-    Device device = null;
-    InstructionResultBuilder resultBuilder = null;
-    And instance = null;
-    instance.doExecute(clockState,
-                       device,
-                       resultBuilder);
-    fail("The test case is a prototype.");
   }
 
 }

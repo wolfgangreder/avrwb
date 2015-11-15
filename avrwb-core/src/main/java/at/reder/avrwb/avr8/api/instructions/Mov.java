@@ -33,6 +33,8 @@ import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 public final class Mov extends Instruction_Rd_Rr
 {
 
+  public static final int OPCODE = 0x2c00;
+
   public Mov(int opcode)
   {
     super(opcode,
@@ -44,16 +46,15 @@ public final class Mov extends Instruction_Rd_Rr
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
-    int rdAddress = getRdAddress();
     Memory sram = device.getSRAM();
     int oldValue = sram.getByteAt(rdAddress);
-    resultBuilder.finished(true);
+    resultBuilder.finished(true,
+                           device.getCPU().getIP() + 1);
     if (oldValue != rrVal) {
       sram.setByteAt(rdAddress,
                      rrVal);
       resultBuilder.addModifiedDataAddresses(rdAddress);
     }
-    resultBuilder.nextIp(device.getCPU().getIP() + 1);
     logExecutionResult(clockState,
                        device,
                        rrVal,

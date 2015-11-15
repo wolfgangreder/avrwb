@@ -25,6 +25,7 @@ import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
 import at.reder.avrwb.avr8.AVRCoreVersion;
 import at.reder.avrwb.avr8.Device;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.util.Set;
 
 /**
@@ -78,10 +79,11 @@ public interface Instruction
    * @param clockState aktueller Taktzustand.
    * @param device controller
    * @return Das Ergebnis des Befehls
+   * @throws at.reder.avrwb.avr8.helper.SimulationException wenn bei der ausführung ein fehler auftritt.
    */
   @NotNull
   public InstructionResult execute(@NotNull ClockState clockState,
-                                   @NotNull Device device);
+                                   @NotNull Device device) throws SimulationException;
 
   /**
    * In welchen Prozessorkernen ist der Befehl implementiert.

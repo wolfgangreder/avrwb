@@ -24,6 +24,7 @@ package at.reder.avrwb.avr8.api;
 import at.reder.avrwb.annotations.Invariants;
 import at.reder.avrwb.annotations.NotNull;
 import at.reder.avrwb.annotations.NotThreadSave;
+import at.reder.avrwb.avr8.Register;
 
 /**
  *
@@ -34,11 +35,14 @@ public interface InstructionResultBuilder
 {
 
   @NotNull
-  public InstructionResultBuilder finished(boolean finished);
+  public InstructionResultBuilder finished(boolean finished,
+                                           @Invariants(minValue = "0", maxValue = "FLASH_END") int nextIP) throws
+          IllegalArgumentException;
+
+  public boolean isFinished();
 
   @NotNull
-  public InstructionResultBuilder nextIp(@Invariants(minValue = "0", maxValue = "FLASH_END") int nextIP) throws
-          IllegalArgumentException;
+  public InstructionResultBuilder addModifiedRegister(@NotNull Register modifiedRegister) throws NullPointerException;
 
   @NotNull
   public InstructionResultBuilder addModifiedDataAddresses(@Invariants(minValue = "0", maxValue = "RAM_END") int modifiedAddress)

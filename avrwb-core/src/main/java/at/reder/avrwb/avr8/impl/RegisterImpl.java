@@ -127,6 +127,18 @@ class RegisterImpl implements Register
   }
 
   @Override
+  public void increment()
+  {
+    this.value = (value + 1) & mask;
+  }
+
+  @Override
+  public void decrement()
+  {
+    this.value = (value - 1) & mask;
+  }
+
+  @Override
   public int setBitGrpValue(RegisterBitGrp bitGrp,
                             RegisterBitGrpValue value) throws ItemNotFoundException, NullPointerException
   {

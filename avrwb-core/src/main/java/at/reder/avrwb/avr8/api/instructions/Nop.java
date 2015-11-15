@@ -26,7 +26,6 @@ import at.reder.avrwb.avr8.api.ClockPhase;
 import at.reder.avrwb.avr8.api.ClockState;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 import at.reder.avrwb.avr8.helper.AVRWBDefaults;
-import java.util.logging.Level;
 
 /**
  *
@@ -35,7 +34,10 @@ import java.util.logging.Level;
 public final class Nop extends AbstractInstruction
 {
 
-  public Nop()
+  public static final int OPCODE_MASK = 0xffff;
+  public static final int OPCODE = 0x0000;
+
+  public Nop(int opcode)
   {
     super(0x0,
           0xffff,
@@ -48,10 +50,10 @@ public final class Nop extends AbstractInstruction
                            InstructionResultBuilder resultBuilder)
   {
     if (clockState.getPhase() == ClockPhase.FALLING) {
-      resultBuilder.finished(true);
-      resultBuilder.nextIp(device.getCPU().getIP() + 1);
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
       if (AVRWBDefaults.isDebugLoggingActive()) {
-        device.getLogger().log(Level.FINEST,
+        device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                                getCurrentDeviceMessage(clockState,
                                                        device));
       }

@@ -1,0 +1,456 @@
+/*
+ * $Id$
+ *
+ * Copyright (C) 2015 Wolfgang Reder <wolfgang.reder@aon.at>.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3.0 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA 02110-1301  USA
+ *
+ */
+package at.reder.avrwb.avr8.impl;
+
+import at.reder.atmelschema.util.HexIntAdapter;
+import at.reder.avrwb.avr8.AVRDeviceKey;
+import at.reder.avrwb.avr8.Device;
+import at.reder.avrwb.avr8.Memory;
+import at.reder.avrwb.avr8.api.Instruction;
+import at.reder.avrwb.avr8.api.InstructionDecoder;
+import at.reder.avrwb.avr8.api.instructions.Adc;
+import at.reder.avrwb.avr8.api.instructions.Add;
+import at.reder.avrwb.avr8.api.instructions.Adiw;
+import at.reder.avrwb.avr8.api.instructions.And;
+import at.reder.avrwb.avr8.api.instructions.Andi;
+import at.reder.avrwb.avr8.api.instructions.Asr;
+import at.reder.avrwb.avr8.api.instructions.BitClearSet;
+import at.reder.avrwb.avr8.api.instructions.Bld;
+import at.reder.avrwb.avr8.api.instructions.BranchInstruction;
+import at.reder.avrwb.avr8.api.instructions.Break;
+import at.reder.avrwb.avr8.api.instructions.Bst;
+import at.reder.avrwb.avr8.api.instructions.Call;
+import at.reder.avrwb.avr8.api.instructions.Com;
+import at.reder.avrwb.avr8.api.instructions.Cp;
+import at.reder.avrwb.avr8.api.instructions.Cpc;
+import at.reder.avrwb.avr8.api.instructions.Cpi;
+import at.reder.avrwb.avr8.api.instructions.Cpse;
+import at.reder.avrwb.avr8.api.instructions.Dec;
+import at.reder.avrwb.avr8.api.instructions.Eor;
+import at.reder.avrwb.avr8.api.instructions.ICall;
+import at.reder.avrwb.avr8.api.instructions.IJump;
+import at.reder.avrwb.avr8.api.instructions.InOut;
+import at.reder.avrwb.avr8.api.instructions.Inc;
+import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
+import at.reder.avrwb.avr8.api.instructions.Jmp;
+import at.reder.avrwb.avr8.api.instructions.Ld;
+import at.reder.avrwb.avr8.api.instructions.Mov;
+import at.reder.avrwb.avr8.api.instructions.Mul;
+import at.reder.avrwb.avr8.api.instructions.Neg;
+import at.reder.avrwb.avr8.api.instructions.Nop;
+import at.reder.avrwb.avr8.api.instructions.Or;
+import at.reder.avrwb.avr8.api.instructions.Pop;
+import at.reder.avrwb.avr8.api.instructions.Push;
+import at.reder.avrwb.avr8.api.instructions.Rcall;
+import at.reder.avrwb.avr8.api.instructions.Ret_i;
+import at.reder.avrwb.avr8.api.instructions.Ror;
+import at.reder.avrwb.avr8.api.instructions.Sbc;
+import at.reder.avrwb.avr8.api.instructions.Sbiw;
+import at.reder.avrwb.avr8.api.instructions.Ser;
+import at.reder.avrwb.avr8.api.instructions.SetClearIOBit;
+import at.reder.avrwb.avr8.api.instructions.Sub;
+import at.reder.avrwb.avr8.api.instructions.Swap;
+import at.reder.avrwb.avr8.helper.InstructionNotAvailableException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+/**
+ *
+ * @author wolfi
+ */
+public class DefaultInstructionDecoder1 implements InstructionDecoder
+{
+
+  private final Map<Integer, Instruction> instructionCache = new HashMap<>();
+
+  @Override
+  public Instruction getInstruction(Device device,
+                                    int address) throws NullPointerException, IllegalArgumentException,
+                                                        InstructionNotAvailableException
+  {
+    Objects.requireNonNull(device);
+    if ((address % 2) != 0) {
+      throw new IllegalArgumentException("address mod 2 !=0");
+    }
+    Memory flash = device.getFlash();
+    int word = flash.getWordAt(address);
+    int nextWord = flash.getWordAt(address + 2);
+    Instruction result = instructionCache.computeIfAbsent(word,
+                                                          (Integer opcode) -> decodeInstruction(device.getDeviceKey(),
+                                                                                                opcode,
+                                                                                                nextWord));
+    if (result == null) {
+      throw new InstructionNotAvailableException("Unknown opcode " + HexIntAdapter.toHexString(word,
+                                                                                               4));
+    }
+    return result;
+  }
+
+  protected Instruction decodeInstruction(AVRDeviceKey deviceKey,
+                                          int opcode,
+                                          int nextOpcode)
+  {
+    switch (opcode & 0xc000) {
+      case 0x0000:
+        return decode_0xxx(deviceKey,
+                           opcode);
+      case 0x4000:
+        return decode_4xxx(deviceKey,
+                           opcode);
+      case 0x8000:
+        return decode_8xxx(deviceKey,
+                           opcode,
+                           nextOpcode);
+      case 0xc000:
+        return decode_cxxx(deviceKey,
+                           opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_0xxx(AVRDeviceKey deviceKey,
+                                    int opcode)
+  {
+    switch (opcode & 0x3000) {
+      case 0x0000:
+        switch (opcode & 0x0c00) {
+          case 0x0000:
+            if (opcode == 0) {
+              return new Nop(opcode);
+//            } else if ((opcode & Operation_Rd_Rr.MASK) == Movw.OPCODE) {
+//              return Movw.getOperation(opcode);
+//            } else {
+//              // hier fehlen die (F)MUL(SU) befehle
+            }
+            break;
+          case 0x0400:
+            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Cpc.OPCODE) {
+              return new Cpc(opcode);
+            }
+            break;
+          case 0x0800:
+            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Sbc.OPCODE) {
+              return new Sbc(opcode);
+            }
+            break;
+          case 0x0c00:
+            return new Add(opcode);
+        }
+        break;
+      case 0x1000:
+        return decode_1xxx(deviceKey,
+                           opcode);
+      case 0x2000:
+        return decode_2xxx(deviceKey,
+                           opcode);
+      case 0x3000:
+        return new Cpi(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_1xxx(AVRDeviceKey deviceKey,
+                                    int opcode)
+  {
+    switch (opcode & 0x0c00) {
+      case 0x0000:
+        return new Cpse(opcode);
+      case 0x0400:
+        return new Cp(opcode);
+      case 0x0800:
+        return new Sub(opcode);
+      case 0x0c00:
+        return new Adc(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_2xxx(AVRDeviceKey deviceKey,
+                                    int opcode)
+  {
+    switch (opcode & 0x0c00) {
+      case 0x0000:
+        return new And(opcode);
+      case 0x0400:
+        return new Eor(opcode);
+      case 0x0800:
+        return new Or(opcode);
+      case 0x0c00:
+        return new Mov(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_4xxx(AVRDeviceKey deviceKey,
+                                    int opcode)
+  {
+    switch (opcode & 0xf000) {
+//      case 0x4000:
+//        return Sbci.getOperation(opcode);
+//      case 0x5000:
+//        return Subi.getOperation(opcode);
+//      case 0x6000:
+//        return Ori.getOperation(opcode);
+      case 0x7000:
+        return new Andi(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_8xxx(AVRDeviceKey deviceKey,
+                                    int opcode,
+                                    int nextopcode)
+  {
+    switch (opcode & 0xf000) {
+      case 0x8000:
+        if ((opcode & 0x0200) == 0) {
+          return Ld.getInstance(deviceKey,
+                                opcode);
+        } else {
+//          if ((opcode & 0x2c07) == 0) {
+//            return St.getOperation(opcode);
+//          } else {
+//            return Std.getOperation(opcode);
+//          }
+        }
+      case 0x9000:
+        switch (opcode & 0xff00) {
+          case 0x9000:
+          case 0x9100:
+            return decode_90xx(deviceKey,
+                               opcode,
+                               nextopcode);
+          case 0x9200:
+          case 0x9300:
+            return decode_92xx(deviceKey,
+                               opcode,
+                               nextopcode);
+          case 0x9400:
+          case 0x9500:
+            return decode_94xx(deviceKey,
+                               opcode,
+                               nextopcode);
+          case 0x9600:
+            switch (deviceKey.getCore()) {
+              case V2E:
+                return new Adiw(opcode);
+            }
+            break;
+          case 0x9700:
+            switch (deviceKey.getCore()) {
+              case V2E:
+                return new Sbiw(opcode);
+            }
+            break;
+          case 0x9800:
+            return new SetClearIOBit(opcode);
+//          case 0x9900:
+//            return Sbic.getOperation(opcode);
+          case 0x9a00:
+            return new SetClearIOBit(opcode);
+//          case 0x9b00:
+//            return Sbis.getOperation(opcode);
+          case 0x9c00:
+            switch (deviceKey.getCore()) {
+              case V2E:
+                return new Mul(opcode);
+            }
+            break;
+        }
+        break;
+      case 0xb000:
+        switch (opcode & 0xf800) {
+          case 0xb000:
+          case 0xb800:
+            return new InOut(opcode);
+        }
+        break;
+    }
+    return null;
+  }
+
+  protected Instruction decode_90xx(AVRDeviceKey deviceKey,
+                                    int opcode,
+                                    int nextopcode)
+  {
+    switch (opcode & 0xfe0f) {
+//      case 0x9000:
+//        if (nextopcode == -1) {
+//          throw new IOException("stream end");
+//        }
+//        return Lds.getOperation((opcode << 16) | nextopcode);
+//      case 0x9001:
+//      case 0x9002:
+//        return Ld.getOperation(opcode);
+//      case 0x9004:
+//      case 0x9005:
+//        return Lpm_Rd.getOperation(opcode);
+//      case 0x9006:
+//      case 0x9007:
+//        return Elpm_Rd.getOperation(opcode);
+//      case 0x9009:
+//      case 0x900a:
+//      case 0x900b:
+//      case 0x900c:
+//      case 0x900d:
+//      case 0x900e:
+//        return Ld.getOperation(opcode);
+      case 0x900f:
+        return new Pop(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_92xx(AVRDeviceKey deviceKey,
+                                    int opcode,
+                                    int nextOpcode)
+  {
+    switch (opcode & 0xfe0f) {
+//      case 0x9200:
+//        if (nextOpcode == -1) {
+//          throw new IOException("stream end");
+//        }
+//        return Sts.getOperation((opcode << 16) | nextOpcode);
+//      case 0x9201:
+//      case 0x9202:
+//        return St.getOperation(opcode);
+//      case 0x9209:
+//      case 0x920a:
+//        return St.getOperation(opcode);
+//      case 0x920c:
+//      case 0x920d:
+//      case 0x920e:
+//        return St.getOperation(opcode);
+      case 0x920f:
+        return new Push(opcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_94xx(AVRDeviceKey deviceKey,
+                                    int opcode,
+                                    int nextOpcode)
+  {
+    switch (opcode) {
+      case 0x9409:
+        return new IJump();
+//      case 0x9419:
+//        return Eijmp.getOperation();
+      case 0x9408:
+      case 0x9418:
+      case 0x9428:
+      case 0x9438:
+      case 0x9448:
+      case 0x9458:
+      case 0x9468:
+      case 0x9478:
+      case 0x9488:
+      case 0x9498:
+      case 0x94a8:
+      case 0x94b8:
+      case 0x94c8:
+      case 0x94d8:
+      case 0x94e8:
+      case 0x94f8:
+        return new BitClearSet(opcode);
+      case 0x9508:
+        return new Ret_i(opcode);
+      case 0x9509:
+        return new ICall();
+      case 0x9518:
+        return new Ret_i(opcode);
+//      case 0x9519:
+//        return Eicall.getOperation();
+//      case 0x9588:
+//        return Sleep.getOperation();
+      case 0x9598:
+        return new Break();
+//      case 0x95a8:
+//        return Wdr.getOperation();
+//      case 0x95c8:
+//        return Lpm.getOperation();
+//      case 0x95d8:
+//        return Elpm.getOperation();
+//      case 0x95e8:
+//        return Spm.getOperation();
+    }
+    switch (opcode & 0xfe0f) {
+      case 0x9400:
+        return new Com(opcode);
+      case 0x9401:
+        return new Neg(opcode);
+      case 0x9402:
+        return new Swap(opcode);
+      case 0x9403:
+        return new Inc(opcode);
+      case 0x9405:
+        return new Asr(opcode);
+      case 0x9407:
+        return new Ror(opcode);
+      case 0x940a:
+        return new Dec(opcode);
+    }
+    switch (opcode & 0xfe0e) {
+      case 0x940c:
+        return new Jmp(opcode,
+                       nextOpcode);
+      case 0x940e:
+        return new Call(opcode,
+                        nextOpcode);
+    }
+    return null;
+  }
+
+  protected Instruction decode_cxxx(AVRDeviceKey deviceKey,
+                                    int opcode)
+  {
+    switch (opcode & 0xf000) {
+//      case 0xc000:
+//        return Rjmp.getOperation(opcode);
+      case 0xd000:
+        return new Rcall(opcode);
+      case 0xe000:
+        if ((opcode & Ser.OPCODE) == Ser.OPCODE) {
+          return new Ser(opcode);
+        }
+      //return Ldi.getOperation(opcode);
+    }
+    switch (opcode & 0xfc00) {
+      case 0xf000:
+      case 0xf400:
+        return new BranchInstruction(opcode);
+    }
+    switch (opcode & 0xfe00) {
+      case 0xf800:
+        return new Bld(opcode);
+      case 0xfa00:
+        return new Bst(opcode);
+//      case 0xfc00:
+//        return Sbrc.getOperation(opcode);
+//      case 0xfe00:
+//        return Sbrs.getOperation(opcode);
+    }
+    return null;
+  }
+
+}

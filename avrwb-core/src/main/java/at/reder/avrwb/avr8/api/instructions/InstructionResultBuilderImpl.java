@@ -23,6 +23,7 @@ package at.reder.avrwb.avr8.api.instructions;
 
 import at.reder.avrwb.annotations.NotThreadSave;
 import at.reder.avrwb.avr8.Device;
+import at.reder.avrwb.avr8.Register;
 import at.reder.avrwb.avr8.api.InstructionResult;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
 import java.util.Objects;
@@ -50,19 +51,32 @@ public final class InstructionResultBuilderImpl implements InstructionResultBuil
   }
 
   @Override
-  public InstructionResultBuilder finished(boolean finished)
+  public boolean isFinished()
+  {
+    return finished;
+  }
+
+  @Override
+  public InstructionResultBuilder finished(boolean finished,
+                                           int nextIP) throws IllegalArgumentException
   {
     this.finished = finished;
+    if (finished) {
+      if (nextIP < device.getFlash().getStart() || nextIP >= device.getFlash().getSize()) {
+        throw new IllegalArgumentException("nextIP out of range");
+      }
+      this.nextIP = nextIP;
+    } else {
+      this.nextIP = -1;
+    }
     return this;
   }
 
   @Override
-  public InstructionResultBuilder nextIp(int nextIP) throws IllegalArgumentException
+  public InstructionResultBuilder addModifiedRegister(Register modifiedRegister) throws NullPointerException
   {
-    if (nextIP < device.getFlash().getStart() || nextIP >= device.getFlash().getSize()) {
-      throw new IllegalArgumentException("nextIP out of range");
-    }
-    this.nextIP = nextIP;
+    Objects.requireNonNull(modifiedRegister);
+    addModifiedDataAddresses(modifiedRegister.getMemoryAddress());
     return this;
   }
 

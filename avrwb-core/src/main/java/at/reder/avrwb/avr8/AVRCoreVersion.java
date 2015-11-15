@@ -31,5 +31,7 @@ public enum AVRCoreVersion
   ANY,
   V1,
   V2,
-  V2E;
+  V2E,
+  I6000;
+
 }

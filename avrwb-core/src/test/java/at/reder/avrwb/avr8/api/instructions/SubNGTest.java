@@ -21,15 +21,13 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
-import static org.testng.AssertJUnit.fail;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
  * @author wolfi
  */
-public class SubNGTest
+public class SubNGTest extends AbstractInstructionTest
 {
 
   public SubNGTest()
@@ -39,12 +37,7 @@ public class SubNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    fail("implement me");
-  }
-
-  @Test
-  public void testSomeMethod()
-  {
+    testClass(Sub.class);
   }
 
 }

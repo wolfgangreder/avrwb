@@ -32,6 +32,7 @@ import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.api.Instruction;
 import at.reder.avrwb.avr8.api.InstructionResult;
 import at.reder.avrwb.avr8.api.InstructionResultBuilder;
+import at.reder.avrwb.avr8.helper.SimulationException;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -51,6 +52,7 @@ public abstract class AbstractInstruction implements Instruction
   private final int opcodeMask;
   private final String mnemonic;
   private String currentDeviceStateMessage;
+  protected long finishCycle = -1;
 
   protected AbstractInstruction(int opcode,
                                 int opcodeMask,
@@ -62,13 +64,13 @@ public abstract class AbstractInstruction implements Instruction
   }
 
   @Override
-  public int getOpcode()
+  public final int getOpcode()
   {
     return opcode;
   }
 
   @Override
-  public int getOpcodeMask()
+  public final int getOpcodeMask()
   {
     return opcodeMask;
   }
@@ -154,33 +156,36 @@ public abstract class AbstractInstruction implements Instruction
 
   protected abstract void doExecute(@NotNull ClockState clockState,
                                     @NotNull Device device,
-                                    @NotNull InstructionResultBuilder resultBuilder);
+                                    @NotNull InstructionResultBuilder resultBuilder) throws SimulationException;
 
   protected void doPrepare(@NotNull ClockState clockState,
                            @NotNull Device device,
-                           @NotNull InstructionResultBuilder resultBuilder)
+                           @NotNull InstructionResultBuilder resultBuilder) throws SimulationException
   {
   }
 
   @Override
   @NotNull
   public final InstructionResult execute(@NotNull ClockState clockState,
-                                         @NotNull Device device)
+                                         @NotNull Device device) throws SimulationException
   {
     Objects.requireNonNull(clockState,
                            "clockState==null");
     currentDeviceStateMessage = null;
     InstructionResultBuilder resultBuilder = InstanceFactories.getInstructionResultBuilder(device);
     switch (clockState.getPhase()) {
-      case RISING:
+      case HI:
         doPrepare(clockState,
                   device,
                   resultBuilder);
         break;
-      case FALLING:
+      case LO:
         doExecute(clockState,
                   device,
                   resultBuilder);
+    }
+    if (resultBuilder.isFinished()) {
+      finishCycle = -1;
     }
     return resultBuilder.build();
   }
@@ -202,11 +207,11 @@ public abstract class AbstractInstruction implements Instruction
                              "clockState==null");
       Objects.requireNonNull(device,
                              "device==null");
-      currentDeviceStateMessage = MessageFormat.format("Exec {0} @ {1}| IP={2}, #CY={5,number,#.###}, PH={3}|",
+      currentDeviceStateMessage = MessageFormat.format("Exec \"{0}\" @ {1} | IP={2}, #CY={5,number,#.###}, PH={3}|",
                                                        toString(),
                                                        device.getName(),
                                                        HexIntAdapter.toHexString(device.getCPU().getIP(),
-                                                                                 10),
+                                                                                 device.getFlash().getHexAddressStringWidth()),
                                                        clockState.getPhase().name(),
                                                        clockState.getCurrentNanos(),
                                                        clockState.getCycleCount());

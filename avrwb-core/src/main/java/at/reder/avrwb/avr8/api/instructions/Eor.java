@@ -55,10 +55,10 @@ public class Eor extends Instruction_Rd_Rr
     sreg.setN((rdVal & 0x80) != 0);
     sreg.setZ(rdVal == 0);
     sreg.fixSignBit();
-    resultBuilder.finished(true);
+    resultBuilder.finished(true,
+                           device.getCPU().getIP() + 1);
     if (oldValue != rdVal) {
-      int rdAddress = getRdAddress();
-      device.getSRAM().setByteAt(getRdAddress(),
+      device.getSRAM().setByteAt(rdAddress,
                                  rdVal);
       resultBuilder.addModifiedDataAddresses(rdAddress);
     }

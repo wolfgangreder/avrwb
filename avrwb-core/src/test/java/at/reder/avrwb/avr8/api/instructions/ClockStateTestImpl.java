@@ -73,17 +73,17 @@ public final class ClockStateTestImpl implements ClockState
 
   public void next()
   {
-    if (phase == ClockPhase.RISING) {
-      phase = ClockPhase.FALLING;
+    if (phase == ClockPhase.HI) {
+      phase = ClockPhase.LO;
     } else {
-      phase = ClockPhase.RISING;
+      phase = ClockPhase.HI;
       ++cycleCount;
     }
   }
 
   public void reset()
   {
-    phase = ClockPhase.RISING;
+    phase = ClockPhase.HI;
     cycleCount = 0;
   }
 

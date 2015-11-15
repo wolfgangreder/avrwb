@@ -21,15 +21,13 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
-import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
  * @author wolfi
  */
-public class SbcNGTest
+public class SbcNGTest extends AbstractInstructionTest
 {
 
   public SbcNGTest()
@@ -39,12 +37,7 @@ public class SbcNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    fail("implement me");
-  }
-
-  @Test
-  public void testDoExecute()
-  {
+    testClass(Sbc.class);
   }
 
 }

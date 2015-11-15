@@ -21,6 +21,7 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
+import at.reder.avrwb.avr8.AVRDeviceKey;
 import at.reder.avrwb.avr8.Architecture;
 import at.reder.avrwb.avr8.CPU;
 import at.reder.avrwb.avr8.Device;
@@ -29,8 +30,11 @@ import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.MemoryBuilder;
 import at.reder.avrwb.avr8.Module;
 import at.reder.avrwb.avr8.ResetSource;
+import at.reder.avrwb.avr8.SRAM;
+import at.reder.avrwb.avr8.Stack;
 import at.reder.avrwb.avr8.helper.SimulationException;
 import at.reder.avrwb.avr8.impl.MemoryBuilderImpl;
+import at.reder.avrwb.avr8.impl.MemoryStack;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,9 +52,11 @@ public class DummyDevice implements Device
 
   private final CPU cpu;
   private final Memory flash;
-  private final Memory sram;
+  private final SRAM sram;
   private final List<Module> modules;
   private final List<Memory> memories;
+  private final Stack stack;
+  private final AVRDeviceKey deviceKey;
 
   public DummyDevice(CPU cpu)
   {
@@ -67,14 +73,20 @@ public class DummyDevice implements Device
     modules = Collections.singletonList(cpu);
     MemoryBuilder builder = new MemoryBuilderImpl().endianess(ByteOrder.LITTLE_ENDIAN).start(0);
     flash = builder.id("prog").name("prog").size(flashSize).build();
-    sram = builder.id("data").name("data").size(sramSize).build();
+    sram = (SRAM) builder.id("data").name("data").size(sramSize).build();
     memories = Collections.unmodifiableList(Arrays.asList(flash,
                                                           sram));
+    stack = new MemoryStack(cpu.getStackPointer(),
+                            sram);
+    deviceKey = new AVRDeviceKey(Family.megaAVR,
+                                 Architecture.AVR8,
+                                 cpu.getCoreVersion(),
+                                 "dummy");
   }
 
   public DummyDevice(CPU cpu,
                      Memory flash,
-                     Memory sram,
+                     SRAM sram,
                      Collection<? extends Module> extraModules,
                      Collection<? extends Memory> extraMemories)
 
@@ -98,6 +110,12 @@ public class DummyDevice implements Device
       tmp.add(sram);
       this.memories = Collections.unmodifiableList(tmp);
     }
+    stack = new MemoryStack(cpu.getStackPointer(),
+                            sram);
+    deviceKey = new AVRDeviceKey(Family.megaAVR,
+                                 Architecture.AVR8,
+                                 cpu.getCoreVersion(),
+                                 "dummy");
   }
 
   @Override
@@ -113,15 +131,9 @@ public class DummyDevice implements Device
   }
 
   @Override
-  public Architecture getArchitecture()
+  public AVRDeviceKey getDeviceKey()
   {
-    return Architecture.AVR8;
-  }
-
-  @Override
-  public Family getFamily()
-  {
-    return Family.megaAVR;
+    return deviceKey;
   }
 
   @Override
@@ -167,9 +179,15 @@ public class DummyDevice implements Device
   }
 
   @Override
-  public Memory getSRAM()
+  public SRAM getSRAM()
   {
     return sram;
+  }
+
+  @Override
+  public Stack getStack()
+  {
+    return stack;
   }
 
   @Override

@@ -36,9 +36,7 @@ public interface Device
 
   public String getName();
 
-  public Architecture getArchitecture();
-
-  public Family getFamily();
+  public AVRDeviceKey getDeviceKey();
 
   public double getVoltageMin();
 
@@ -54,7 +52,9 @@ public interface Device
 
   public Memory getFlash();
 
-  public Memory getSRAM();
+  public SRAM getSRAM();
+
+  public Stack getStack();
 
   public void reset(ResetSource source) throws SimulationException;
 

@@ -64,10 +64,8 @@ public class DeviceImplTest
                   device.getFlash());
     assertNotNull("sram==null",
                   device.getSRAM());
-    assertNotNull("architecture==null",
-                  device.getArchitecture());
-    assertNotNull("family==null",
-                  device.getFamily());
+    assertNotNull("deviceKey==null",
+                  device.getDeviceKey());
   }
 
 }
