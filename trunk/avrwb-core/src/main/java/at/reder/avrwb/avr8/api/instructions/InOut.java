@@ -37,6 +37,8 @@ import java.util.logging.Logger;
 public final class InOut extends AbstractInstruction
 {
 
+  public static final int OPCODE_IN = 0xb000;
+  public static final int OPCODE_OUT = 0xb800;
   private final boolean in;
   private final int portAddress;
   private final int registerAddress;

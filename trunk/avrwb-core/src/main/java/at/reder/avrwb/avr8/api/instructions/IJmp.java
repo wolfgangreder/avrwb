@@ -34,17 +34,17 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-public final class IJump extends AbstractInstruction
+public final class IJmp extends AbstractInstruction
 {
 
   public static final int OPCODE = 0x9409;
   private int callTarget;
 
-  public IJump()
+  public IJmp()
   {
     super(OPCODE,
           0xffff,
-          "ijump");
+          "ijmp");
   }
 
   @Override

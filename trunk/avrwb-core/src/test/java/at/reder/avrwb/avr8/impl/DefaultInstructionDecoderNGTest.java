@@ -25,8 +25,12 @@ import at.reder.atmelschema.util.HexIntAdapter;
 import at.reder.avrwb.avr8.AVRCoreVersion;
 import at.reder.avrwb.avr8.AVRDeviceKey;
 import at.reder.avrwb.avr8.Architecture;
+import at.reder.avrwb.avr8.Device;
 import at.reder.avrwb.avr8.Family;
+import at.reder.avrwb.avr8.Pointer;
+import at.reder.avrwb.avr8.SREG;
 import at.reder.avrwb.avr8.api.Instruction;
+import at.reder.avrwb.avr8.api.InstructionDecoder;
 import at.reder.avrwb.avr8.api.instructions.AbstractInstructionTest;
 import at.reder.avrwb.avr8.api.instructions.Adc;
 import at.reder.avrwb.avr8.api.instructions.Add;
@@ -48,12 +52,15 @@ import at.reder.avrwb.avr8.api.instructions.Cpse;
 import at.reder.avrwb.avr8.api.instructions.Dec;
 import at.reder.avrwb.avr8.api.instructions.Eor;
 import at.reder.avrwb.avr8.api.instructions.ICall;
-import at.reder.avrwb.avr8.api.instructions.IJump;
+import at.reder.avrwb.avr8.api.instructions.IJmp;
 import at.reder.avrwb.avr8.api.instructions.InOut;
 import at.reder.avrwb.avr8.api.instructions.Inc;
+import at.reder.avrwb.avr8.api.instructions.Instruction_P_b;
+import at.reder.avrwb.avr8.api.instructions.Instruction_Rd;
 import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_K8;
 import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
 import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_b;
+import at.reder.avrwb.avr8.api.instructions.Instruction_Rdl_K6;
 import at.reder.avrwb.avr8.api.instructions.Jmp;
 import at.reder.avrwb.avr8.api.instructions.Ld;
 import at.reder.avrwb.avr8.api.instructions.Ldi;
@@ -74,11 +81,14 @@ import at.reder.avrwb.avr8.api.instructions.Sbr;
 import at.reder.avrwb.avr8.api.instructions.SetClearIOBit;
 import at.reder.avrwb.avr8.api.instructions.Sub;
 import at.reder.avrwb.avr8.api.instructions.Swap;
+import at.reder.avrwb.avr8.helper.InstructionNotAvailableException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import static org.testng.AssertJUnit.*;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
 /**
@@ -92,14 +102,48 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                                                       Architecture.AVR8,
                                                       AVRCoreVersion.V2E,
                                                       "ATmega8");
+  private final AVRDeviceKey xmega = new AVRDeviceKey(Family.AVR_XMEGA,
+                                                      Architecture.AVR8_XMEGA,
+                                                      AVRCoreVersion.I6000,
+                                                      "xmega");
+  private static final Set<Integer> TESTED_OPCODES = new HashSet<>();
 
-  public DefaultInstructionDecoderNGTest()
+  private static final class ProtocollDecoder implements InstructionDecoder
   {
+
+    private final DefaultInstructionDecoder decoder = new DefaultInstructionDecoder();
+
+    @Override
+    public Instruction getInstruction(Device device,
+                                      int address) throws NullPointerException, IllegalArgumentException,
+                                                          InstructionNotAvailableException
+    {
+      throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public Instruction decodeInstruction(AVRDeviceKey deviceKey,
+                                         int opcode,
+                                         int nextOpcode)
+    {
+      Instruction result = this.decoder.decodeInstruction(deviceKey,
+                                                          opcode,
+                                                          nextOpcode);
+      if (result != null) {
+        TESTED_OPCODES.add(opcode);
+      }
+      return result;
+    }
+
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @AfterClass
+  public static void afterClass()
   {
+    double coverage = TESTED_OPCODES.size();
+    coverage /= 65535d;
+    System.err.println(MessageFormat.format("Tested {0,number,0,000} ({1,number,0.0}%) opcodes.",
+                                            TESTED_OPCODES.size(),
+                                            coverage * 100));
   }
 
   @Test
@@ -107,27 +151,35 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
   {
     int opcode = 0x0;
     int nextOpcode = 0x0;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     nextOpcode);
     assertTrue(result instanceof Nop);
   }
 
-  @Test(enabled = false)
+  @Test
   public void testDecodeInstructionMul()
   {
-    int opcode = 0x9c00;
+    int opcode = constructOpcodeRdRr(Mul.OPCODE,
+                                     5,
+                                     31);
     int nextOpcode = 0x0;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     nextOpcode);
     assertTrue(result instanceof Mul);
+    assertEquals("mul r5, r31",
+                 result.toString());
+    assertRdRr(instance,
+               Mul.OPCODE,
+               Mul.class,
+               "mul");
   }
 
-  @Test(enabled = false)
-  public void setDecodeBitClearSet()
+  @Test
+  public void testDecodeBitClearSet()
   {
     Map<Integer, String> expected = new HashMap();
     expected.put(0x9408,
@@ -164,39 +216,73 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  "cli");
     assertEquals(16,
                  expected.size());
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     for (int opcode = 0x9407; opcode < 0x94fa; ++opcode) {
+      String context = Integer.toHexString(opcode) + " | ";
       Instruction instruction = instance.decodeInstruction(mega8,
                                                            opcode,
                                                            0);
       if (!expected.containsKey(opcode)) {
-        assertFalse(instruction instanceof BitClearSet);
+        assertFalse(context + "class",
+                    instruction instanceof BitClearSet);
       } else {
-        assertTrue(instruction instanceof BitClearSet);
-        assertEquals(expected.get(opcode),
+        assertTrue(context + "class",
+                   instruction instanceof BitClearSet);
+        assertEquals(context + "mnemoic",
+                     expected.get(opcode),
                      instruction.getMnemonic());
       }
     }
   }
 
-  @Test(enabled = false)
+  @Test
   public void testAsr()
   {
-    int opcode = 0x9505;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Asr.OPCODE,
+                                   16);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Asr);
     assertEquals("asr r16",
                  result.toString());
+    assertRd(instance,
+             Asr.OPCODE,
+             Asr.class,
+             "asr");
   }
 
-  @Test(enabled = false)
+  private void assertRd(ProtocollDecoder decoder,
+                        int baseOpcode,
+                        Class<? extends Instruction_Rd> clazz,
+                        String mnemonic)
+  {
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = mnemonic + " r" + rd + " | ";
+      int opcode = constructOpcodeRd(baseOpcode,
+                                     rd);
+      Instruction inst = decoder.decodeInstruction(mega8,
+                                                   opcode,
+                                                   0);
+      assertTrue(context + "class",
+                 clazz.isInstance(inst));
+      Instruction_Rd ird = clazz.cast(inst);
+      assertEquals(context + "rd",
+                   rd,
+                   ird.getRdAddress());
+      assertEquals(context + "mnemonic",
+                   mnemonic,
+                   ird.getMnemonic());
+    }
+  }
+
+  @Test
   public void testCom()
   {
-    int opcode = 0x95f0;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Com.OPCODE,
+                                   31);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -206,84 +292,112 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
 
   }
 
-  @Test(enabled = false)
+  @Test
   public void testDec()
   {
-    int opcode = 0x947a;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Dec.OPCODE,
+                                   7);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Dec);
     assertEquals("dec r7",
                  result.toString());
+    assertRd(instance,
+             Dec.OPCODE,
+             Dec.class,
+             "dec");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testInc()
   {
-    int opcode = 0x9583;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Inc.OPCODE,
+                                   24);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Inc);
     assertEquals("inc r24",
                  result.toString());
+    assertRd(instance,
+             Inc.OPCODE,
+             Inc.class,
+             "inc");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testNeg()
   {
-    int opcode = 0x9431;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Neg.OPCODE,
+                                   3);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Neg);
     assertEquals("neg r3",
                  result.toString());
+    assertRd(instance,
+             Neg.OPCODE,
+             Neg.class,
+             "neg");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testPop()
   {
-    int opcode = 0x91ef;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Pop.OPCODE,
+                                   30);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Pop);
     assertEquals("pop r30",
                  result.toString());
-
+    assertRd(instance,
+             Pop.OPCODE,
+             Pop.class,
+             "pop");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testPush()
   {
-    int opcode = 0x93ef;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Push.OPCODE,
+                                   30);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Push);
     assertEquals("push r30",
                  result.toString());
-
+    assertRd(instance,
+             Push.OPCODE,
+             Push.class,
+             "push");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testRor()
   {
-    int opcode = 0x9467;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Ror.OPCODE,
+                                   6);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Ror);
     assertEquals("ror r6",
                  result.toString());
+    assertRd(instance,
+             Ror.OPCODE,
+             Ror.class,
+             "ror");
   }
 
   @Test
@@ -292,7 +406,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Ldi.OPCODE,
                                      16,
                                      0xff);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -306,43 +420,90 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
 
   }
 
-  @Test(enabled = false)
+  @Test
   public void testSwap()
   {
-    int opcode = 0x9432;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRd(Swap.OPCODE,
+                                   3);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Swap);
     assertEquals("swap r3",
                  result.toString());
+    assertRd(instance,
+             Swap.OPCODE,
+             Swap.class,
+             "swap");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testAdiw()
   {
-    int opcode = 0x964f;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRdlK6(Adiw.OPCODE,
+                                      24,
+                                      0x1f);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Adiw);
     assertEquals("adiw r25:r24, 0x1f",
                  result.toString());
+    assertRdlK6(instance,
+                Adiw.OPCODE,
+                Adiw.class,
+                "adiw");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testSbiw()
   {
-    int opcode = 0x976f;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRdlK6(Sbiw.OPCODE,
+                                      24,
+                                      0x1f);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof Sbiw);
-    assertEquals("sbiw r29:r28, 0x1f",
+    assertEquals("sbiw r25:r24, 0x1f",
                  result.toString());
+    assertRdlK6(instance,
+                Sbiw.OPCODE,
+                Sbiw.class,
+                "sbiw");
+  }
+
+  private void assertRdlK6(ProtocollDecoder decoder,
+                           int baseOpcode,
+                           Class<? extends Instruction_Rdl_K6> clazz,
+                           String mnemonic)
+  {
+    for (int rdl = 26; rdl < 32; rdl += 2) {
+      for (int k6 = 0; k6 < 64; ++k6) {
+        String context = mnemonic + " r" + (rdl + 1) + ":r" + rdl + ", " + k6 + " | ";
+        int opcode = constructOpcodeRdlK6(baseOpcode,
+                                          rdl,
+                                          k6);
+        Instruction instr = decoder.decodeInstruction(mega8,
+                                                      opcode,
+                                                      0);
+        assertTrue(context + "class",
+                   clazz.isInstance(instr));
+        Instruction_Rdl_K6 rdlk6 = clazz.cast(instr);
+        assertEquals(context + "rdl",
+                     rdl,
+                     rdlk6.getRdlAddress());
+        assertEquals(context + "k6",
+                     k6,
+                     rdlk6.getK6());
+        assertEquals(context + "mnemoic",
+                     mnemonic,
+                     rdlk6.getMnemonic());
+      }
+    }
   }
 
   @Test
@@ -351,7 +512,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Andi.OPCODE,
                                      19,
                                      0xc5);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -370,7 +531,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Sbci_Subi.OPCODE_SBCI,
                                      19,
                                      0xc5);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -389,7 +550,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Sbci_Subi.OPCODE_SUBI,
                                      19,
                                      0xc5);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -408,7 +569,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Sbr.OPCODE,
                                      19,
                                      0xc5);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -421,10 +582,10 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                "sbr");
   }
 
-  protected void assertRdb(DefaultInstructionDecoder decoder,
-                           int baseOpcode,
-                           Class<? extends Instruction_Rd_b> clazz,
-                           String mnemonic)
+  private void assertRdb(ProtocollDecoder decoder,
+                         int baseOpcode,
+                         Class<? extends Instruction_Rd_b> clazz,
+                         String mnemonic)
   {
     for (int rd = 0; rd < 32; ++rd) {
       for (int b = 0; b < 8; ++b) {
@@ -457,7 +618,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdb(Bld.OPCODE,
                                     19,
                                     5);//0xf935;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -470,27 +631,47 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
               "bld");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testBranchInstruction()
   {
     Map<Integer, String> expected = new HashMap<>();
-    expected.put(0xf3f8,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                       SREG.C,
+                                       -1),
                  "brcs -1");
-    expected.put(0xf401,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_CLR,
+                                       SREG.Z,
+                                       0),
                  "brzc 0");
-    expected.put(0xf2da,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                       SREG.N,
+                                       -37),
                  "brns -37");
-    expected.put(0xf47b,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_CLR,
+                                       SREG.V,
+                                       15),
                  "brvc 15");
-    expected.put(0xf3dc,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                       SREG.S,
+                                       -5),
                  "brss -5");
-    expected.put(0xf515,
-                 "brhc 34");
-    expected.put(0xf206,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_CLR,
+                                       SREG.H,
+                                       63),
+                 "brhc 63");
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                       SREG.T,
+                                       -64),
                  "brts -64");
-    expected.put(0xf5ef,
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_CLR,
+                                       SREG.I,
+                                       61),
                  "brid 61");
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    expected.put(constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                       SREG.I,
+                                       1),
+                 "brie 1");
+    ProtocollDecoder instance = new ProtocollDecoder();
     for (Map.Entry<Integer, String> e : expected.entrySet()) {
       Instruction result = instance.decodeInstruction(mega8,
                                                       e.getKey(),
@@ -502,6 +683,50 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                    e.getValue(),
                    result.toString());
     }
+    for (int b = 0; b < 8; ++b) {
+      for (int d = -64; d < 64; ++d) {
+        int opcode = constructOpcodeBranch(BranchInstruction.OPCODE_CLR,
+                                           b,
+                                           d);
+        String context = "clr b " + b + " d " + d + " | ";
+        Instruction i = instance.decodeInstruction(mega8,
+                                                   opcode,
+                                                   0);
+        assertTrue(context + "class",
+                   i instanceof BranchInstruction);
+        BranchInstruction bi = (BranchInstruction) i;
+        assertEquals(context + "b",
+                     b,
+                     bi.getBitIndex());
+        assertEquals(context + "d",
+                     d,
+                     bi.getOffset());
+        assertFalse(context + "clr",
+                    bi.isBitSet());
+      }
+    }
+    for (int b = 0; b < 8; ++b) {
+      for (int d = -64; d < 64; ++d) {
+        int opcode = constructOpcodeBranch(BranchInstruction.OPCODE_SET,
+                                           b,
+                                           d);
+        String context = "set b " + b + " d " + d + " | ";
+        Instruction i = instance.decodeInstruction(mega8,
+                                                   opcode,
+                                                   0);
+        assertTrue(context + "class",
+                   i instanceof BranchInstruction);
+        BranchInstruction bi = (BranchInstruction) i;
+        assertEquals(context + "b",
+                     b,
+                     bi.getBitIndex());
+        assertEquals(context + "d",
+                     d,
+                     bi.getOffset());
+        assertTrue(context + "set",
+                   bi.isBitSet());
+      }
+    }
   }
 
   @Test
@@ -510,7 +735,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdb(Bst.OPCODE,
                                     19,
                                     5);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -523,11 +748,11 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
               "bst");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testBreak()
   {
     int opcode = Break.OPCODE;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -536,47 +761,106 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
+  @Test
   public void testCall()
   {
-    int opcode = 0x95eeafeb;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeCallJmp(Call.OPCODE,
+                                        0x3cafeb);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     (opcode >> 16) & 0xffff,
                                                     opcode & 0xffff);
     assertTrue(result instanceof Call);
     assertEquals("call 0x3cafeb",
                  result.toString());
-
+    for (int offset = 0xffff; offset < 0x40ffff; offset += 0x10000) {
+      String context = "call 0x" + Integer.toHexString(offset) + " | ";
+      opcode = constructOpcodeCallJmp(Call.OPCODE,
+                                      offset);
+      result = instance.decodeInstruction(mega8,
+                                          (opcode >> 16) & 0xffff,
+                                          opcode & 0xffff);
+      assertTrue(context + "class",
+                 result instanceof Call);
+      Call call = (Call) result;
+      assertEquals(context + "target",
+                   offset,
+                   call.getCallTarget());
+      assertEquals(context + "mnemonic",
+                   "call",
+                   call.getMnemonic());
+    }
   }
 
-  @Test(enabled = false)
+  private void assertInstruction_P_b(ProtocollDecoder decoder,
+                                     int baseOpcode,
+                                     Class<? extends Instruction_P_b> clazz,
+                                     String mnemonic)
+  {
+    for (int io = 0; io < 32; ++io) {
+      for (int b = 0; b < 8; ++b) {
+        int opcode = constructOpcodePb(baseOpcode,
+                                       io,
+                                       b);
+        String context = mnemonic + " 0x" + Integer.toHexString(io) + ", " + b + " | ";
+        Instruction i = decoder.decodeInstruction(mega8,
+                                                  opcode,
+                                                  0);
+        assertTrue(context + "class",
+                   clazz.isInstance(i));
+        Instruction_P_b pb = clazz.cast(i);
+        assertEquals(context + "io",
+                     io,
+                     pb.getPortAddress());
+        assertEquals(context + "b",
+                     b,
+                     pb.getBitOffset());
+        assertEquals(context + "mnemonic",
+                     mnemonic,
+                     pb.getMnemonic());
+      }
+    }
+  }
+
+  @Test
   public void testCBI()
   {
-    int opcode = 0x98c4;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodePb(SetClearIOBit.OPCODE_CBI,
+                                   0x18,
+                                   4);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof SetClearIOBit);
     assertEquals("cbi 0x18, 4",
                  result.toString());
+    assertInstruction_P_b(instance,
+                          SetClearIOBit.OPCODE_CBI,
+                          SetClearIOBit.class,
+                          "cbi");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testSBI()
   {
-    int opcode = 0x9aff;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodePb(SetClearIOBit.OPCODE_SBI,
+                                   0x1f,
+                                   7);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof SetClearIOBit);
     assertEquals("sbi 0x1f, 7",
                  result.toString());
+    assertInstruction_P_b(instance,
+                          SetClearIOBit.OPCODE_SBI,
+                          SetClearIOBit.class,
+                          "sbi");
   }
 
-  private void assertRdK8(DefaultInstructionDecoder decoder,
+  private void assertRdK8(ProtocollDecoder decoder,
                           int baseOpcode,
                           Class<? extends Instruction_Rd_K8> clazz,
                           String mnemonic)
@@ -614,7 +898,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdK8(Cpi.OPCODE,
                                      21,
                                      0x8f);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -627,37 +911,76 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                "cpi");
   }
 
-  @Test(enabled = false)
+  private void assertRdP(ProtocollDecoder decoder,
+                         int baseOpcode,
+                         String mnemonic)
+  {
+    for (int rd = 0; rd < 32; ++rd) {
+      for (int p = 0; p < 64; ++p) {
+        int opcode = constructOpcodeRdP(baseOpcode,
+                                        rd,
+                                        p);
+        String context = mnemonic + " r" + rd + ", 0x" + Integer.toHexString(p) + " | ";
+        Instruction i = decoder.decodeInstruction(mega8,
+                                                  opcode,
+                                                  0);
+        assertTrue(context + "class",
+                   i instanceof InOut);
+        InOut io = (InOut) i;
+        assertEquals(context + "rd",
+                     rd,
+                     io.getRegisterAddress());
+        assertEquals(context + "io",
+                     p,
+                     io.getPortAddress());
+        assertEquals(context + "mnemonic",
+                     mnemonic,
+                     io.getMnemonic());
+      }
+    }
+  }
+
+  @Test
   public void testIn()
   {
-    int opcode = 0xb777;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRdP(InOut.OPCODE_IN,
+                                    23,
+                                    0x37);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof InOut);
     assertEquals("in r23, 0x37",
                  result.toString());
+    assertRdP(instance,
+              InOut.OPCODE_IN,
+              "in");
   }
 
-  @Test(enabled = false)
+  @Test
   public void testOut()
   {
-    int opcode = 0xbf77;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeRdP(InOut.OPCODE_OUT,
+                                    23,
+                                    0x37);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
     assertTrue(result instanceof InOut);
     assertEquals("out 0x37, r23",
                  result.toString());
+    assertRdP(instance,
+              InOut.OPCODE_OUT,
+              "out");
   }
 
   @Test
   public void testRcall()
   {
     int opcode = 0xd800;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -687,11 +1010,11 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
+  @Test
   public void testRet()
   {
     int opcode = 0x9508;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -700,11 +1023,11 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
+  @Test
   public void testReti()
   {
     int opcode = 0x9518;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -713,11 +1036,11 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                  result.toString());
   }
 
-  @Test(enabled = false)
+  @Test
   public void testICall()
   {
     int opcode = 0x9509;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -727,55 +1050,52 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
 
   }
 
-  @Test(enabled = false)
+  @Test
   public void testIJump()
   {
     int opcode = 0x9409;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
-    assertTrue(result instanceof IJump);
-    assertEquals("ijump",
+    assertTrue(result instanceof IJmp);
+    assertEquals("ijmp",
                  result.toString());
 
   }
 
-  @Test(enabled = false)
+  @Test
   public void testJmp()
   {
-    int opcode = 0x95ecafeb;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    int opcode = constructOpcodeCallJmp(Jmp.OPCODE,
+                                        0x3cafeb);
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     (opcode >> 16) & 0xffff,
                                                     opcode & 0xffff);
     assertTrue(result instanceof Jmp);
     assertEquals("jmp 0x3cafeb",
                  result.toString());
-
+    for (int offset = 0xffff; offset < 0x40ffff; offset += 0x10000) {
+      String context = "jmp 0x" + Integer.toHexString(offset) + " | ";
+      opcode = constructOpcodeCallJmp(Jmp.OPCODE,
+                                      offset);
+      result = instance.decodeInstruction(mega8,
+                                          (opcode >> 16) & 0xffff,
+                                          opcode & 0xffff);
+      assertTrue(context + "class",
+                 result instanceof Jmp);
+      Jmp jmp = (Jmp) result;
+      assertEquals(context + "target",
+                   offset,
+                   jmp.getJumpTarget());
+      assertEquals(context + "mnemonic",
+                   "jmp",
+                   jmp.getMnemonic());
+    }
   }
 
-  @Test(enabled = false)
-  public void testLd_X()
-  {
-    int opcode = 0x911c;
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
-    Instruction result = instance.decodeInstruction(mega8,
-                                                    opcode,
-                                                    0);
-    assertTrue(result instanceof Ld);
-    assertEquals("ld r17, X",
-                 result.toString());
-
-  }
-
-  @Test
-  public void testLd_Y()
-  {
-    fail("noch nicht implementiert");
-  }
-
-  private void assertRdRr(DefaultInstructionDecoder instance,
+  private void assertRdRr(ProtocollDecoder instance,
                           int baseOpcode,
                           Class<? extends Instruction_Rd_Rr> clazz,
                           String menmonic)
@@ -810,7 +1130,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Add.OPCODE,
                                      28,
                                      15);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -829,7 +1149,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Cpc.OPCODE,
                                      18,
                                      19);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -848,7 +1168,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Sbc.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -867,7 +1187,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Cpse.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -887,7 +1207,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(And.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -906,7 +1226,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Eor.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -925,7 +1245,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Or.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -944,7 +1264,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Mov.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -963,7 +1283,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Adc.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -983,7 +1303,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Cp.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -1002,7 +1322,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     int opcode = constructOpcodeRdRr(Sub.OPCODE,
                                      31,
                                      0);
-    DefaultInstructionDecoder instance = new DefaultInstructionDecoder();
+    ProtocollDecoder instance = new ProtocollDecoder();
     Instruction result = instance.decodeInstruction(mega8,
                                                     opcode,
                                                     0);
@@ -1014,6 +1334,186 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                Sub.class,
                "sub");
 
+  }
+
+  private void assertLdPtr(ProtocollDecoder decoder,
+                           Pointer pointer)
+  {
+    Instruction instruction;
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", " + pointer.name() + " | ";
+      int opcode = constructOpcodeLd(pointer,
+                                     rd,
+                                     Ld.Mode.UNMODIFIED,
+                                     0);
+      instruction = decoder.decodeInstruction(mega8,
+                                              opcode,
+                                              0);
+      assertTrue(context + "class",
+                 instruction instanceof Ld);
+      Ld ld = (Ld) instruction;
+      assertEquals(context + "mnemonic",
+                   "ld",
+                   ld.getMnemonic());
+      assertEquals(context + "rd",
+                   rd,
+                   ld.getRdAddress());
+      assertEquals(context + "ptr",
+                   pointer,
+                   ld.getPointer());
+      assertEquals(context + "disp",
+                   0,
+                   ld.getDisplacement());
+      assertEquals(context + "mode",
+                   Ld.Mode.UNMODIFIED,
+                   ld.getMode());
+    }
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", " + pointer.name() + "+ | ";
+      int opcode = constructOpcodeLd(pointer,
+                                     rd,
+                                     Ld.Mode.POST_INCREMENT,
+                                     0);
+      instruction = decoder.decodeInstruction(mega8,
+                                              opcode,
+                                              0);
+      assertTrue(context + "class",
+                 instruction instanceof Ld);
+      Ld ld = (Ld) instruction;
+      assertEquals(context + "mnemonic",
+                   "ld",
+                   ld.getMnemonic());
+      assertEquals(context + "rd",
+                   rd,
+                   ld.getRdAddress());
+      assertEquals(context + "ptr",
+                   pointer,
+                   ld.getPointer());
+      assertEquals(context + "disp",
+                   0,
+                   ld.getDisplacement());
+      assertEquals(context + "mode",
+                   Ld.Mode.POST_INCREMENT,
+                   ld.getMode());
+    }
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", -" + pointer.name() + " | ";
+      int opcode = constructOpcodeLd(pointer,
+                                     rd,
+                                     Ld.Mode.PRE_DECREMENT,
+                                     0);
+      instruction = decoder.decodeInstruction(mega8,
+                                              opcode,
+                                              0);
+      assertTrue(context + "class",
+                 instruction instanceof Ld);
+      Ld ld = (Ld) instruction;
+      assertEquals(context + "mnemonic",
+                   "ld",
+                   ld.getMnemonic());
+      assertEquals(context + "rd",
+                   rd,
+                   ld.getRdAddress());
+      assertEquals(context + "ptr",
+                   pointer,
+                   ld.getPointer());
+      assertEquals(context + "disp",
+                   0,
+                   ld.getDisplacement());
+      assertEquals(context + "mode",
+                   Ld.Mode.PRE_DECREMENT,
+                   ld.getMode());
+    }
+    if (pointer != Pointer.X) {
+      for (int rd = 0; rd < 32; ++rd) {
+        for (int q = 0; q < 64; ++q) {
+          String context = "ldd r" + rd + ", " + pointer.name() + "+" + q + " | ";
+          int opcode = constructOpcodeLd(pointer,
+                                         rd,
+                                         Ld.Mode.DISPLACEMENT,
+                                         q);
+          instruction = decoder.decodeInstruction(mega8,
+                                                  opcode,
+                                                  0);
+          assertNull(context + "xmega",
+                     instruction);
+          instruction = decoder.decodeInstruction(xmega,
+                                                  opcode,
+                                                  0);
+          assertTrue(context + "class",
+                     instruction instanceof Ld);
+          Ld ld = (Ld) instruction;
+          assertEquals(context + "disp",
+                       q,
+                       ld.getDisplacement());
+          assertEquals(context + "mnemonic",
+                       "ldd",
+                       ld.getMnemonic());
+          assertEquals(context + "rd",
+                       rd,
+                       ld.getRdAddress());
+          assertEquals(context + "ptr",
+                       pointer,
+                       ld.getPointer());
+          if (q != 0) {
+            assertEquals(context + "mnemonic",
+                         "ldd",
+                         ld.getMnemonic());
+            assertEquals(context + "mode",
+                         Ld.Mode.DISPLACEMENT,
+                         ld.getMode());
+          } else {
+            assertEquals(context + "mnemonic",
+                         "ld",
+                         ld.getMnemonic());
+            assertEquals(context + "mode",
+                         Ld.Mode.UNMODIFIED,
+                         ld.getMode());
+          }
+        }
+      }
+
+    }
+  }
+
+  @Test
+  public void testLd_X()
+  {
+    int opcode = constructOpcodeLd(Pointer.X,
+                                   17,
+                                   Ld.Mode.UNMODIFIED,
+                                   0);//0x911c;
+    ProtocollDecoder instance = new ProtocollDecoder();
+    Instruction result = instance.decodeInstruction(mega8,
+                                                    opcode,
+                                                    0);
+    assertTrue(result instanceof Ld);
+    assertEquals("ld r17, X",
+                 result.toString());
+    assertLdPtr(instance,
+                Pointer.X);
+  }
+
+  @Test
+  public void testLd_Y()
+  {
+    int opcode = constructOpcodeLd(Pointer.Y,
+                                   17,
+                                   Ld.Mode.DISPLACEMENT,
+                                   5);
+    ProtocollDecoder instance = new ProtocollDecoder();
+    Instruction result = instance.decodeInstruction(mega8,
+                                                    opcode,
+                                                    0);
+    assertNull(result);
+    result = instance.decodeInstruction(xmega,
+                                        opcode,
+                                        0);
+    assertTrue(result instanceof Ld);
+    assertEquals("ldd r17, Y+5",
+                 result.toString());
+    assertLdPtr(instance,
+                Pointer.Y);
   }
 
 }

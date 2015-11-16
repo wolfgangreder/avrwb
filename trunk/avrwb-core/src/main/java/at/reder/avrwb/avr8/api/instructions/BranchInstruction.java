@@ -42,7 +42,8 @@ public final class BranchInstruction extends AbstractInstruction
 {
 
   public static final int OPCODE_MASK = 0xfc00;
-  public static final int OPCODE = 0xfc00;
+  public static final int OPCODE_SET = 0xf000;
+  public static final int OPCODE_CLR = 0xf400;
   private final int bitOffset;
   private final int offset;
   private final boolean bitSet;
@@ -52,7 +53,7 @@ public final class BranchInstruction extends AbstractInstruction
   public BranchInstruction(int opcode)
   {
     super(opcode,
-          OPCODE,
+          OPCODE_MASK,
           decodeMnemonic(opcode));
     offset = decodeOffset(opcode);
     bitOffset = decodeBitOffset(opcode);

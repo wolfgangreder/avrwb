@@ -34,6 +34,8 @@ import at.reder.avrwb.avr8.helper.SimulationException;
 public final class Inc extends Instruction_Rd
 {
 
+  public static final int OPCODE = 0x9403;
+
   public Inc(int opcode)
   {
     super(opcode,

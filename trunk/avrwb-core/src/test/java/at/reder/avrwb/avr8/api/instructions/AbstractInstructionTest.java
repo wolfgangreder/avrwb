@@ -21,6 +21,7 @@
  */
 package at.reder.avrwb.avr8.api.instructions;
 
+import at.reder.avrwb.avr8.Pointer;
 import at.reder.avrwb.avr8.api.Instruction;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -56,12 +57,142 @@ public class AbstractInstructionTest
                Modifier.isFinal(clazz.getModifiers()));
   }
 
+  protected int constructOpcodeCallJmp(int baseOpcode,
+                                       int offset)
+  {
+    return baseOpcode | (offset & 0x1ffff) | ((offset & 0x3e0000) << 3);
+  }
+
+  protected int constructOpcodeRdlK6(int baseOpcode,
+                                     int rdl,
+                                     int k6)
+  {
+    if ((baseOpcode & ~0xff00) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (rdl < 24 || rdl > 30 || ((rdl % 2) != 0)) {
+      throw new IllegalArgumentException("invalid rdl");
+    }
+    if (k6 < 0 || k6 > 63) {
+      throw new IllegalArgumentException("invalid k6");
+    }
+    return baseOpcode | ((rdl - 24) << 3) | ((k6 & 0x30) << 2) | (k6 & 0xf);
+  }
+
+  protected int constructOpcodeRd(int baseOpcode,
+                                  int rd)
+  {
+    if ((baseOpcode & ~0xfe0f) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (rd < 0 || rd > 31) {
+      throw new IllegalArgumentException("invalid rd");
+    }
+    return baseOpcode | (rd << 4);
+  }
+
+  protected int constructOpcodeLd(Pointer ptr,
+                                  int rd,
+                                  Ld.Mode mode,
+                                  int displacement)
+  {
+    if (rd > 31 || rd < 0) {
+      throw new IllegalArgumentException("invalid register r" + rd);
+    }
+    int result = 0;
+    switch (ptr) {
+      case X: {
+        result = 0x900c;
+      }
+      break;
+      case Y: {
+        result = 0x8008;
+      }
+      break;
+      case Z: {
+      }
+    }
+    if (null != mode) {
+      switch (mode) {
+        case POST_INCREMENT:
+          result |= 0x1001;
+          break;
+        case PRE_DECREMENT:
+          result |= 0x1002;
+          break;
+        case DISPLACEMENT:
+          if (ptr == Pointer.X) {
+            throw new IllegalArgumentException("displacement only implemented for Y and Z");
+          }
+          if (displacement < 0) {
+            throw new IllegalArgumentException("displacement <0");
+          }
+          if (displacement > 63) {
+            throw new IllegalArgumentException("displacement > 63");
+          }
+          result = result | ((displacement & 0x20) << 8) | ((displacement & 18) << 7) | (displacement & 0x7);
+          break;
+        default:
+          break;
+      }
+    }
+    return result | ((rd << 4));
+  }
+
+  protected int constructOpcodeBranch(int baseOpcode,
+                                      int bit,
+                                      int offset)
+  {
+    if ((baseOpcode & ~0xfc00) != 0) {
+      throw new IllegalArgumentException("invalid opcode");
+    }
+    if (bit < 0 || bit > 7) {
+      throw new IllegalArgumentException("invalid bit");
+    }
+    if (offset < -64 || offset > 63) {
+      throw new IllegalArgumentException("invalid offset");
+    }
+    return baseOpcode | bit | ((offset & 0x7f) << 3);
+  }
+
+  protected int constructOpcodeRdP(int baseOpcode,
+                                   int rd,
+                                   int io)
+  {
+    if ((baseOpcode & ~0xf800) != 0) {
+      throw new IllegalArgumentException("invalid opcode");
+    }
+    if (rd < 0 || rd > 31) {
+      throw new IllegalArgumentException("invalid rd");
+    }
+    if (io < 0 || io > 63) {
+      throw new IllegalArgumentException("invalid io");
+    }
+    return baseOpcode | (rd << 4) | (io & 0xf) | ((io & 0x30) << 5);
+  }
+
+  protected int constructOpcodePb(int opcode,
+                                  int io,
+                                  int b)
+  {
+    if ((opcode & ~0xff00) != 0) {
+      throw new IllegalArgumentException("invalid opcode");
+    }
+    if (io < 0 || io > 31) {
+      throw new IllegalArgumentException("invalid io");
+    }
+    if (b < 0 || b > 7) {
+      throw new IllegalArgumentException("invalid bit");
+    }
+    return opcode | b | (io << 3);
+  }
+
   protected int constructOpcodeRdb(int opcode,
                                    int rd,
                                    int b)
   {
     if ((opcode & ~0xfe08) != 0) {
-      return new IllegalArgumentException("invalid rd,b opcode" + Integer.toHexString(opcode));
+      throw new IllegalArgumentException("invalid rd,b opcode" + Integer.toHexString(opcode));
     }
     if (rd > 31 || rd < 0) {
       throw new IllegalArgumentException("invalid register r" + rd);

@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 public final class Ld extends AbstractInstruction
 {
 
-  private enum Mode
+  public enum Mode
   {
     UNMODIFIED,
     POST_INCREMENT,
@@ -91,6 +91,17 @@ public final class Ld extends AbstractInstruction
 
   private static int getDisplacement(int opcode)
   {
+    switch (opcode & 0xfe0f) {
+      case 0x900c:
+      case 0x900d:
+      case 0x900e: // X
+        return 0;
+    }
+    switch (opcode & 0x2df7) {
+      case 0x8000: // Z
+      case 0x8008: // Y
+        return 0;
+    }
     int tmp1 = opcode & 0x7;
     int tmp2 = (opcode & 0xc00) >> 7;
     int tmp3 = (opcode & 0x2000) >> 8;
@@ -138,11 +149,11 @@ public final class Ld extends AbstractInstruction
       return null;
     }
     StringBuilder strBuilder = new StringBuilder("ld");
-    if (ptr != Pointer.X) {
+    if (mode == Mode.DISPLACEMENT) {
       strBuilder.append('d');
     }
     final String menmonic = strBuilder.toString();
-    final int rdAddress = (opcode & 0x1f0) >> 8;
+    final int rdAddress = (opcode & 0x1f0) >> 4;
     strBuilder.append(" r");
     strBuilder.append(rdAddress);
     strBuilder.append(", ");
@@ -181,6 +192,26 @@ public final class Ld extends AbstractInstruction
     this.displacement = displacement;
     this.toStringValue = toStringValue;
     this.ptr = ptr;
+  }
+
+  public int getRdAddress()
+  {
+    return rdAddress;
+  }
+
+  public int getDisplacement()
+  {
+    return displacement;
+  }
+
+  public Pointer getPointer()
+  {
+    return ptr;
+  }
+
+  public Ld.Mode getMode()
+  {
+    return mode;
   }
 
   @Override
