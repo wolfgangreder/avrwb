@@ -37,7 +37,7 @@ public class IJumpNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(IJump.class);
+    testClass(IJmp.class);
   }
 
 }

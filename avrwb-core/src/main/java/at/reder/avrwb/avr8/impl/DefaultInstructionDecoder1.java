@@ -47,7 +47,7 @@ import at.reder.avrwb.avr8.api.instructions.Cpse;
 import at.reder.avrwb.avr8.api.instructions.Dec;
 import at.reder.avrwb.avr8.api.instructions.Eor;
 import at.reder.avrwb.avr8.api.instructions.ICall;
-import at.reder.avrwb.avr8.api.instructions.IJump;
+import at.reder.avrwb.avr8.api.instructions.IJmp;
 import at.reder.avrwb.avr8.api.instructions.InOut;
 import at.reder.avrwb.avr8.api.instructions.Inc;
 import at.reder.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
@@ -353,7 +353,7 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
   {
     switch (opcode) {
       case 0x9409:
-        return new IJump();
+        return new IJmp();
 //      case 0x9419:
 //        return Eijmp.getOperation();
       case 0x9408:

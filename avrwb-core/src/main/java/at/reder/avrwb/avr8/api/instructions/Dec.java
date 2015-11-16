@@ -34,6 +34,8 @@ import at.reder.avrwb.avr8.helper.SimulationException;
 public class Dec extends Instruction_Rd
 {
 
+  public static final int OPCODE = 0x940a;
+
   public Dec(int opcode)
   {
     super(opcode,

@@ -35,6 +35,8 @@ import at.reder.avrwb.avr8.helper.SimulationException;
 public final class Asr extends Instruction_Rd
 {
 
+  public static final int OPCODE = 0x9405;
+
   public Asr(int opcode)
   {
     super(opcode,

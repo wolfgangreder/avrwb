@@ -41,7 +41,7 @@ public final class Jmp extends AbstractInstruction
   private final String toStringValue;
 
   public Jmp(int opcode,
-              int nextOpcode)
+             int nextOpcode)
   {
     super(opcode << 16 | nextOpcode,
           0xfe0effff,
@@ -49,6 +49,11 @@ public final class Jmp extends AbstractInstruction
     int tmp = getOpcode();
     callTarget = (tmp & 0xffff) | ((tmp & 0x1f00000) >> 3) | (tmp & 0x10000);
     toStringValue = "jmp 0x" + Integer.toHexString(callTarget);
+  }
+
+  public int getJumpTarget()
+  {
+    return callTarget;
   }
 
   @Override

@@ -69,6 +69,11 @@ public final class Call extends AbstractInstruction
     }
   }
 
+  public int getCallTarget()
+  {
+    return callTarget;
+  }
+
   @Override
   protected void doExecute(ClockState clockState,
                            Device device,

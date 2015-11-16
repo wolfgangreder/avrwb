@@ -36,6 +36,8 @@ import java.text.MessageFormat;
 public final class SetClearIOBit extends Instruction_P_b
 {
 
+  public static final int OPCODE_CBI = 0x9800;
+  public static final int OPCODE_SBI = 0x9a00;
   private final boolean setBit;
 
   public SetClearIOBit(int opcode)
