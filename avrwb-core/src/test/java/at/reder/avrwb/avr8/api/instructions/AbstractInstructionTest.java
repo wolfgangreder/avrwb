@@ -63,6 +63,18 @@ public class AbstractInstructionTest
     return baseOpcode | (offset & 0x1ffff) | ((offset & 0x3e0000) << 3);
   }
 
+  protected int constructOpcodeK4(int baseOpcode,
+                                  int k4)
+  {
+    if ((baseOpcode & ~Instruction_K4.OPCODE_MASK) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (k4 < 0 || k4 > 15) {
+      throw new IllegalArgumentException("invalid k4");
+    }
+    return baseOpcode | (k4 << 4);
+  }
+
   protected int constructOpcodeRdlK6(int baseOpcode,
                                      int rdl,
                                      int k6)
@@ -77,18 +89,6 @@ public class AbstractInstructionTest
       throw new IllegalArgumentException("invalid k6");
     }
     return baseOpcode | ((rdl - 24) << 3) | ((k6 & 0x30) << 2) | (k6 & 0xf);
-  }
-
-  protected int constructOpcodeRd(int baseOpcode,
-                                  int rd)
-  {
-    if ((baseOpcode & ~0xfe0f) != 0) {
-      throw new IllegalArgumentException("invalid base opcode");
-    }
-    if (rd < 0 || rd > 31) {
-      throw new IllegalArgumentException("invalid rd");
-    }
-    return baseOpcode | (rd << 4);
   }
 
   protected int constructOpcodeLd(Pointer ptr,
@@ -110,6 +110,7 @@ public class AbstractInstructionTest
       }
       break;
       case Z: {
+        result = 0x8000;
       }
     }
     if (null != mode) {
@@ -130,7 +131,7 @@ public class AbstractInstructionTest
           if (displacement > 63) {
             throw new IllegalArgumentException("displacement > 63");
           }
-          result = result | ((displacement & 0x20) << 8) | ((displacement & 18) << 7) | (displacement & 0x7);
+          result = result | ((displacement & 0x20) << 0x8) | ((displacement & 0x18) << 7) | (displacement & 0x7);
           break;
         default:
           break;

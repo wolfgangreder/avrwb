@@ -46,14 +46,26 @@ import at.reder.avrwb.avr8.api.instructions.Cpc;
 import at.reder.avrwb.avr8.api.instructions.Cpi;
 import at.reder.avrwb.avr8.api.instructions.Cpse;
 import at.reder.avrwb.avr8.api.instructions.Dec;
+import at.reder.avrwb.avr8.api.instructions.Des;
+import at.reder.avrwb.avr8.api.instructions.EICall;
+import at.reder.avrwb.avr8.api.instructions.EIJmp;
+import at.reder.avrwb.avr8.api.instructions.Elpm;
 import at.reder.avrwb.avr8.api.instructions.Eor;
+import at.reder.avrwb.avr8.api.instructions.Fmul;
+import at.reder.avrwb.avr8.api.instructions.Fmuls;
+import at.reder.avrwb.avr8.api.instructions.Fmulsu;
 import at.reder.avrwb.avr8.api.instructions.ICall;
 import at.reder.avrwb.avr8.api.instructions.IJmp;
 import at.reder.avrwb.avr8.api.instructions.InOut;
 import at.reder.avrwb.avr8.api.instructions.Inc;
 import at.reder.avrwb.avr8.api.instructions.Jmp;
+import at.reder.avrwb.avr8.api.instructions.Lac;
+import at.reder.avrwb.avr8.api.instructions.Las;
+import at.reder.avrwb.avr8.api.instructions.Lat;
 import at.reder.avrwb.avr8.api.instructions.Ld;
 import at.reder.avrwb.avr8.api.instructions.Ldi;
+import at.reder.avrwb.avr8.api.instructions.Lds;
+import at.reder.avrwb.avr8.api.instructions.Lds16;
 import at.reder.avrwb.avr8.api.instructions.Mov;
 import at.reder.avrwb.avr8.api.instructions.Mul;
 import at.reder.avrwb.avr8.api.instructions.Neg;
@@ -143,7 +155,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
    */
   private Instruction decode_0_3fff(AVRDeviceKey deviceKey,
                                     int opcode,
-                                    int nextOpcde)
+                                    int nextOpcode)
   {
 
     switch (opcode & 0x3000) {
@@ -151,7 +163,9 @@ public class DefaultInstructionDecoder implements InstructionDecoder
         // 0000 xxxx xxxx xxxx
         switch (opcode & 0x0c00) {
           case 0x0000:
-            return new Nop(opcode);
+            return decode_0_0fff(deviceKey,
+                                 opcode,
+                                 nextOpcode);
           case 0x0c00:
             // 0000 11xx xxxx xxxx
             return new Add(opcode);
@@ -192,6 +206,29 @@ public class DefaultInstructionDecoder implements InstructionDecoder
       case 0x3000:
         return new Cpi(opcode);
 
+    }
+    return null;
+  }
+
+  /*
+   decodert 0000 00xx xxxx xxxx
+   */
+  public Instruction decode_0_0fff(AVRDeviceKey deviceKey,
+                                   int opcode,
+                                   int nextOpcode)
+  {
+    switch (opcode & 0x0300) {
+      case 0x0000:
+        return new Nop(opcode);
+      case 0x0300:
+        switch (opcode & 0x0088) {
+          case 0x0008:
+            return new Fmul(opcode);
+          case 0x0080:
+            return new Fmuls(opcode);
+          case 0x0088:
+            return new Fmulsu(opcode);
+        }
     }
     return null;
   }
@@ -242,13 +279,26 @@ public class DefaultInstructionDecoder implements InstructionDecoder
                              nextOpcde);
       case 0x2000:
         //1010 xxxx xxxx xxxx
-        if ((opcode & 0x0200) == 0) {
-          return Ld.getInstance(deviceKey,
-                                opcode);
-        } else {
-//          return St.getInstance(deviceKey,opcode);
-          return null;
+        switch (opcode & 0x0300) {
+          case 0x0000:
+          case 0x0100:
+            return new Lds16(opcode);
+          case 0x0200:
+//            return St.getInstance(deviceKey,
+//                                  opcode);
+            return null;
+          case 0x0300:
+            return Ld.getInstance(deviceKey,
+                                  opcode);
         }
+//        if ((opcode & 0x0200) == 0) {
+//          return Ld.getInstance(deviceKey,
+//                                opcode);
+//        } else {
+//
+////          return St.getInstance(deviceKey,opcode);
+//          return null;
+//        }
       case 0x3000:
         // 1011 xxxx xxxx xxxx
         return new InOut(opcode);
@@ -273,8 +323,8 @@ public class DefaultInstructionDecoder implements InstructionDecoder
       }
       switch (opcode & 0xfe0f) {
         case 0x9000:
-//          return new Lds(opcode,nextOpcode);
-          return null;
+          return new Lds(opcode,
+                         nextOpcode);
         case 0x9001:
         case 0x9002:
         case 0x9008:
@@ -285,6 +335,9 @@ public class DefaultInstructionDecoder implements InstructionDecoder
         case 0x900e:
           return Ld.getInstance(deviceKey,
                                 opcode);
+        case 0x9006:
+        case 0x9007:
+          return Elpm.getInstance(opcode);
         case 0x900f:
           return new Pop(opcode);
         case 0x9101:
@@ -301,6 +354,12 @@ public class DefaultInstructionDecoder implements InstructionDecoder
         case 0x9200:
 //          return new Sts(opcode,nextOpcode);
           return null;
+        case 0x9205:
+          return new Las(opcode);
+        case 0x9206:
+          return new Lac(opcode);
+        case 0x9207:
+          return new Lat(opcode);
         case 0x920f:
           return new Push(opcode);
         case 0x9400:
@@ -340,6 +399,8 @@ public class DefaultInstructionDecoder implements InstructionDecoder
         case 0x9408:
         case 0x9808:
           return new BitClearSet(opcode);
+        case 0x940b:
+          return new Des(opcode);
         case 0x940c:
         case 0x940d:
         case 0x950c:
@@ -356,8 +417,12 @@ public class DefaultInstructionDecoder implements InstructionDecoder
       switch (opcode) {
         case 0x9409:
           return new IJmp();
+        case 0x9419:
+          return new EIJmp();
         case 0x9509:
           return new ICall();
+        case 0x9519:
+          return new EICall();
         case 0x9588:
 //          return new Sleep();
           return null;
@@ -369,6 +434,8 @@ public class DefaultInstructionDecoder implements InstructionDecoder
         case 0x95c8:
 //          return new Lpm(opcode);
           return null;
+        case 0x95d8:
+          return Elpm.getInstance(opcode);
       }
     }
     return null;
