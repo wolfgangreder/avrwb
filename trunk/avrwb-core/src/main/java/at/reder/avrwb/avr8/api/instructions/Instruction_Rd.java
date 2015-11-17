@@ -37,7 +37,20 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rd extends AbstractInstruction
 {
 
-  public static final int MASK = 0xfe0f;
+  public static final int OPCODE_MASK = 0xfe0f;
+
+  public static int composeOpcode(int baseOpcode,
+                                  int rd)
+  {
+    if ((baseOpcode & ~OPCODE_MASK) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (rd < 0 || rd > 31) {
+      throw new IllegalArgumentException("invalid rd");
+    }
+    return baseOpcode | (rd << 4);
+  }
+
   protected int rdVal;
   private final String toStringVal;
 
@@ -45,7 +58,7 @@ public abstract class Instruction_Rd extends AbstractInstruction
                         String mnemonic)
   {
     super(opcode,
-          MASK,
+          OPCODE_MASK,
           mnemonic);
     toStringVal = MessageFormat.format("{0} r{1,number,0}",
                                        getMnemonic(),

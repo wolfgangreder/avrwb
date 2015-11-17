@@ -91,18 +91,17 @@ public final class Ld extends AbstractInstruction
 
   private static int getDisplacement(int opcode)
   {
-    switch (opcode & 0xfe0f) {
-      case 0x900c:
-      case 0x900d:
-      case 0x900e: // X
-        return 0;
+//    switch (opcode & 0xfe0f) {
+//      case 0x900c:
+//      case 0x900d:
+//      case 0x900e: // X
+//        return 0;
+//    }
+    int tmp1 = opcode & 0xd208;
+    if (tmp1 != 0x8008 && tmp1 != 0x8000) {
+      return 0;
     }
-    switch (opcode & 0x2df7) {
-      case 0x8000: // Z
-      case 0x8008: // Y
-        return 0;
-    }
-    int tmp1 = opcode & 0x7;
+    tmp1 = opcode & 0x7;
     int tmp2 = (opcode & 0xc00) >> 7;
     int tmp3 = (opcode & 0x2000) >> 8;
     return tmp1 + tmp2 + tmp3;

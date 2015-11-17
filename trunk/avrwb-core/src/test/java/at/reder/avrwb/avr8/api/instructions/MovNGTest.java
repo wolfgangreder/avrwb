@@ -28,13 +28,11 @@ import at.reder.avrwb.avr8.Memory;
 import at.reder.avrwb.avr8.ResetSource;
 import at.reder.avrwb.avr8.api.InstanceFactories;
 import at.reder.avrwb.avr8.api.Instruction;
-import at.reder.avrwb.avr8.helper.AVRWBDefaults;
 import at.reder.avrwb.avr8.helper.ItemNotFoundException;
 import at.reder.avrwb.avr8.helper.SimulationException;
 import at.reder.avrwb.avr8.impl.DeviceImplTest;
 import at.reder.avrwb.io.IntelHexInputStream;
 import java.io.IOException;
-import java.util.logging.Level;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -58,8 +56,8 @@ public class MovNGTest extends AbstractInstructionTest
   {
     testClass(Mov.class);
     file = XA_AvrToolsDeviceFile.load(DeviceImplTest.class.getResource("/com/atmel/devices/ATmega8.xml"));
-    AVRWBDefaults.setDebugLoggingActive(true);
-    AVRWBDefaults.setInstructionTraceLvel(Level.INFO);
+//    AVRWBDefaults.setDebugLoggingActive(true);
+//    AVRWBDefaults.setInstructionTraceLvel(Level.INFO);
   }
 
   private Device initDevice(String deviceFile) throws NullPointerException, IllegalStateException, ItemNotFoundException,
@@ -67,7 +65,7 @@ public class MovNGTest extends AbstractInstructionTest
   {
     Device device = InstanceFactories.getDeviceBuilder().fromDescriptor(file,
                                                                         null).
-            deviceLogger(AVRWBDefaults.LOGGER).
+            //            deviceLogger(AVRWBDefaults.LOGGER).
             build();
     Memory flash = device.getFlash();
     flash.initialize(new IntelHexInputStream(getClass().getResourceAsStream("/testprojects/mov/" + deviceFile)).read());
