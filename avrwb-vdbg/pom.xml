@@ -2,11 +2,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>at.reder</groupId>
+        <groupId>com.avrwb</groupId>
         <artifactId>avrwb-parent</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>avrwb-vdbg</artifactId>
+    <artifactId>vdbg</artifactId>
     <packaging>nbm</packaging>
     <build>
         <plugins>
@@ -15,10 +15,6 @@
                 <artifactId>nbm-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <useOSGiDependencies>true</useOSGiDependencies>
-                    <publicPackages>
-                        <publicPackage>at.reder.avrwb.vdbg.model</publicPackage>
-                    </publicPackages>
                 </configuration>
             </plugin>
             <plugin>
@@ -36,12 +32,7 @@
             <artifactId>org-netbeans-api-annotations-common</artifactId>
             <version>${netbeans.version}</version>
         </dependency>
-        <dependency>
-            <groupId>at.reder</groupId>
-            <artifactId>avrwb-core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <type>jar</type>
-        </dependency>
+    
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

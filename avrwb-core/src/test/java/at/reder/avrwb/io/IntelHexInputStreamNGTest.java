@@ -21,6 +21,9 @@
  */
 package at.reder.avrwb.io;
 
+import com.avrwb.io.MemoryChunk;
+import com.avrwb.io.IntelHexInputStream;
+import com.avrwb.io.IntelHexOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
