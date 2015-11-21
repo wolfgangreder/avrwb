@@ -21,17 +21,14 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.RegisterVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Bitfield;
-import com.avrwb.atmelschema.XA_Value;
-import com.avrwb.atmelschema.XA_ValueGroup;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpBuilder;
 import com.avrwb.avr8.RegisterBitGrpValue;
 import com.avrwb.avr8.RegisterBitGrpValueBuilder;
+import com.avrwb.schema.XmlBitgroup;
+import com.avrwb.schema.XmlBitvalue;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,33 +47,22 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   private String name;
   private String caption;
   private int mask;
-  private XA_AvrToolsDeviceFile deviceFile;
   private final List<RegisterBitGrpValue> bitValues = new ArrayList<>();
 
   @Override
-  public RegisterBitGrpBuilder fromDescriptor(@NotNull XA_AvrToolsDeviceFile descriptor,
-                                              @NotNull XA_Bitfield bitField,
-                                              @NotNull RegisterVector registerVector) throws NullPointerException
+  public RegisterBitGrpBuilder fromDescriptor(XmlBitgroup bitField) throws NullPointerException
   {
-    Objects.requireNonNull(descriptor,
-                           "descriptor==null");
-    Objects.requireNonNull(registerVector,
-                           "registerVector==null");
     Objects.requireNonNull(bitField,
                            "bitField==null");
     String newName = bitField.getName();
     String newCaption = bitField.getCaption();
     List<RegisterBitGrpValue> newBitValues = null;
-    if (bitField.getValues() != null && !bitField.getValues().trim().isEmpty()) {
-      XA_ValueGroup vg = descriptor.findValueGroup(registerVector.withBitGrp(bitField.getValues()));
-      if (vg != null) {
-        newBitValues = new LinkedList<>();
-        RegisterBitGrpValueBuilder builder = new RegisterBitGrpValueBuilderImpl();
-        for (XA_Value v : vg.getValues()) {
-          newBitValues.add(builder.fromDescriptor(v).build());
-        }
+    if (bitField.getBitvalues() != null && !bitField.getBitvalues().getBitvalue().isEmpty()) {
+      RegisterBitGrpValueBuilder builder = new RegisterBitGrpValueBuilderImpl();
+      newBitValues = new LinkedList<>();
+      for (XmlBitvalue v : bitField.getBitvalues().getBitvalue()) {
+        newBitValues.add(builder.fromDescriptor(v).build());
       }
-
     }
     Objects.requireNonNull(newName,
                            "name==null");
@@ -88,7 +74,7 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
                            "caption==null");
     name = newName;
     caption = newCaption;
-    mask = bitField.getMask();
+    mask = bitField.getBitmask();
     bitValues.clear();
     if (newBitValues != null) {
       bitValues.addAll(newBitValues);
@@ -150,9 +136,6 @@ public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder
   @NotNull
   public RegisterBitGrp build() throws NullPointerException, IllegalStateException
   {
-    if (deviceFile != null) {
-
-    }
     Objects.requireNonNull(name,
                            "name is null");
     if (name.trim().isEmpty()) {

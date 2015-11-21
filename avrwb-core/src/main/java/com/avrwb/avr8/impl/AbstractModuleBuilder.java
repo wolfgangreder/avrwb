@@ -21,11 +21,10 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.ModuleVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Module;
 import com.avrwb.avr8.ModuleBuilder;
 import com.avrwb.avr8.helper.NotFoundStrategy;
+import com.avrwb.schema.XmlDevice;
+import com.avrwb.schema.XmlModule;
 import java.util.Objects;
 
 /**
@@ -35,9 +34,8 @@ import java.util.Objects;
 public abstract class AbstractModuleBuilder<B extends ModuleBuilder> implements ModuleBuilder<B>
 {
 
-  protected XA_AvrToolsDeviceFile file;
-  protected ModuleVector moduleVector;
-  protected XA_Module module;
+  protected XmlDevice device;
+  protected XmlModule module;
   protected NotFoundStrategy nfStrategy;
 
   protected abstract B getThis();
@@ -45,30 +43,26 @@ public abstract class AbstractModuleBuilder<B extends ModuleBuilder> implements 
   @Override
   public B notFoundStrategy(NotFoundStrategy nfStrategy) throws NullPointerException
   {
-    Objects.requireNonNull(nfStrategy, "nfStrategy==null");
+    Objects.requireNonNull(nfStrategy,
+                           "nfStrategy==null");
     this.nfStrategy = nfStrategy;
     return getThis();
   }
 
   @Override
-  public B moduleVector(ModuleVector mv) throws NullPointerException
+  public B device(XmlDevice device) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(mv, "mv==null");
-    moduleVector = mv;
+    Objects.requireNonNull(device,
+                           "device==null");
+    this.device = device;
     return getThis();
   }
 
   @Override
-  public B descriptor(XA_AvrToolsDeviceFile file) throws NullPointerException, IllegalArgumentException
+  public B moduleDescriptor(XmlModule module) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(file, "file==null");
-    this.file = file;
-    return getThis();
-  }
-
-  @Override
-  public B moduleDescriptor(XA_Module module)
-  {
+    Objects.requireNonNull(module,
+                           "module==null");
     this.module = module;
     return getThis();
   }

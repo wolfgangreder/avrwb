@@ -21,14 +21,8 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.ModuleVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Module;
-import com.avrwb.atmelschema.XA_Register;
-import com.avrwb.atmelschema.XA_RegisterGroup;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
@@ -40,16 +34,18 @@ import com.avrwb.avr8.api.InstanceFactories;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
 import com.avrwb.avr8.api.InstructionResult;
-import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.ModuleClass;
+import com.avrwb.schema.XmlDevice;
+import com.avrwb.schema.XmlModule;
+import com.avrwb.schema.XmlRegister;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -61,87 +57,67 @@ public class CPU_2E implements CPU
 {
 
   private final String name;
-  private final String caption;
-  private final Map<String, String> params;
   private int ip;
   private Instruction currentInstruction;
   private final SREG sreg;
   private final Register sp;
   private final List<Register> register;
   private final CPU_2EInstructionDecoder instructionDecoder;
-  private final AVRCoreVersion version;
+  private final AvrCore version;
 
-  CPU_2E(@NotNull XA_AvrToolsDeviceFile file,
-         @NotNull ModuleVector moduleVector,
-         XA_Module mod,
+  CPU_2E(@NotNull XmlDevice device,
+         XmlModule module,
          @NotNull NotFoundStrategy nfStrategy) throws NullPointerException, ItemNotFoundException
   {
-    Objects.requireNonNull(file,
+    Objects.requireNonNull(device,
                            "file==null");
-    Objects.requireNonNull(moduleVector,
+    Objects.requireNonNull(module,
                            "moduleVector==null");
     Objects.requireNonNull(nfStrategy,
                            "nfStrategy==null");
-    XA_Module module = mod != null ? mod : file.findModule(moduleVector);
-    if (module == null) {
-      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
-                                                moduleVector.getModuleName(),
-                                                NotFoundStrategy.ERROR);
-      throw new NullPointerException("module==null");
+    if (module.getClazz() != ModuleClass.CPU) {
+      throw new IllegalArgumentException("module is no cpu");
     }
     this.name = module.getName();
-    if (module.getCaption().trim().isEmpty()) {
-      this.caption = this.name;
-    } else {
-      this.caption = module.getCaption();
-    }
-    if (module.getParameter().isEmpty()) {
-      params = Collections.emptyMap();
-    } else {
-      params = Collections.unmodifiableMap(new HashMap<>(module.getParameter()));
-    }
     final RegisterBuilder registerBuilder = InstanceFactories.getRegisterBuilder();
     final List<Register> tmpRegister = new ArrayList<>();
     SREG tmpSREG = null;
     Register tmpSP = null;
-    for (XA_RegisterGroup rg : module.getRegisterGroups()) {
-      for (XA_Register r : rg.getRegister()) {
-        Register reg = registerBuilder.fromDescritpor(file,
-                                                      moduleVector.withRegister(r.getName())).build();
-        switch (reg.getName()) {
-          case "SREG":
-            if (reg instanceof SREG) {
-              tmpSREG = (SREG) reg;
-            } else {
-              tmpSREG = new SREGImpl(reg);
-            }
-            tmpRegister.add(tmpSREG);
-            break;
-          case "SP":
-            tmpSP = reg;
-            tmpRegister.add(reg);
-            break;
-          default:
-            tmpRegister.add(reg);
-            break;
-        }
+    for (XmlRegister r : module.getRegister()) {
+      Register reg = registerBuilder.fromDescritpor(r).build();
+      switch (reg.getName()) {
+        case "SREG":
+          if (reg instanceof SREG) {
+            tmpSREG = (SREG) reg;
+          } else {
+            tmpSREG = new SREGImpl(reg);
+          }
+          tmpRegister.add(tmpSREG);
+          break;
+        case "SP":
+          tmpSP = reg;
+          tmpRegister.add(reg);
+          break;
+        default:
+          tmpRegister.add(reg);
+          break;
       }
     }
     this.register = Collections.unmodifiableList(tmpRegister);
     this.sreg = tmpSREG;
     this.sp = tmpSP;
     if (sreg == null) {
-      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
+      ItemNotFoundException.processItemNotFound(device.getName(),
                                                 "SREG",
                                                 nfStrategy);
     }
     if (sp == null) {
-      ItemNotFoundException.processItemNotFound(moduleVector.getDeviceName(),
+      ItemNotFoundException.processItemNotFound(device.getName(),
                                                 "SP",
                                                 nfStrategy);
     }
     instructionDecoder = new CPU_2EInstructionDecoder();
-    version = AVRCoreVersion.valueOf(module.getParameter().get(AVRWBDefaults.PROP_CORE_VERSION));
+    version = device.getAvrCore();
   }
 
   @Override
@@ -180,18 +156,6 @@ public class CPU_2E implements CPU
   public String getName()
   {
     return name;
-  }
-
-  @Override
-  public String getCaption()
-  {
-    return caption;
-  }
-
-  @Override
-  public Map<String, String> getParam()
-  {
-    return params;
   }
 
   @Override
@@ -240,7 +204,7 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public AVRCoreVersion getCoreVersion()
+  public AvrCore getCoreVersion()
   {
     return version;
   }

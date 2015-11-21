@@ -21,12 +21,13 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.DeviceBuilder;
 import com.avrwb.avr8.api.InstanceFactories;
 import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.schema.XmlPart;
+import com.avrwb.schema.util.DeviceStreamer;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -38,7 +39,7 @@ import org.testng.annotations.Test;
 public class DeviceImplTest
 {
 
-  static XA_AvrToolsDeviceFile file;
+  static XmlPart file;
 
   public DeviceImplTest()
   {
@@ -47,7 +48,8 @@ public class DeviceImplTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    file = XA_AvrToolsDeviceFile.load(DeviceImplTest.class.getResource("/com/atmel/devices/ATmega8.xml"));
+    file = DeviceStreamer.loadDevice(DeviceImplTest.class.getResource("/com/avrwb/devices/ATmega8.xml"),
+                                     null);
     assertNotNull(file);
   }
 
@@ -55,8 +57,7 @@ public class DeviceImplTest
   public void testConstruct() throws NullPointerException, IllegalStateException, ItemNotFoundException
   {
     DeviceBuilder deviceBuilder = InstanceFactories.getDeviceBuilder();
-    Device device = deviceBuilder.fromDescriptor(file,
-                                                 null).build();
+    Device device = deviceBuilder.fromDescriptor(file).build();
     CPU cpu = device.getCPU();
     assertNotNull("cpu==null",
                   cpu);

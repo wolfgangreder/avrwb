@@ -21,6 +21,8 @@
  */
 package com.atmel.schema;
 
+import com.avrwb.atmelschema.Architecture;
+import com.avrwb.atmelschema.Family;
 import com.avrwb.atmelschema.RegisterVector;
 import com.avrwb.atmelschema.XA_AddressSpace;
 import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
@@ -36,8 +38,6 @@ import com.avrwb.atmelschema.XA_RegisterGroup;
 import com.avrwb.atmelschema.XA_Value;
 import com.avrwb.atmelschema.XA_ValueGroup;
 import com.avrwb.atmelschema.XA_Variant;
-import com.avrwb.atmelschema.Architecture;
-import com.avrwb.atmelschema.Family;
 import com.avrwb.avr8.MemoryAccess;
 import com.avrwb.avr8.MemoryAccessSet;
 import com.avrwb.avr8.MemoryType;
@@ -73,7 +73,7 @@ public class AvrToolsDevice_mega8_NGTest
   @Test
   public void testStreaming() throws IOException
   {
-    mega8URL = getClass().getResource("/com/atmel/devices/ATmega8.xml");
+    mega8URL = getClass().getResource("/com/avrwb/devices/ATmega8.xml");
     mega8 = XA_AvrToolsDeviceFile.load(mega8URL);
   }
 

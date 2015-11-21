@@ -21,12 +21,12 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.schema.AvrCore;
 
 public interface CPU extends Module
 {
@@ -77,6 +77,6 @@ public interface CPU extends Module
   public InstructionDecoder getInstructionDecoder();
 
   @NotNull
-  public AVRCoreVersion getCoreVersion();
+  public AvrCore getCoreVersion();
 
 }

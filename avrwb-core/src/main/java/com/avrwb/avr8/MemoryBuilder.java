@@ -21,9 +21,9 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.atmelschema.XA_AddressSpace;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
+import com.avrwb.schema.XmlAddressSpace;
 import java.nio.ByteOrder;
 
 @NotThreadSave
@@ -40,7 +40,7 @@ public interface MemoryBuilder
 
   public MemoryBuilder start(int start) throws IllegalArgumentException;
 
-  public MemoryBuilder fromAddressSpace(@NotNull XA_AddressSpace space) throws NullPointerException;
+  public MemoryBuilder fromAddressSpace(@NotNull XmlAddressSpace space) throws NullPointerException;
 
   public Memory build() throws NullPointerException, IllegalStateException;
 

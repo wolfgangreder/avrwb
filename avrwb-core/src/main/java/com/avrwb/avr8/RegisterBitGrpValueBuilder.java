@@ -21,10 +21,10 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.atmelschema.XA_Value;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
+import com.avrwb.schema.XmlBitvalue;
 
 /**
  *
@@ -42,7 +42,7 @@ public interface RegisterBitGrpValueBuilder
    * @throws NullPointerException wenn {@code valueGroup} gleich {@code null}
    */
   @NotNull
-  public RegisterBitGrpValueBuilder fromDescriptor(@NotNull XA_Value valueGroup) throws NullPointerException;
+  public RegisterBitGrpValueBuilder fromDescriptor(@NotNull XmlBitvalue valueGroup) throws NullPointerException;
 
   /**
    * Setzt den Kurzamen des Wertes.

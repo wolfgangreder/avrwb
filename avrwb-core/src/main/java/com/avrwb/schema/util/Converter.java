@@ -21,6 +21,8 @@
  */
 package com.avrwb.schema.util;
 
+import com.avrwb.avr8.MemoryAccess;
+import com.avrwb.avr8.MemoryAccessSet;
 import java.nio.ByteOrder;
 
 /**
@@ -112,6 +114,30 @@ public final class Converter
       return Integer.decode(str);
     }
     return null;
+  }
+
+  public static String printMemoryAccessSet(MemoryAccessSet mas)
+  {
+    if (mas == null) {
+      return null;
+    }
+    StringBuilder tmp = new StringBuilder();
+    for (MemoryAccess mac : mas) {
+      tmp.append(mac.sign());
+    }
+    return tmp.toString();
+  }
+
+  public static MemoryAccessSet parseMemoryAccessSet(String str)
+  {
+    if (str == null) {
+      return null;
+    }
+    MemoryAccessSet result = new MemoryAccessSet();
+    for (char ch : str.toCharArray()) {
+      result.add(MemoryAccess.valueOf(ch));
+    }
+    return result;
   }
 
 }

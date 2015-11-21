@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+$Id$
+
+Copyright (C) 2015 Wolfgang Reder <wolfgang.reder@aon.at>.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3.0 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301  USA
+
+-->
+
+
+<avr:part
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns:avr='http://www.avrwb.com/schema/avr/partdescriptor-1.0'
+  xsi:schemaLocation='http://www.avrwb.com/schema/avr/partdescriptor-1.0 ../schema/partdescriptor-1.0.xsd'>
+  
+  <avr:device>
+    <avr:name>Template File</avr:name>
+    <avr:family>tiny</avr:family>
+    <avr:avr-core>V1</avr:avr-core>
+    
+    <avr:variants>
+      <avr:variant>
+        <avr:vcc-min>4.5</avr:vcc-min>
+        <avr:vcc-max>5.5</avr:vcc-max>
+        <avr:speed-max>1000000</avr:speed-max>
+      </avr:variant>
+    </avr:variants>
+
+    <avr:address-spaces>
+      <avr:address-space xml:id="progmem">
+        <avr:name>progmem</avr:name>
+        <avr:max-size>0x1000</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>progmem</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x2000</avr:size>
+          <avr:access>r w x</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="data">
+        <avr:name>data</avr:name>
+        <avr:max-size>0x160</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>register file</avr:name>          
+          <avr:start>0</avr:start>
+          <avr:size>0x20</avr:size>
+          <avr:access>r w</avr:access>
+          <avr:type>register</avr:type>          
+        </avr:segment>
+        <avr:segment>
+          <avr:name>io</avr:name>
+          <avr:start>0x20</avr:start>
+          <avr:size>0x40</avr:size>
+          <avr:access>r w</avr:access>
+          <avr:type>io</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>iram</avr:name>
+          <avr:start>0x60</avr:start>
+          <avr:size>0x100</avr:size>
+          <avr:access>r w</avr:access>
+          <avr:type>internal-ram</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="eeprom">
+        <avr:name>eeprom</avr:name>
+        <avr:max-size>0x100</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>eeprom</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x100</avr:size>
+          <avr:access>r w</avr:access>
+          <avr:type>eeprom</avr:type>
+        </avr:segment>
+      </avr:address-space>
+    </avr:address-spaces>
+
+    <avr:modules>
+      <avr:module xml:id="cpu">
+        <avr:name>CPU</avr:name>
+        <avr:class>cpu</avr:class>        
+        <avr:register>
+          <avr:name>SREG</avr:name>
+          <avr:caption>Status Register</avr:caption>
+          <avr:io-address>0x3f</avr:io-address>
+          <avr:ram-address>0x5f</avr:ram-address>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:bitmask>0x1</avr:bitmask>
+            <avr:name>C</avr:name>
+            <avr:caption>Carry Flag</avr:caption>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x2</avr:bitmask>
+            <avr:name>Z</avr:name>   
+            <avr:caption>Zero Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x4</avr:bitmask>
+            <avr:name>N</avr:name>            
+            <avr:caption>Negative Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x8</avr:bitmask>
+            <avr:name>V</avr:name>            
+            <avr:caption>Two's Complement Overflow Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x10</avr:bitmask>
+            <avr:name>S</avr:name>            
+            <avr:caption>Sign Bit</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x20</avr:bitmask>
+            <avr:name>H</avr:name>            
+            <avr:caption>Half Carry Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x40</avr:bitmask>
+            <avr:name>T</avr:name>            
+            <avr:caption>Bit Copy Storage</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x80</avr:bitmask>
+            <avr:name>I</avr:name>            
+            <avr:caption>Global Interrupt Enable</avr:caption>         
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>SP</avr:name>
+          <avr:caption>Stack Pointer</avr:caption>
+          <avr:io-address>0x3d</avr:io-address>
+          <avr:ram-address>0x5d</avr:ram-address>
+          <avr:bitmask>0x7ff</avr:bitmask>
+          <avr:size>2</avr:size>
+        </avr:register>
+        <avr:interrupt>
+          <avr:name>RESET</avr:name>
+          <avr:caption>External Pin, Power-on Reset and Watchdog Reset</avr:caption>
+          <avr:vector>0</avr:vector>
+        </avr:interrupt>
+      </avr:module>
+    </avr:modules>
+
+    <avr:instructions>
+      adc add adiw and andi asr bclr bld brbc brbs brcc brcs break breq brge brhc brhs brid brie brlo brlt brmi
+      brne brpl brsh brtc brts brvc brvs bset bst cbi cbr clc clh cli cln clr cls clt clv clz com cp cpc cpi cpse dec 
+      eor in inc ld ldd ldi lds lpm lsl lsr mov movw 
+      neg nop or ori out pop push rcall ret reti rjmp rol ror sbc sbci sbi sbic sbis sbiw sbr sbrc sbrs sec seh sei sen ser ses
+      set sev sez sleep spm st std sts sub subi swap tst wdr      
+    </avr:instructions>
+
+
+  </avr:device>
+</avr:part>

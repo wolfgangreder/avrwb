@@ -21,10 +21,10 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.XA_AddressSpace;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.schema.XmlAddressSpace;
 import java.nio.ByteOrder;
 import java.util.Objects;
 
@@ -89,15 +89,15 @@ public final class MemoryBuilderImpl implements MemoryBuilder
   }
 
   @Override
-  public MemoryBuilder fromAddressSpace(XA_AddressSpace space) throws NullPointerException
+  public MemoryBuilder fromAddressSpace(XmlAddressSpace space) throws NullPointerException
   {
     Objects.requireNonNull(space,
                            "space==null");
     this.byteOrder = space.getByteOrder();
     this.name = space.getName();
     this.id = space.getId();
-    this.size = space.getSize();
-    this.start = space.getStart();
+    this.size = space.getMaxSize();
+    this.start = 0;
     return this;
   }
 

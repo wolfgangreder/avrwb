@@ -24,9 +24,7 @@ package com.avrwb.avr8;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.ClockSink;
 import com.avrwb.avr8.api.Resetable;
-import com.avrwb.schema.ModuleClass;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Basiseigenschaften und funktionalität für Untermodule.
@@ -45,33 +43,11 @@ public interface Module extends Resetable, ClockSink
   public String getName();
 
   /**
-   * Vollständiger name des Moduls.
-   *
-   * @return caption;
-   */
-  @NotNull
-  public String getCaption();
-
-  /**
-   * Paramter des Moduls.
-   *
-   * @return paramMap
-   */
-  @NotNull
-  public Map<String, String> getParam();
-
-  /**
    * Liste der Register des Moduls.
    *
    * @return
    */
   @NotNull
   public List<Register> getRegister();
-
-  @NotNull
-  public default ModuleClass getModuleClass()
-  {
-    return ModuleClass.OTHER;
-  }
 
 }

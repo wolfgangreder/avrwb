@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
@@ -32,6 +31,8 @@ import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.impl.DeviceImplTest;
 import com.avrwb.io.IntelHexInputStream;
+import com.avrwb.schema.XmlPart;
+import com.avrwb.schema.util.DeviceStreamer;
 import java.io.IOException;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
@@ -44,7 +45,7 @@ import org.testng.annotations.Test;
 public class MovNGTest extends AbstractInstructionTest
 {
 
-  private static XA_AvrToolsDeviceFile file;
+  private static XmlPart file;
   private final ClockStateTestImpl clockState = new ClockStateTestImpl();
 
   public MovNGTest()
@@ -55,7 +56,9 @@ public class MovNGTest extends AbstractInstructionTest
   public static void setUpClass() throws Exception
   {
     testClass(Mov.class);
-    file = XA_AvrToolsDeviceFile.load(DeviceImplTest.class.getResource("/com/atmel/devices/ATmega8.xml"));
+    file = DeviceStreamer.loadDevice(DeviceImplTest.class.getResource("/com/avrwb/devices/ATmega8.xml"),
+                                     DeviceStreamer.Version.V_1_0);
+    assertNotNull(file);
 //    AVRWBDefaults.setDebugLoggingActive(true);
 //    AVRWBDefaults.setInstructionTraceLvel(Level.INFO);
   }
@@ -63,8 +66,7 @@ public class MovNGTest extends AbstractInstructionTest
   private Device initDevice(String deviceFile) throws NullPointerException, IllegalStateException, ItemNotFoundException,
                                                       IOException, SimulationException
   {
-    Device device = InstanceFactories.getDeviceBuilder().fromDescriptor(file,
-                                                                        null).
+    Device device = InstanceFactories.getDeviceBuilder().fromDescriptor(file).
             //            deviceLogger(AVRWBDefaults.LOGGER).
             build();
     Memory flash = device.getFlash();
