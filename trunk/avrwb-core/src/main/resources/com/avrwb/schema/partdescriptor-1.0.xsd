@@ -93,9 +93,7 @@ MA 02110-1301  USA
     <xs:restriction base="xs:string">
       <xs:enumeration value="r"/>  
       <xs:enumeration value="w"/>  
-      <xs:enumeration value="rw"/>  
-      <xs:enumeration value="rx"/>  
-      <xs:enumeration value="rwx"/>  
+      <xs:enumeration value="x"/>  
     </xs:restriction>
   </xs:simpleType>
   
@@ -303,7 +301,18 @@ MA 02110-1301  USA
         <xs:element name="name" type="avr:name"/>
         <xs:element name="start" type="avr:uint"/>
         <xs:element name="size" type="avr:uint"/>
-        <xs:element name="access" type="avr:access"/>
+        <xs:element name="access">
+          <xs:annotation>
+            <xs:appinfo>
+              <jxb:javaType name="com.avrwb.avr8.MemoryAccessSet"
+                            parseMethod="com.avrwb.schema.util.Converter.parseMemoryAccessSet"
+                            printMethod="com.avrwb.schema.util.Converter.printMemoryAccessSet"/>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:list itemType="avr:access"/>
+          </xs:simpleType>
+        </xs:element>
         <xs:element name="type" type="avr:segment-type"/>
       </xs:sequence>
     </xs:complexType>

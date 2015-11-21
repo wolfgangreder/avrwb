@@ -21,11 +21,10 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.atmelschema.RegisterVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
+import com.avrwb.schema.XmlRegister;
 
 /**
  *
@@ -38,16 +37,14 @@ public interface RegisterBuilder
   /**
    * Initialisiert den Builder mit den Werten aus der Descriptordatei.
    *
-   * @param descriptorFile vollständige Descriptordatei
-   * @param vector vektor auf das Register
+   * @param register XmlRegister
    * @return {@code this}
    * @throws NullPointerException wenn {@code descriptorFile} oder {@code vector} gleich {@code null} ist.
    * @throws IllegalArgumentException wenn das Register nicht gefunden werden kann.
    */
   @NotNull
-  public RegisterBuilder fromDescritpor(@NotNull XA_AvrToolsDeviceFile descriptorFile,
-                                        @NotNull RegisterVector vector) throws NullPointerException,
-                                                                               IllegalArgumentException;
+  public RegisterBuilder fromDescritpor(@NotNull XmlRegister register) throws NullPointerException,
+                                                                              IllegalArgumentException;
 
   /**
    * Setzt den Kurznamen des zu erzeugenden Registers.

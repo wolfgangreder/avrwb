@@ -28,6 +28,7 @@ import com.avrwb.schema.XmlPart;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -144,6 +145,19 @@ public final class DeviceStreamer
         throw (SAXException) ex.getCause();
       }
       throw new IOException(ex);
+    }
+  }
+
+  @NotNull
+  public static XmlPart loadDevice(@NotNull URL url,
+                                   @NullAllowed("no schema validation") DeviceStreamer.Version schemaVersion) throws IOException,
+                                                                                                                     SAXException
+  {
+    Objects.requireNonNull(url,
+                           "url==null");
+    try (InputStream is = url.openStream()) {
+      return loadDevice(is,
+                        schemaVersion);
     }
   }
 

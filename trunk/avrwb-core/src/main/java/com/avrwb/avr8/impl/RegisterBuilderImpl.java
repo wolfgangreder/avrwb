@@ -21,15 +21,13 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.RegisterVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Bitfield;
-import com.avrwb.atmelschema.XA_Register;
 import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpBuilder;
 import com.avrwb.avr8.RegisterBuilder;
+import com.avrwb.schema.XmlBitgroup;
+import com.avrwb.schema.XmlRegister;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,28 +52,19 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   private final List<RegisterBitGrp> registerBits = new ArrayList<>();
 
   @Override
-  public RegisterBuilder fromDescritpor(XA_AvrToolsDeviceFile descriptorFile,
-                                        RegisterVector vector) throws NullPointerException, IllegalArgumentException
+  public RegisterBuilder fromDescritpor(XmlRegister register) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(descriptorFile,
-                           "descriptorFile==null");
-    Objects.requireNonNull(vector,
-                           "vector==null");
-    XA_Register register = descriptorFile.findRegister(vector);
-    if (register == null) {
-      throw new IllegalArgumentException("cannot find register " + vector);
-    }
+    Objects.requireNonNull(register,
+                           "register==null");
     name = register.getName();
     caption = register.getCaption();
-    memoryAddress = register.getOffset();
-    ioAddress = memoryAddress - 32;
-    mask = register.getMask();
+    memoryAddress = register.getRamAddress();
+    ioAddress = register.getIoAddress();
+    mask = register.getBitmask();
     size = register.getSize();
     RegisterBitGrpBuilder builder = new RegisterBitBuilderImpl();
-    for (XA_Bitfield bf : register.getBitfields()) {
-      registerBits.add(builder.fromDescriptor(descriptorFile,
-                                              bf,
-                                              vector).build());
+    for (XmlBitgroup bf : register.getBitgroup()) {
+      registerBits.add(builder.fromDescriptor(bf).build());
     }
     return this;
   }

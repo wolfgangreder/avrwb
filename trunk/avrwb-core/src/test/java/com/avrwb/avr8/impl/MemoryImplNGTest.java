@@ -21,13 +21,12 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.avr8.impl.MemoryImpl;
-import com.avrwb.avr8.impl.MemoryBuilderImpl;
-import com.avrwb.atmelschema.XA_AddressSpace;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
 import com.avrwb.io.DefaultMemoryChunk;
 import com.avrwb.io.IntelHexInputStream;
 import com.avrwb.io.MemoryChunk;
+import com.avrwb.schema.XmlAddressSpace;
+import com.avrwb.schema.XmlPart;
+import com.avrwb.schema.util.DeviceStreamer;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.ByteBuffer;
@@ -48,8 +47,8 @@ public class MemoryImplNGTest
 
   private final Charset utf8;
   private static URL mega8URL;
-  private static XA_AvrToolsDeviceFile mega8;
-  private static XA_AddressSpace dataSpace;
+  private static XmlPart mega8;
+  private static XmlAddressSpace dataSpace;
   private MemoryImpl memory;
 
   public MemoryImplNGTest()
@@ -61,8 +60,9 @@ public class MemoryImplNGTest
   public static void setUpClass() throws Exception
   {
     mega8URL = MemoryImplNGTest.class.getResource("/com/atmel/devices/ATmega8.xml");
-    mega8 = XA_AvrToolsDeviceFile.load(mega8URL);
-    for (XA_AddressSpace space : mega8.getDevice("ATmega8").getAdressSpaces()) {
+    mega8 = DeviceStreamer.loadDevice(mega8URL,
+                                      null);
+    for (XmlAddressSpace space : mega8.getDevice().getAddressSpaces().getAddressSpace()) {
       if ("data".equals(space.getId())) {
         dataSpace = space;
         break;

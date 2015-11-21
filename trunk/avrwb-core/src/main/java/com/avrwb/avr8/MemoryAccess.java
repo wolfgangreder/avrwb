@@ -31,9 +31,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
  */
 public enum MemoryAccess
 {
-  READ('R'),
-  WRITE('W'),
-  EXECUTE('X');
+  READ('r'),
+  WRITE('w'),
+  EXECUTE('x');
 
   @Stateless
   @ThreadSave
@@ -48,10 +48,13 @@ public enum MemoryAccess
       }
       switch (v) {
         case "R":
+        case "r":
           return READ;
         case "W":
+        case "w":
           return WRITE;
         case "X":
+        case "x":
           return EXECUTE;
         default:
           return valueOf(v);
@@ -84,10 +87,13 @@ public enum MemoryAccess
   {
     switch (ch) {
       case 'R':
+      case 'r':
         return READ;
       case 'W':
+      case 'w':
         return WRITE;
       case 'X':
+      case 'x':
         return EXECUTE;
     }
     throw new IllegalArgumentException();

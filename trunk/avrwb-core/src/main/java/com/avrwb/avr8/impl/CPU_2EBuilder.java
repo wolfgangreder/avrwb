@@ -24,6 +24,9 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.CPUBuilder;
 import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.schema.ModuleClass;
+import com.avrwb.schema.XmlModule;
+import java.util.Objects;
 
 /**
  *
@@ -39,9 +42,22 @@ final class CPU_2EBuilder extends AbstractModuleBuilder<CPU_2EBuilder> implement
   }
 
   @Override
+  public CPU_2EBuilder moduleDescriptor(XmlModule module) throws NullPointerException, IllegalArgumentException
+  {
+    Objects.requireNonNull(module,
+                           "moduel==null");
+    if (module.getClazz() != ModuleClass.CPU) {
+      throw new IllegalArgumentException("module" + module.getId() + " is no cpu");
+    }
+    return super.moduleDescriptor(module);
+  }
+
+  @Override
   public CPU build() throws IllegalStateException, ItemNotFoundException, NullPointerException
   {
-    return new CPU_2E(file, moduleVector, module, nfStrategy);
+    return new CPU_2E(device,
+                      module,
+                      nfStrategy);
   }
 
 }

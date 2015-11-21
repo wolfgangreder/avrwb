@@ -21,19 +21,17 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.avr8.impl.CPU_2E;
-import com.avrwb.avr8.impl.CPU_2EBuilder;
-import com.avrwb.atmelschema.ModuleVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Module;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.api.instructions.DummyDevice;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.XmlDevice;
+import com.avrwb.schema.XmlModule;
+import com.avrwb.schema.XmlPart;
+import com.avrwb.schema.util.DeviceStreamer;
 import java.util.List;
-import java.util.Random;
 import static org.testng.AssertJUnit.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -46,25 +44,32 @@ public class CPU_2ENGTest
 {
 
   private static CPU_2E cpu;
-  private static final Random RANDOM = new Random();
 
   public CPU_2ENGTest()
   {
+  }
+
+  private static XmlModule findCPU(XmlPart part)
+  {
+    XmlDevice dev = part.getDevice();
+    for (XmlModule m : dev.getModules().getModule()) {
+      if (m.getId().equals("cpu")) {
+        return m;
+      }
+    }
+    return null;
   }
 
   @BeforeClass
   public static void setUpClass() throws Exception
   {
     CPU_2EBuilder builder = new CPU_2EBuilder();
-    XA_AvrToolsDeviceFile file = XA_AvrToolsDeviceFile.load(CPU_2ENGTest.class.getResource("/com/atmel/devices/ATmega8.xml"));
-    ModuleVector vector = new ModuleVector("ATmega8",
-                                           "CPU");
-    XA_Module module = file.findModule(vector);
+    XmlPart file = DeviceStreamer.loadDevice(CPU_2ENGTest.class.getResource("/com/avrwb/devices/ATmega8.xml"),
+                                             null);
+    XmlModule module = findCPU(file);
     cpu = (CPU_2E) builder.
-            descriptor(file).
             notFoundStrategy(NotFoundStrategy.ERROR).
             moduleDescriptor(module).
-            moduleVector(vector).
             build();
     assertNotNull("cpu==null",
                   cpu);
@@ -82,13 +87,6 @@ public class CPU_2ENGTest
   {
     assertNotNull("sp==null",
                   cpu.getStackPointer());
-  }
-
-  @Test
-  public void testGetParam()
-  {
-    assertNotNull("param==null",
-                  cpu.getParam());
   }
 
   @Test
