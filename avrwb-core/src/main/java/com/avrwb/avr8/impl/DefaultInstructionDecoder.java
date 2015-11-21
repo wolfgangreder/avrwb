@@ -21,9 +21,7 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.avr8.AVRDeviceKey;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.Instruction;
@@ -82,7 +80,9 @@ import com.avrwb.avr8.api.instructions.Sbr;
 import com.avrwb.avr8.api.instructions.SetClearIOBit;
 import com.avrwb.avr8.api.instructions.Sub;
 import com.avrwb.avr8.api.instructions.Swap;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.schema.util.Converter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -118,13 +118,13 @@ public class DefaultInstructionDecoder implements InstructionDecoder
                                                                                                 opcode,
                                                                                                 nextWord));
     if (result == null) {
-      throw new InstructionNotAvailableException("Unknown opcode " + HexIntAdapter.toHexString(word,
-                                                                                               4));
+      throw new InstructionNotAvailableException("Unknown opcode " + Converter.printHexString(word,
+                                                                                              4));
     }
     return result;
   }
 
-  protected Instruction decodeInstruction(AVRDeviceKey deviceKey,
+  protected Instruction decodeInstruction(AvrDeviceKey deviceKey,
                                           int opcode,
                                           int nextOpcode)
   {
@@ -152,7 +152,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
      decodiert 00xx xxxx xxxx xxxx
    */
-  private Instruction decode_0_3fff(AVRDeviceKey deviceKey,
+  private Instruction decode_0_3fff(AvrDeviceKey deviceKey,
                                     int opcode,
                                     int nextOpcode)
   {
@@ -212,7 +212,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
    decodert 0000 00xx xxxx xxxx
    */
-  public Instruction decode_0_0fff(AVRDeviceKey deviceKey,
+  public Instruction decode_0_0fff(AvrDeviceKey deviceKey,
                                    int opcode,
                                    int nextOpcode)
   {
@@ -235,7 +235,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
      decodiert 01xx xxxx xxxx xxxx
    */
-  private Instruction decode_4_3fff(AVRDeviceKey deviceKey,
+  private Instruction decode_4_3fff(AvrDeviceKey deviceKey,
                                     int opcode,
                                     int nextOpcde)
   {
@@ -257,7 +257,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
      decodiert 10xx xxxx xxxx xxxx
    */
-  private Instruction decode_8_3fff(AVRDeviceKey deviceKey,
+  private Instruction decode_8_3fff(AvrDeviceKey deviceKey,
                                     int opcode,
                                     int nextOpcde)
   {
@@ -279,7 +279,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
       case 0x2000:
         //1010 xxxx xxxx xxxx
         switch (deviceKey.getFamily()) {
-          case AVR_XMEGA:
+          case XMEGA:
             return decode_2_0fff_xmega(deviceKey,
                                        opcode,
                                        nextOpcde);
@@ -295,7 +295,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
     return null;
   }
 
-  private Instruction decode_2_0fff_xmega(AVRDeviceKey deviceKey,
+  private Instruction decode_2_0fff_xmega(AvrDeviceKey deviceKey,
                                           int opcode,
                                           int nextOpcode)
   {
@@ -306,7 +306,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
     return null;
   }
 
-  private Instruction decode_2_0fff_mega_tiny(AVRDeviceKey deviceKey,
+  private Instruction decode_2_0fff_mega_tiny(AvrDeviceKey deviceKey,
                                               int opcode,
                                               int nextOpcode)
   {
@@ -323,7 +323,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
     decodiert 1001 xxxx xxxx xxxx
    */
-  private Instruction decode_9_0fff(AVRDeviceKey deviceKey,
+  private Instruction decode_9_0fff(AvrDeviceKey deviceKey,
                                     int opcode,
                                     int nextOpcode)
   {
@@ -458,7 +458,7 @@ public class DefaultInstructionDecoder implements InstructionDecoder
   /*
      decodiert 11xx xxxx xxxx xxxx
    */
-  private Instruction decode_c_3fff(AVRDeviceKey deviceKey,
+  private Instruction decode_c_3fff(AvrDeviceKey deviceKey,
                                     int opcode,
                                     int nextOpcde)
   {

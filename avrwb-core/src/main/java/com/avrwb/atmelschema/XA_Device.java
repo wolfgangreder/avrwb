@@ -22,8 +22,6 @@
 package com.avrwb.atmelschema;
 
 import com.avrwb.annotations.XmlEntity;
-import com.avrwb.avr8.Architecture;
-import com.avrwb.avr8.Family;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAttribute;

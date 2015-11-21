@@ -21,11 +21,11 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 
 /**
  *
@@ -64,8 +64,8 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
           mnemonic);
     rdAddress = (opcode >> 20) & 0x1f;
     k16 = opcode & 0xffff;
-    toStringValue = mnemonic + " r" + rdAddress + ", " + HexIntAdapter.toHexString(k16,
-                                                                                   4);
+    toStringValue = mnemonic + " r" + rdAddress + ", " + Converter.printHexString(k16,
+                                                                                  4);
   }
 
   public final int getRdAddress()

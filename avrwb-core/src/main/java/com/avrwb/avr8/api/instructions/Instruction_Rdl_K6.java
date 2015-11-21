@@ -21,12 +21,12 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
@@ -83,8 +83,8 @@ public abstract class Instruction_Rdl_K6 extends AbstractInstruction
                                                         device),
                                 rdlAddress,
                                 rdlAddress + 1,
-                                HexIntAdapter.toHexString(rdVal,
-                                                          4)});
+                                Converter.printHexString(rdVal,
+                                                         4)});
       }
       finishCycle = clockState.getCycleCount() + 1;
     }
@@ -101,8 +101,8 @@ public abstract class Instruction_Rdl_K6 extends AbstractInstruction
                              -> MessageFormat.format("{0} writing result {1} to r{3,number,0}:r{2,number,0}",
                                                      getCurrentDeviceMessage(clockState,
                                                                              device),
-                                                     HexIntAdapter.toHexString(result,
-                                                                               4),
+                                                     Converter.printHexString(result,
+                                                                              4),
                                                      rdlAddress,
                                                      rdlAddress + 1));
     }

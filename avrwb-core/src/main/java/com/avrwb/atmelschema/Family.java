@@ -19,30 +19,38 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.annotations;
+package com.avrwb.atmelschema;
 
-import com.avrwb.schema.AvrFamily;
-import com.avrwb.schema.ModuleClass;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Repeatable(ProvidedModules.class)
-public @interface ProvidedModule
+/**
+ *
+ * @author Wolfgang Reder
+ */
+public enum Family
 {
+  tinyAVR,
+  megaAVR,
+  AVR_XMEGA;
 
-  ModuleClass moduleClass();
+  public static final class Adapter extends XmlAdapter<String, Family>
+  {
 
-  AvrFamily family();
+    @Override
+    public Family unmarshal(String v)
+    {
+      if (v == null) {
+        return null;
+      }
+      String tmp = v.replace(' ', '_');
+      return valueOf(tmp);
+    }
 
-  String[] core();
+    @Override
+    public String marshal(Family v)
+    {
+      return v.name();
+    }
 
-  String[] value();
-
+  }
 }

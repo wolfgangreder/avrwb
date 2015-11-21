@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
@@ -31,6 +30,7 @@ import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Level;
 
@@ -203,13 +203,13 @@ public final class BranchInstruction extends AbstractInstruction
                                                                getCurrentDeviceMessage(clockState,
                                                                                        device),
                                                                nextInstruction.toString(),
-                                                               HexIntAdapter.toHexString(nextIp,
-                                                                                         addressWidth));
+                                                               Converter.printHexString(nextIp,
+                                                                                        addressWidth));
                                  } catch (NullPointerException | IllegalArgumentException | InstructionNotAvailableException ex) {
                                    device.getLogger().log(Level.SEVERE,
                                                           MessageFormat.format("get instruction @ip={0}",
-                                                                               new Object[]{HexIntAdapter.toHexString(nextIp,
-                                                                                                                      addressWidth)}),
+                                                                               new Object[]{Converter.printHexString(nextIp,
+                                                                                                                     addressWidth)}),
                                                           ex);
                                    throw new IllegalStateException();
                                  }

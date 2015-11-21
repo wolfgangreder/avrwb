@@ -21,10 +21,6 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.annotations.ProvidedModule;
-import com.avrwb.annotations.ProvidedModules;
-import com.avrwb.avr8.AVRCoreVersion;
-import com.avrwb.avr8.Architecture;
 import com.avrwb.avr8.CPUBuilder;
 import com.avrwb.avr8.CPUBuilderFactory;
 import com.avrwb.avr8.ModuleBuilderFactory;
@@ -35,9 +31,6 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Wolfgang Reder
  */
 @ServiceProvider(service = ModuleBuilderFactory.class, path = "avrwb")
-@ProvidedModules({
-  @ProvidedModule(core = AVRCoreVersion.V2E, architecture = Architecture.AVR8, value = "CPU")
-})
 public final class CPU_2EBuilderFactory implements CPUBuilderFactory
 {
 

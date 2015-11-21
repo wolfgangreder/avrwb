@@ -22,18 +22,14 @@
 package com.avrwb.avr8.impl;
 
 import com.avrwb.annotations.NullAllowed;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Device;
-import com.avrwb.atmelschema.XA_Variant;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.DeviceBuilder;
+import com.avrwb.avr8.Variant;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.NotFoundStrategy;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
+import com.avrwb.schema.XmlDevice;
+import com.avrwb.schema.XmlPart;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle.Messages;
 
@@ -46,10 +42,8 @@ public final class DeviceBuilderImpl implements DeviceBuilder
 {
 
   private NotFoundStrategy strategy = NotFoundStrategy.WARNING;
-  private XA_Variant variant;
-  private XA_AvrToolsDeviceFile file;
-  private String deviceName;
-  private Function<Collection<? extends XA_Device>, XA_Device> deviceSelector;
+  private XmlPart part;
+  private Variant variant;
   @SuppressWarnings("NonConstantLogger")
   private Logger deviceLogger;
 
@@ -61,16 +55,20 @@ public final class DeviceBuilderImpl implements DeviceBuilder
   }
 
   @Override
-  public DeviceBuilder deviceSelector(Function<Collection<? extends XA_Device>, XA_Device> ds)
+  public DeviceBuilder variant(Variant variant) throws NullPointerException
   {
-    this.deviceSelector = ds;
+    Objects.requireNonNull(variant,
+                           "variant==null");
+    this.variant = variant;
     return this;
   }
 
   @Override
-  public DeviceBuilder deviceName(String deviceName)
+  public DeviceBuilder fromDescriptor(XmlPart file) throws NullPointerException, IllegalArgumentException
   {
-    this.deviceName = deviceName;
+    Objects.requireNonNull(file,
+                           "file==null");
+    this.part = file;
     return this;
   }
 
@@ -84,68 +82,20 @@ public final class DeviceBuilderImpl implements DeviceBuilder
   }
 
   @Override
-  public DeviceBuilder fromDescriptor(InputStream strm,
-                                      Function<Collection<? extends XA_Variant>, XA_Variant> pickVariant) throws
-          NullPointerException,
-          IllegalArgumentException,
-          IOException
-  {
-    return fromDescriptor(XA_AvrToolsDeviceFile.load(strm),
-                          pickVariant);
-  }
-
-  @Override
-  public DeviceBuilder fromDescriptor(XA_AvrToolsDeviceFile file,
-                                      Function<Collection<? extends XA_Variant>, XA_Variant> pickVariant) throws
-          NullPointerException,
-          IllegalArgumentException
-  {
-    Objects.requireNonNull(file,
-                           "file==null");
-    Function<Collection<? extends XA_Variant>, XA_Variant> pv;
-    if (pickVariant != null) {
-      pv = pickVariant;
-    } else {
-      pv = (Collection<? extends XA_Variant> vc) -> {
-        return vc.isEmpty() ? vc.iterator().next() : null;
-      };
-    }
-    this.file = file;
-    variant = pv.apply(file.getVariants());
-    return this;
-  }
-
-  @Override
   public Device build() throws NullPointerException, IllegalStateException, ItemNotFoundException
   {
-    Objects.requireNonNull(file,
-                           "file==null");
+    Objects.requireNonNull(part,
+                           "part==null");
     Objects.requireNonNull(strategy,
                            "strategy==null");
-    XA_Device dev = null;
-    if (deviceName == null || deviceName.trim().isEmpty()) {
-      if (deviceSelector == null) {
-        if (!file.getDevices().isEmpty()) {
-          deviceName = file.getDevices().get(0).getName();
-        }
-      } else {
-        dev = deviceSelector.apply(file.getDevices());
-      }
+    XmlDevice dev = part.getDevice();
+    Objects.requireNonNull(dev,
+                           "device==null");
+    if (variant == null && !part.getDevice().getVariants().getVariant().isEmpty()) {
+      variant = new VariantBuilderImpl().xmlVariant(part.getDevice().getVariants().getVariant().get(0)).build();
     }
-    if (dev == null) {
-      for (XA_Device d : file.getDevices()) {
-        if (deviceName.equals(d.getName())) {
-          dev = d;
-          break;
-        }
-      }
-    }
-    if (dev == null) {
-      throw new ItemNotFoundException(Bundle.DeviceBuilderImpl_no_device());
-    }
-    return new DeviceImpl(file,
+    return new DeviceImpl(part.getDevice(),
                           variant,
-                          dev,
                           strategy,
                           deviceLogger);
   }

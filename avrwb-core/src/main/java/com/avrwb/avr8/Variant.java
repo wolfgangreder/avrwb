@@ -21,36 +21,25 @@
  */
 package com.avrwb.avr8;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public enum Family
+public interface Variant
 {
-  tinyAVR,
-  megaAVR,
-  AVR_XMEGA;
 
-  public static final class Adapter extends XmlAdapter<String, Family>
+  public String getName();
+
+  public float getVccMin();
+
+  public float getVccMax();
+
+  public long getSpeedMax();
+
+  public default boolean isInRange(float vcc,
+                                   int speed)
   {
-
-    @Override
-    public Family unmarshal(String v)
-    {
-      if (v == null) {
-        return null;
-      }
-      String tmp = v.replace(' ', '_');
-      return valueOf(tmp);
-    }
-
-    @Override
-    public String marshal(Family v)
-    {
-      return v.name();
-    }
-
+    return vcc >= getVccMin() && vcc <= getVccMax() && speed <= getSpeedMax();
   }
+
 }

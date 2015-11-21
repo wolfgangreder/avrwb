@@ -21,12 +21,7 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
-import com.avrwb.avr8.AVRCoreVersion;
-import com.avrwb.avr8.AVRDeviceKey;
-import com.avrwb.avr8.Architecture;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.Family;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.Instruction;
@@ -93,7 +88,11 @@ import com.avrwb.avr8.api.instructions.Sbr;
 import com.avrwb.avr8.api.instructions.SetClearIOBit;
 import com.avrwb.avr8.api.instructions.Sub;
 import com.avrwb.avr8.api.instructions.Swap;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -110,13 +109,11 @@ import org.testng.annotations.Test;
 public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
 {
 
-  private final AVRDeviceKey mega8 = new AVRDeviceKey(Family.megaAVR,
-                                                      Architecture.AVR8,
-                                                      AVRCoreVersion.V2E,
+  private final AvrDeviceKey mega8 = new AvrDeviceKey(AvrFamily.MEGA,
+                                                      AvrCore.V2E,
                                                       "ATmega8");
-  private final AVRDeviceKey xmega = new AVRDeviceKey(Family.AVR_XMEGA,
-                                                      Architecture.AVR8_XMEGA,
-                                                      AVRCoreVersion.I6000,
+  private final AvrDeviceKey xmega = new AvrDeviceKey(AvrFamily.XMEGA,
+                                                      AvrCore.I6000,
                                                       "xmega");
   private static final Set<Integer> TESTED_OPCODES = new HashSet<>();
 
@@ -133,7 +130,7 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    public Instruction decodeInstruction(AVRDeviceKey deviceKey,
+    public Instruction decodeInstruction(AvrDeviceKey deviceKey,
                                          int opcode,
                                          int nextOpcode)
     {
@@ -690,8 +687,8 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
                                                       0);
       assertTrue(result instanceof BranchInstruction);
       assertEquals(MessageFormat.format("opcode {0}",
-                                        HexIntAdapter.toHexString(e.getKey(),
-                                                                  4)),
+                                        Converter.printHexString(e.getKey(),
+                                                                 4)),
                    e.getValue(),
                    result.toString());
     }
@@ -1759,8 +1756,8 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     final ProtocollDecoder decoder = new ProtocollDecoder();
     final int k = 0xffff;
     for (int rd = 0; rd < 32; ++rd) {
-      String context = "lds r" + rd + " " + HexIntAdapter.toHexString(k,
-                                                                      4) + " | ";
+      String context = "lds r" + rd + " " + Converter.printHexString(k,
+                                                                     4) + " | ";
       final int opcode = Lds.composeOpcode(Lds.OPCODE,
                                            rd,
                                            k);
@@ -1788,8 +1785,8 @@ public class DefaultInstructionDecoderNGTest extends AbstractInstructionTest
     final ProtocollDecoder decoder = new ProtocollDecoder();
     for (int k = 0; k < 0x80; ++k) {
       for (int rd = 16; rd < 32; ++rd) {
-        String context = "lds r" + rd + " " + HexIntAdapter.toHexString(k,
-                                                                        4) + " | ";
+        String context = "lds r" + rd + " " + Converter.printHexString(k,
+                                                                       4) + " | ";
         final int opcode = Lds16.composeOpcode(Lds16.OPCODE,
                                                rd,
                                                k);

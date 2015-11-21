@@ -19,20 +19,12 @@
  * MA 02110-1301  USA
  *
  */
-@XmlJavaTypeAdapters({
-  @XmlJavaTypeAdapter(value = Family.Adapter.class, type = Family.class),
-  @XmlJavaTypeAdapter(value = ByteOrderAdapter.class, type = ByteOrder.class),
-  @XmlJavaTypeAdapter(value = BooleanIntAdapter.class, type = Boolean.class),
-  @XmlJavaTypeAdapter(value = NoExecuteMemoryAccessAdapter.class, type = MemoryAccessSet.class),
-  @XmlJavaTypeAdapter(value = HexIntAdapter.class, type = Integer.class)
-})
 package com.avrwb.atmelschema;
 
 import com.avrwb.atmelschema.util.BooleanIntAdapter;
 import com.avrwb.atmelschema.util.ByteOrderAdapter;
 import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.atmelschema.util.NoExecuteMemoryAccessAdapter;
-import com.avrwb.avr8.Family;
 import com.avrwb.avr8.MemoryAccessSet;
 import java.nio.ByteOrder;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

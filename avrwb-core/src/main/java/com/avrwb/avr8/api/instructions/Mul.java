@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
@@ -30,6 +29,7 @@ import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 
 /**
@@ -90,8 +90,8 @@ public final class Mul extends Instruction_Rd_Rr
                                () -> MessageFormat.format("{0} writing result {1} to r1:r0",
                                                           getCurrentDeviceMessage(clockState,
                                                                                   device),
-                                                          HexIntAdapter.toHexString(result,
-                                                                                    4)));
+                                                          Converter.printHexString(result,
+                                                                                   4)));
       }
     }
   }

@@ -21,32 +21,32 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.ModuleVector;
-import com.avrwb.atmelschema.XA_AddressSpace;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Device;
-import com.avrwb.atmelschema.XA_DeviceModule;
-import com.avrwb.atmelschema.XA_Module;
-import com.avrwb.atmelschema.XA_Variant;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
-import com.avrwb.avr8.AVRCoreVersion;
-import com.avrwb.avr8.AVRDeviceKey;
+import com.avrwb.atmelschema.AVRCoreVersion;
+import com.avrwb.atmelschema.ModuleVector;
+import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
+import com.avrwb.atmelschema.XA_Module;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.Module;
-import com.avrwb.avr8.ModuleBuilderFactory;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
+import com.avrwb.avr8.Variant;
 import com.avrwb.avr8.api.InstanceFactories;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.ModuleKey;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
+import com.avrwb.schema.ModuleClass;
+import com.avrwb.schema.XmlDevice;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +65,7 @@ final class DeviceImpl implements Device
   @SuppressWarnings("NonConstantLogger")
   private final Logger deviceLogger;
   private final String name;
-  private final AVRDeviceKey deviceKey;
+  private final AvrDeviceKey deviceKey;
   private final double voltageMin;
   private final double voltageMax;
   private final long speedMax;
@@ -76,15 +76,12 @@ final class DeviceImpl implements Device
   private final SRAM sram;
   private final Stack stack;
 
-  DeviceImpl(@NotNull XA_AvrToolsDeviceFile file,
-             XA_Variant variant,
-             @NotNull XA_Device device,
+  DeviceImpl(@NotNull XmlDevice device,
+             Variant variant,
              @NotNull NotFoundStrategy nfStrategy,
              @NullAllowed Logger deviceLogger) throws ItemNotFoundException, NullPointerException
   {
     this.deviceLogger = deviceLogger != null ? deviceLogger : createDeviceLogger(device.getName());
-    Objects.requireNonNull(file,
-                           "file==null");
     Objects.requireNonNull(device,
                            "device==null");
     Objects.requireNonNull(nfStrategy,
@@ -99,8 +96,7 @@ final class DeviceImpl implements Device
       speedMax = AVRWBDefaults.SPEED_MAX;
     }
     name = device.getName();
-    List<Module> tmpModules = initModules(file,
-                                          device,
+    List<Module> tmpModules = initModules(device,
                                           nfStrategy);
     if (tmpModules.isEmpty()) {
       modules = Collections.emptyList();
@@ -115,8 +111,7 @@ final class DeviceImpl implements Device
       }
       cpu = tmpCpu;
     }
-    List<Memory> tmpMemories = initMemories(file,
-                                            device,
+    List<Memory> tmpMemories = initMemories(device,
                                             nfStrategy);
     Memory tmpFlash = null;
     SRAM tmpSRAM = null;
@@ -141,10 +136,13 @@ final class DeviceImpl implements Device
     } else {
       stack = new HardwareStack();
     }
-    deviceKey = new AVRDeviceKey(device.getFamily(),
-                                 device.getArchitecture(),
-                                 cpu.getCoreVersion(),
-                                 device.getName());
+//    deviceKey = new AvrDeviceKey(device.getFamily(),
+//                                 device.getArchitecture(),
+//                                 cpu.getCoreVersion(),
+//                                 device.getName());
+    deviceKey = new AvrDeviceKey(AvrFamily.TINY,
+                                 AvrCore.V1,
+                                 name);
   }
 
   private Logger createDeviceLogger(String deviceName)
@@ -187,55 +185,54 @@ final class DeviceImpl implements Device
     return result;
   }
 
-  private static List<Module> initModules(XA_AvrToolsDeviceFile file,
-                                          XA_Device device,
+  private static List<Module> initModules(XmlDevice device,
                                           NotFoundStrategy nfStrategy) throws ItemNotFoundException
   {
-    final AVRCoreVersion version = extractCoreVersion(file,
-                                                      device.getName());
+//    final AVRCoreVersion version = extractCoreVersion(file,
+//                                                      device.getName());
     final ModuleKey baseKey = new ModuleKey(".",
-                                            version,
-                                            device.getArchitecture());
+                                            AvrCore.V1,
+                                            AvrFamily.TINY,
+                                            ModuleClass.OTHER);
     final ModuleResolver moduleResolver = ModuleResolver.getInstance();
     final List<Module> result = new ArrayList<>();
-
-    for (XA_DeviceModule moduleDescriptor : device.getModules()) {
-      ModuleVector mv = new ModuleVector(device.getName(),
-                                         moduleDescriptor.getName());
-      XA_Module module = file.findModule(mv);
-      if (module != null) {
-        ModuleKey currentKey = baseKey.withName(moduleDescriptor.getName());
-        ModuleBuilderFactory factory = moduleResolver.findModuleBuilder(currentKey);
-        if (factory != null) {
-          result.add(factory.createBuilder().
-                  descriptor(file).
-                  moduleDescriptor(module).
-                  moduleVector(mv).
-                  notFoundStrategy(nfStrategy).
-                  build());
-        } else {
-          ItemNotFoundException.processItemNotFound(device.getName(),
-                                                    moduleDescriptor.getName(),
-                                                    nfStrategy);
-        }
-      } else {
-        ItemNotFoundException.processItemNotFound(device.getName(),
-                                                  moduleDescriptor.getName(),
-                                                  nfStrategy);
-      }
-    }
+//
+//    for (XA_DeviceModule moduleDescriptor : device.getModules()) {
+//      ModuleVector mv = new ModuleVector(device.getName(),
+//                                         moduleDescriptor.getName());
+//      XA_Module module = file.findModule(mv);
+//      if (module != null) {
+//        ModuleKey currentKey = baseKey.withName(moduleDescriptor.getName());
+//        ModuleBuilderFactory factory = moduleResolver.findModuleBuilder(currentKey);
+//        if (factory != null) {
+//          result.add(factory.createBuilder().
+//                  descriptor(file).
+//                  moduleDescriptor(module).
+//                  moduleVector(mv).
+//                  notFoundStrategy(nfStrategy).
+//                  build());
+//        } else {
+//          ItemNotFoundException.processItemNotFound(device.getName(),
+//                                                    moduleDescriptor.getName(),
+//                                                    nfStrategy);
+//        }
+//      } else {
+//        ItemNotFoundException.processItemNotFound(device.getName(),
+//                                                  moduleDescriptor.getName(),
+//                                                  nfStrategy);
+//      }
+//    }
     return result;
   }
 
-  private static List<Memory> initMemories(XA_AvrToolsDeviceFile file,
-                                           XA_Device device,
+  private static List<Memory> initMemories(XmlDevice device,
                                            NotFoundStrategy nfStrategy) throws ItemNotFoundException
   {
     MemoryBuilder builder = InstanceFactories.getMemoryBuilder();
     List<Memory> result = new ArrayList<>();
-    for (XA_AddressSpace space : device.getAdressSpaces()) {
-      result.add(builder.fromAddressSpace(space).build());
-    }
+//    for (XA_AddressSpace space : device.getAdressSpaces()) {
+//      result.add(builder.fromAddressSpace(space).build());
+//    }
     return result;
   }
 
@@ -246,7 +243,7 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public AVRDeviceKey getDeviceKey()
+  public AvrDeviceKey getDeviceKey()
   {
     return deviceKey;
   }

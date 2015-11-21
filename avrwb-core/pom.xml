@@ -40,13 +40,13 @@
                 <configuration>
                     <useOSGiDependencies>true</useOSGiDependencies>
                     <publicPackages>
-                        <publicPackage>com.avrwb.atmelschema</publicPackage>
                         <publicPackage>com.avrwb.atmelschema.util</publicPackage>
                         <publicPackage>com.avrwb.annotations</publicPackage>
                         <publicPackage>com.avrwb.avr8</publicPackage>
                         <publicPackage>com.avrwb.avr8.api</publicPackage>
                         <publicPackage>com.avrwb.io</publicPackage>
                         <publicPackage>com.avrwb.avr8.helper</publicPackage>
+                        <publicPackage>com.avrwb.schema.util</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

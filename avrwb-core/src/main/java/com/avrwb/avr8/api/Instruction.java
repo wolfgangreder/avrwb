@@ -23,7 +23,7 @@ package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.avr8.AVRCoreVersion;
+import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.helper.SimulationException;
 import java.util.Set;

@@ -21,9 +21,9 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.schema.util.Converter;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.logging.Level;
@@ -46,8 +46,8 @@ public final class HardwareStack implements Stack
     if (stack.size() > STACK_SIZE) {
       AVRWBDefaults.LOGGER.log(Level.WARNING,
                                "stack overflow while pushing {0}",
-                               new Object[]{HexIntAdapter.toHexString(byteToPush,
-                                                                      2)});
+                               new Object[]{Converter.printHexString(byteToPush,
+                                                                     2)});
       stack.removeLast();
     }
     return oldByte;

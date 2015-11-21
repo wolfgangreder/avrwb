@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+$Id$
+
+Copyright (C) 2015 Wolfgang Reder <wolfgang.reder@aon.at>.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3.0 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301  USA
+
+-->
+
+
+<avr:part
+  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns:avr='http://www.avrwb.com/schema/avr/partdescriptor-1.0'>
+  
+  <avr:device avr:datasheet="http://www.atmel.com/Images/Atmel-2486-8-bit-AVR-microcontroller-ATmega8_L_datasheet.pdf" 
+              avr:uri="http://www.atmel.com/devices/atmega8.aspx">
+    <avr:name>ATmega8</avr:name>
+    <avr:family>mega</avr:family>
+    <avr:documentation>
+      <avr:doc>
+<![CDATA[<hmlt><h1>ATmega8(L)</h1></html>]]>
+      </avr:doc>
+    </avr:documentation>
+
+    <avr:address-spaces>
+      <avr:address-space xml:id="flash">
+        <avr:name>progmem</avr:name>
+        <avr:max-size>0x2000</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>progmem</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x2000</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 1</avr:name>
+          <avr:start>0x1f00</avr:start>
+          <avr:size>0x100</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 2</avr:name>
+          <avr:start>0x1e00</avr:start>
+          <avr:size>0x200</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 3</avr:name>
+          <avr:start>0x1d00</avr:start>
+          <avr:size>0x300</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 4</avr:name>
+          <avr:start>0x1c00</avr:start>
+          <avr:size>0x400</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="data">
+        <avr:name>data</avr:name>
+        <avr:max-size>0x460</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>register file</avr:name>          
+          <avr:start>0</avr:start>
+          <avr:size>0x20</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>register</avr:type>          
+        </avr:segment>
+        <avr:segment>
+          <avr:name>io</avr:name>
+          <avr:start>0x20</avr:start>
+          <avr:size>0x40</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>io</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>iram</avr:name>
+          <avr:start>0x60</avr:start>
+          <avr:size>0x400</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>internal-ram</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="eeprom">
+        <avr:name>eeprom</avr:name>
+        <avr:max-size>0x200</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>eeprom</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x200</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>eeprom</avr:type>
+        </avr:segment>
+      </avr:address-space>
+    </avr:address-spaces>
+
+    <avr:modules>
+      <avr:module xml:id="cpu">
+        <avr:name>CPU</avr:name>
+        <avr:class>cpu</avr:class>        
+      </avr:module>
+    </avr:modules>
+
+    <avr:instructions>
+      adc add adiw and andi asr bclr bld brbc brbs brcc brcs break breq brge brhc brhs brid brie brlo brlt brmi
+      brne brpl brsh brtc brts brvc brvs bset bst cbi cbr clc clh cli cln clr cls clt clv clz com cp cpc cpi cpse dec 
+      eor fmul fmuls fmulsu icall ijmp in inc ld ldd ldi lds lpm lsl lsr mov movw mul muls mulsu
+      neg nop or ori out pop push rcall ret reti rjmp rol ror sbc sbci sbi sbic sbis sbiw sbr sbrc sbrs sec seh sei sen ser ses
+      set sev sez sleep spm st std sts sub subi swap tst wdr      
+    </avr:instructions>
+
+
+  </avr:device>
+</avr:part>

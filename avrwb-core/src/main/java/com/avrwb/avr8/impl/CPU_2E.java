@@ -28,7 +28,7 @@ import com.avrwb.atmelschema.XA_Register;
 import com.avrwb.atmelschema.XA_RegisterGroup;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.avr8.AVRCoreVersion;
+import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;

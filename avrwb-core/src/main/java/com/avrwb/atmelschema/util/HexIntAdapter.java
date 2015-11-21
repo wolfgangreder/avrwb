@@ -23,6 +23,7 @@ package com.avrwb.atmelschema.util;
 
 import com.avrwb.annotations.Immutable;
 import com.avrwb.annotations.ThreadSave;
+import com.avrwb.schema.util.Converter;
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -35,35 +36,6 @@ public final class HexIntAdapter extends XmlAdapter<String, Integer>
 {
 
   private final int minDigits;
-
-  public static String toHexString(int i)
-  {
-    return toHexString(i,
-                       1);
-  }
-
-  public static String toHexString(int i,
-                                   int minDigits)
-  {
-    String tmp = Integer.toHexString(i);
-    if (tmp.length() < minDigits) {
-      StringBuilder b = new StringBuilder(minDigits);
-      for (int n = tmp.length(); n < minDigits; ++n) {
-        b.append("0");
-      }
-      tmp = b.append(tmp).toString();
-    }
-    return "0x" + tmp;
-
-  }
-
-  public static Integer fromHexString(String str)
-  {
-    if (str != null) {
-      return Integer.decode(str);
-    }
-    return null;
-  }
 
   public HexIntAdapter()
   {
@@ -78,10 +50,7 @@ public final class HexIntAdapter extends XmlAdapter<String, Integer>
   @Override
   public Integer unmarshal(String v)
   {
-    if (v == null) {
-      return null;
-    }
-    return Integer.decode(v);
+    return Converter.parseHexString(v);
   }
 
   @Override
@@ -90,8 +59,8 @@ public final class HexIntAdapter extends XmlAdapter<String, Integer>
     if (v == null) {
       return null;
     }
-    return toHexString(v,
-                       minDigits);
+    return Converter.printHexString(v,
+                                    minDigits);
   }
 
 }

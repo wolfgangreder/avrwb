@@ -21,13 +21,13 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 
 /**
@@ -100,8 +100,8 @@ public final class BitClearSet extends AbstractInstruction
 
       }
     }
-    throw new IllegalArgumentException("invalid opcode " + HexIntAdapter.toHexString(opcode,
-                                                                                     4));
+    throw new IllegalArgumentException("invalid opcode " + Converter.printHexString(opcode,
+                                                                                    4));
   }
 
   private static boolean decodeSetBit(int opcode)

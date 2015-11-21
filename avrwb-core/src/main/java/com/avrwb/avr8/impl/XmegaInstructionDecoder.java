@@ -19,30 +19,13 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.annotations;
 
-import com.avrwb.schema.AvrFamily;
-import com.avrwb.schema.ModuleClass;
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package com.avrwb.avr8.impl;
 
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-@Repeatable(ProvidedModules.class)
-public @interface ProvidedModule
-{
-
-  ModuleClass moduleClass();
-
-  AvrFamily family();
-
-  String[] core();
-
-  String[] value();
+/**
+ *
+ * @author wolfi
+ */
+public class XmegaInstructionDecoder {
 
 }

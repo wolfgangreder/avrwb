@@ -21,12 +21,12 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
@@ -85,8 +85,8 @@ public abstract class Instruction_Rd extends AbstractInstruction
                  new Object[]{getCurrentDeviceMessage(clockState,
                                                       device),
                               rdAddress,
-                              HexIntAdapter.toHexString(rdVal,
-                                                        2)});
+                              Converter.printHexString(rdVal,
+                                                       2)});
     }
   }
 
@@ -101,8 +101,8 @@ public abstract class Instruction_Rd extends AbstractInstruction
                              -> MessageFormat.format("{0} writing result {1} to r{2,number,0}",
                                                      getCurrentDeviceMessage(clockState,
                                                                              device),
-                                                     HexIntAdapter.toHexString(result,
-                                                                               2),
+                                                     Converter.printHexString(result,
+                                                                              2),
                                                      rdAddress));
     }
   }

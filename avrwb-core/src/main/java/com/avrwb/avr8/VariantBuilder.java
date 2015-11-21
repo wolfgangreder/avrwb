@@ -21,34 +21,33 @@
  */
 package com.avrwb.avr8;
 
+import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
-import com.avrwb.annotations.NullAllowed;
-import com.avrwb.avr8.helper.ItemNotFoundException;
-import com.avrwb.avr8.helper.NotFoundStrategy;
-import com.avrwb.schema.XmlPart;
-import java.util.logging.Logger;
+import com.avrwb.schema.XmlVariant;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public interface DeviceBuilder
+public interface VariantBuilder
 {
 
   @NotNull
-  public DeviceBuilder deviceLogger(@NullAllowed("sublogger .dev.<devname> to global logger") Logger deviceLogger);
+  public VariantBuilder xmlVariant(@NotNull XmlVariant variant) throws NullPointerException, IllegalArgumentException;
 
   @NotNull
-  public DeviceBuilder notFoundStrategy(@NotNull NotFoundStrategy strategy) throws NullPointerException;
+  public VariantBuilder name(String name);
 
   @NotNull
-  public DeviceBuilder fromDescriptor(@NotNull XmlPart file)
-          throws NullPointerException, IllegalArgumentException;
+  public VariantBuilder vccMin(@Invariants(minValue = "0.0f") float vccMin) throws IllegalArgumentException;
 
   @NotNull
-  public DeviceBuilder variant(@NotNull Variant variant) throws NullPointerException;
+  public VariantBuilder vccMax(@Invariants(minValue = "0.0f") float vccMax) throws IllegalArgumentException;
 
   @NotNull
-  public Device build() throws NullPointerException, IllegalStateException, ItemNotFoundException;
+  public VariantBuilder speedMax(@Invariants(minValue = "0") long speedMax) throws IllegalArgumentException;
+
+  @NotNull
+  public Variant build() throws IllegalStateException;
 
 }

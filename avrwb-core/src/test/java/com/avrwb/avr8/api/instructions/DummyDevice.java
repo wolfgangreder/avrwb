@@ -21,20 +21,20 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.AVRDeviceKey;
-import com.avrwb.avr8.Architecture;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.Family;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.Module;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;
 import com.avrwb.avr8.impl.MemoryStack;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +56,7 @@ public class DummyDevice implements Device
   private final List<Module> modules;
   private final List<Memory> memories;
   private final Stack stack;
-  private final AVRDeviceKey deviceKey;
+  private final AvrDeviceKey deviceKey;
 
   public DummyDevice(CPU cpu)
   {
@@ -78,9 +78,8 @@ public class DummyDevice implements Device
                                                           sram));
     stack = new MemoryStack(cpu.getStackPointer(),
                             sram);
-    deviceKey = new AVRDeviceKey(Family.megaAVR,
-                                 Architecture.AVR8,
-                                 cpu.getCoreVersion(),
+    deviceKey = new AvrDeviceKey(AvrFamily.TINY,
+                                 AvrCore.V1,
                                  "dummy");
   }
 
@@ -112,9 +111,8 @@ public class DummyDevice implements Device
     }
     stack = new MemoryStack(cpu.getStackPointer(),
                             sram);
-    deviceKey = new AVRDeviceKey(Family.megaAVR,
-                                 Architecture.AVR8,
-                                 cpu.getCoreVersion(),
+    deviceKey = new AvrDeviceKey(AvrFamily.TINY,
+                                 AvrCore.V1,
                                  "dummy");
   }
 
@@ -131,7 +129,7 @@ public class DummyDevice implements Device
   }
 
   @Override
-  public AVRDeviceKey getDeviceKey()
+  public AvrDeviceKey getDeviceKey()
   {
     return deviceKey;
   }
