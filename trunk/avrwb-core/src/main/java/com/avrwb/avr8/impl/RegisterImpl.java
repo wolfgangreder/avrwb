@@ -21,12 +21,12 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpValue;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.NotFoundStrategy;
+import com.avrwb.schema.util.Converter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -225,10 +225,10 @@ class RegisterImpl implements Register
   @Override
   public String toString()
   {
-    return "Register{" + "name=" + name + ", address(" + HexIntAdapter.toHexString(memoryAddress,
-                                                                                   2) + ","
-                   + HexIntAdapter.toHexString(ioAddress,
-                                               2) + ")}";
+    return "Register{" + "name=" + name + ", address(" + Converter.printHexString(memoryAddress,
+                                                                                  2) + ","
+                   + Converter.printHexString(ioAddress,
+                                              2) + ")}";
   }
 
 }

@@ -19,19 +19,15 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8;
+package com.avrwb.atmelschema;
 
 /**
- * Aufzählung der einzelnen CoreVersionen
+ * Auflistung der unterstützten CPU Architekturen
  *
  * @author Wolfgang Reder
  */
-public enum AVRCoreVersion
+public enum Architecture
 {
-  ANY,
-  V1,
-  V2,
-  V2E,
-  I6000;
-
+  AVR8,
+  AVR8_XMEGA;
 }

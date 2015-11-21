@@ -85,6 +85,10 @@ public final class AVRWBDefaults
   public static final String MEMNAME_FLASH = "prog";
   public static final String MEMNAME_SRAM = "data";
 
+  public static final String MEMID_FLASH = "progmem";
+  public static final String MEMID_SRAM = "data";
+  public static final String MEMID_EEPROM = "eeprom";
+
   public static final String MODULENAME_CPU = "CPU";
 
   public static final String PROP_CORE_VERSION = "CORE_VERSION";

@@ -24,6 +24,7 @@ package com.avrwb.avr8;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.ClockSink;
 import com.avrwb.avr8.api.Resetable;
+import com.avrwb.schema.ModuleClass;
 import java.util.List;
 import java.util.Map;
 
@@ -66,5 +67,11 @@ public interface Module extends Resetable, ClockSink
    */
   @NotNull
   public List<Register> getRegister();
+
+  @NotNull
+  public default ModuleClass getModuleClass()
+  {
+    return ModuleClass.OTHER;
+  }
 
 }

@@ -27,7 +27,397 @@ MA 02110-1301  USA
   xmlns:avr='http://www.avrwb.com/schema/avr/partdescriptor-1.0'
   xsi:schemaLocation='http://www.avrwb.com/schema/avr/partdescriptor-1.0 ../schema/partdescriptor-1.0.xsd'>
   
-  <avr:device avr:family="mega" avr:name="ATmega8">
+  <avr:device avr:datasheet="http://www.atmel.com/Images/Atmel-2486-8-bit-AVR-microcontroller-ATmega8_L_datasheet.pdf" 
+              avr:uri="http://www.atmel.com/devices/atmega8.aspx">
+    <avr:name>ATmega8</avr:name>
+    <avr:family>mega</avr:family>
+    <avr:avr-core>V2E</avr:avr-core>
     
+    <avr:variants>
+      <avr:variant>
+        <avr:vcc-min>4.5</avr:vcc-min>
+        <avr:vcc-max>5.5</avr:vcc-max>
+        <avr:speed-max>16000000</avr:speed-max>
+      </avr:variant>
+      <avr:variant>
+        <avr:name>L</avr:name>
+        <avr:vcc-min>2.7</avr:vcc-min>
+        <avr:vcc-max>5.5</avr:vcc-max>
+        <avr:speed-max>8000000</avr:speed-max>        
+      </avr:variant>
+    </avr:variants>
+
+    <avr:address-spaces>
+      <avr:address-space xml:id="progmem">
+        <avr:name>progmem</avr:name>
+        <avr:max-size>0x2000</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>progmem</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x2000</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 1</avr:name>
+          <avr:start>0x1f00</avr:start>
+          <avr:size>0x100</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 2</avr:name>
+          <avr:start>0x1e00</avr:start>
+          <avr:size>0x200</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 3</avr:name>
+          <avr:start>0x1d00</avr:start>
+          <avr:size>0x300</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>boot 4</avr:name>
+          <avr:start>0x1c00</avr:start>
+          <avr:size>0x400</avr:size>
+          <avr:access>rwx</avr:access>
+          <avr:type>flash</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="data">
+        <avr:name>data</avr:name>
+        <avr:max-size>0x460</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>register file</avr:name>          
+          <avr:start>0</avr:start>
+          <avr:size>0x20</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>register</avr:type>          
+        </avr:segment>
+        <avr:segment>
+          <avr:name>io</avr:name>
+          <avr:start>0x20</avr:start>
+          <avr:size>0x40</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>io</avr:type>
+        </avr:segment>
+        <avr:segment>
+          <avr:name>iram</avr:name>
+          <avr:start>0x60</avr:start>
+          <avr:size>0x400</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>internal-ram</avr:type>
+        </avr:segment>
+      </avr:address-space>
+      <avr:address-space xml:id="eeprom">
+        <avr:name>eeprom</avr:name>
+        <avr:max-size>0x200</avr:max-size>
+        <avr:byte-order>little-endian</avr:byte-order>
+        <avr:segment>
+          <avr:name>eeprom</avr:name>
+          <avr:start>0</avr:start>
+          <avr:size>0x200</avr:size>
+          <avr:access>rw</avr:access>
+          <avr:type>eeprom</avr:type>
+        </avr:segment>
+      </avr:address-space>
+    </avr:address-spaces>
+
+    <avr:modules>
+      <avr:module xml:id="cpu">
+        <avr:name>CPU</avr:name>
+        <avr:class>cpu</avr:class>        
+        <avr:register>
+          <avr:name>SREG</avr:name>
+          <avr:caption>Status Register</avr:caption>
+          <avr:io-address>0x3f</avr:io-address>
+          <avr:ram-address>0x5f</avr:ram-address>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:bitmask>0x1</avr:bitmask>
+            <avr:name>C</avr:name>
+            <avr:caption>Carry Flag</avr:caption>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x2</avr:bitmask>
+            <avr:name>Z</avr:name>   
+            <avr:caption>Zero Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x4</avr:bitmask>
+            <avr:name>N</avr:name>            
+            <avr:caption>Negative Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x8</avr:bitmask>
+            <avr:name>V</avr:name>            
+            <avr:caption>Two's Complement Overflow Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x10</avr:bitmask>
+            <avr:name>S</avr:name>            
+            <avr:caption>Sign Bit</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x20</avr:bitmask>
+            <avr:name>H</avr:name>            
+            <avr:caption>Half Carry Flag</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x40</avr:bitmask>
+            <avr:name>T</avr:name>            
+            <avr:caption>Bit Copy Storage</avr:caption>         
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:bitmask>0x80</avr:bitmask>
+            <avr:name>I</avr:name>            
+            <avr:caption>Global Interrupt Enable</avr:caption>         
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>SP</avr:name>
+          <avr:caption>Stack Pointer</avr:caption>
+          <avr:io-address>0x3d</avr:io-address>
+          <avr:ram-address>0x5d</avr:ram-address>
+          <avr:bitmask>0x7ff</avr:bitmask>
+          <avr:size>2</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>MCUCR</avr:name>
+          <avr:caption>MCU Control Register</avr:caption>
+          <avr:io-address>0x35</avr:io-address>
+          <avr:ram-address>0x55</avr:ram-address>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>ISC0</avr:name>
+            <avr:caption>Interrupt Sense Control 0 Bits</avr:caption>
+            <avr:bitmask>0x03</avr:bitmask>
+            <avr:bitvalues>
+              <avr:bitvalue>
+                <avr:name>LO</avr:name>
+                <avr:caption>Low Level of INT0</avr:caption>
+                <avr:bit-value>0x0</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>CH</avr:name>
+                <avr:caption>Any Logical Change in INT0</avr:caption>
+                <avr:bit-value>0x1</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>FALLING</avr:name>
+                <avr:caption>Falling Edge of INT0</avr:caption>
+                <avr:bit-value>0x2</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>RISING</avr:name>
+                <avr:caption>Rising Edge of INT0</avr:caption>
+                <avr:bit-value>0x3</avr:bit-value>
+              </avr:bitvalue>
+            </avr:bitvalues>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>ISC1</avr:name>
+            <avr:caption>Interrupt Sense Control 1 Bits</avr:caption>
+            <avr:bitmask>0x0c</avr:bitmask>
+            <avr:bitvalues>
+              <avr:bitvalue>
+                <avr:name>LO</avr:name>
+                <avr:caption>Low Level of INT1</avr:caption>
+                <avr:bit-value>0x0</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>CH</avr:name>
+                <avr:caption>Any Logical Change in INT1</avr:caption>
+                <avr:bit-value>0x1</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>FALLING</avr:name>
+                <avr:caption>Falling Edge of INT1</avr:caption>
+                <avr:bit-value>0x2</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>RISING</avr:name>
+                <avr:caption>Rising Edge of INT1</avr:caption>
+                <avr:bit-value>0x3</avr:bit-value>
+              </avr:bitvalue>
+            </avr:bitvalues>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>SM</avr:name>
+            <avr:caption>Sleep Mode Select</avr:caption>
+            <avr:bitmask>0x70</avr:bitmask>
+            <avr:bitvalues>
+              <avr:bitvalue>
+                <avr:name>Idle</avr:name>
+                <avr:caption>Idle</avr:caption>
+                <avr:bit-value>0x0</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>ADCNR</avr:name>
+                <avr:caption>ADC Noise Reduction</avr:caption>
+                <avr:bit-value>0x10</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>PD</avr:name>
+                <avr:caption>Power Down</avr:caption>
+                <avr:bit-value>0x20</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>PS</avr:name>
+                <avr:caption>Power Save</avr:caption>
+                <avr:bit-value>0x30</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>-</avr:name>
+                <avr:caption>Reserved</avr:caption>
+                <avr:bit-value>0x40</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>-</avr:name>
+                <avr:caption>Reserved</avr:caption>
+                <avr:bit-value>0x50</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>SB</avr:name>
+                <avr:caption>Standby</avr:caption>
+                <avr:bit-value>0x60</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>-</avr:name>
+                <avr:caption>Reserved</avr:caption>
+                <avr:bit-value>0x70</avr:bit-value>
+              </avr:bitvalue>
+            </avr:bitvalues>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>SE</avr:name>
+            <avr:caption>Sleep Enable</avr:caption>
+            <avr:bitmask>0x80</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>MCUSR</avr:name>
+          <avr:caption>MCU Control And Status Register</avr:caption>
+          <avr:io-address>0x34</avr:io-address>
+          <avr:ram-address>0x54</avr:ram-address>
+          <avr:bitmask>0x0f</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>PORF</avr:name>
+            <avr:caption>Power-on reset Flag</avr:caption>
+            <avr:bitmask>0x01</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>EXTRF</avr:name>
+            <avr:caption>External Reset Flag</avr:caption>
+            <avr:bitmask>0x02</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>BORF</avr:name>
+            <avr:caption>Brown-out Reset Flag</avr:caption>
+            <avr:bitmask>0x04</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>WDRF</avr:name>
+            <avr:caption>Watchdog Reset Flag</avr:caption>
+            <avr:bitmask>0x08</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>OSCCAL</avr:name>
+          <avr:caption>Oscillator Calibration Value</avr:caption>
+          <avr:io-address>0x31</avr:io-address>
+          <avr:ram-address>0x51</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>SPMCR</avr:name>
+          <avr:caption>Store Program Memory Control Register</avr:caption>
+          <avr:io-address>0x37</avr:io-address>
+          <avr:ram-address>0x57</avr:ram-address>
+          <avr:bitmask>0xdf</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>SPEM</avr:name>
+            <avr:caption>Store Program Memory Enable</avr:caption>
+            <avr:bitmask>0x01</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>PERS</avr:name>
+            <avr:caption>Page Erase</avr:caption>
+            <avr:bitmask>0x02</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>PGWRT</avr:name>
+            <avr:caption>Page Write</avr:caption>
+            <avr:bitmask>0x04</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>BLBSET</avr:name>
+            <avr:caption>Boot Lock Bit Set</avr:caption>
+            <avr:bitmask>0x08</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>RWWSRE</avr:name>
+            <avr:caption>Read-While-Write Section Read Enable</avr:caption>
+            <avr:bitmask>0x10</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>RWWSB</avr:name>
+            <avr:caption>Read-While-Write Section Busy</avr:caption>
+            <avr:bitmask>0x40</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>SPMIE</avr:name>
+            <avr:caption>SPM Interrupt Enable</avr:caption>
+            <avr:bitmask>0x80</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>SFIOR</avr:name>
+          <avr:caption>Special Function IO Register</avr:caption>
+          <avr:io-address>0x30</avr:io-address>
+          <avr:ram-address>0x50</avr:ram-address>
+          <avr:bitmask>0x15</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>PSR10</avr:name>
+            <avr:caption>Prescaler Reset Timer/Counter1 and Timer/Counter0</avr:caption>
+            <avr:bitmask>0x01</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>PU</avr:name>
+            <avr:caption>Pull-up Disable</avr:caption>
+            <avr:bitmask>0x04</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>ADHSM</avr:name>
+            <avr:caption>ADC High Speed Mode</avr:caption>
+            <avr:bitmask>0x10</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:interrupt>
+          <avr:name>RESET</avr:name>
+          <avr:caption>External Pin, Power-on Reset, Brown-out Reset and Watchdog Reset</avr:caption>
+          <avr:vector>0</avr:vector>
+        </avr:interrupt>
+      </avr:module>
+    </avr:modules>
+
+    <avr:instructions>
+      adc add adiw and andi asr bclr bld brbc brbs brcc brcs break breq brge brhc brhs brid brie brlo brlt brmi
+      brne brpl brsh brtc brts brvc brvs bset bst cbi cbr clc clh cli cln clr cls clt clv clz com cp cpc cpi cpse dec 
+      eor fmul fmuls fmulsu icall ijmp in inc ld ldd ldi lds lpm lsl lsr mov movw mul muls mulsu
+      neg nop or ori out pop push rcall ret reti rjmp rol ror sbc sbci sbi sbic sbis sbiw sbr sbrc sbrs sec seh sei sen ser ses
+      set sev sez sleep spm st std sts sub subi swap tst wdr      
+    </avr:instructions>
+
+
   </avr:device>
 </avr:part>

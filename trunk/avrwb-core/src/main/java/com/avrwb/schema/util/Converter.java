@@ -19,13 +19,99 @@
  * MA 02110-1301  USA
  *
  */
-
 package com.avrwb.schema.util;
+
+import java.nio.ByteOrder;
 
 /**
  *
  * @author wolfi
  */
-public class Converter {
+public final class Converter
+{
+
+  private Converter()
+  {
+  }
+
+  public static Boolean parseBoolean(String v)
+  {
+    if (v == null) {
+      return null;
+    }
+    try {
+      return Integer.parseInt(v) != 0;
+    } catch (NumberFormatException ex) {
+
+    }
+    return Boolean.parseBoolean(v);
+  }
+
+  public static String printBoolean(Boolean b)
+  {
+    if (b == null) {
+      return null;
+    }
+    return b.toString();
+  }
+
+  public static ByteOrder parseByteOrder(String s)
+  {
+    if (s == null) {
+      return null;
+    }
+    switch (s) {
+      case "little-endian":
+        return ByteOrder.LITTLE_ENDIAN;
+      case "big-endian":
+        return ByteOrder.BIG_ENDIAN;
+      default:
+        throw new IllegalArgumentException("unknown byte order " + s);
+    }
+  }
+
+  public static String printByteOrder(ByteOrder bo)
+  {
+    if (bo == null) {
+      return null;
+    }
+    if (bo == ByteOrder.BIG_ENDIAN) {
+      return "big-endian";
+    } else {
+      return "little-endian";
+    }
+  }
+
+  public static String printHexString(Integer i)
+  {
+    if (i == null) {
+      return null;
+    }
+    return printHexString(i,
+                          1);
+  }
+
+  public static String printHexString(int i,
+                                      int minDigits)
+  {
+    String tmp = Integer.toHexString(i);
+    if (tmp.length() < minDigits) {
+      StringBuilder b = new StringBuilder(minDigits);
+      for (int n = tmp.length(); n < minDigits; ++n) {
+        b.append("0");
+      }
+      tmp = b.append(tmp).toString();
+    }
+    return "0x" + tmp;
+
+  }
+
+  public static Integer parseHexString(String str)
+  {
+    if (str != null) {
+      return Integer.decode(str);
+    }
+    return null;
+  }
 
 }

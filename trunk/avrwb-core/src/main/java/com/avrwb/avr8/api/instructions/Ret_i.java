@@ -21,16 +21,15 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.api.instructions.AbstractInstruction;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 
 /**
@@ -96,8 +95,8 @@ public final class Ret_i extends AbstractInstruction
                                -> MessageFormat.format("{0} returning to ip {1}",
                                                        getCurrentDeviceMessage(clockState,
                                                                                device),
-                                                       HexIntAdapter.toHexString(targetIP,
-                                                                                 device.getFlash().getHexAddressStringWidth())));
+                                                       Converter.printHexString(targetIP,
+                                                                                device.getFlash().getHexAddressStringWidth())));
       }
     }
   }

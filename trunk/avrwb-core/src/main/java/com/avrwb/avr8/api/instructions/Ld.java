@@ -21,16 +21,16 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
-import com.avrwb.avr8.AVRDeviceKey;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.Family;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.AvrFamily;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
@@ -127,7 +127,7 @@ public final class Ld extends AbstractInstruction
 
   }
 
-  public static Ld getInstance(AVRDeviceKey deviceKey,
+  public static Ld getInstance(AvrDeviceKey deviceKey,
                                int opcode)
   {
     int displacement = getDisplacement(opcode);
@@ -139,7 +139,7 @@ public final class Ld extends AbstractInstruction
     if (displacement == 0 && mode == Mode.DISPLACEMENT) {
       mode = Mode.UNMODIFIED;
     }
-    if (deviceKey.getFamily() != Family.AVR_XMEGA && mode == Mode.DISPLACEMENT) {
+    if (deviceKey.getFamily() != AvrFamily.XMEGA && mode == Mode.DISPLACEMENT) {
       return null;
     }
     Pointer ptr = getPtr(opcode,
@@ -232,7 +232,7 @@ public final class Ld extends AbstractInstruction
       final boolean external = sram.isAddressExternal(ptrVal);
       if (mode == Mode.DISPLACEMENT) {
         finishDelta = external ? 1 : 2;
-      } else if (device.getDeviceKey().getFamily() == Family.AVR_XMEGA) {
+      } else if (device.getDeviceKey().getFamily() == AvrFamily.XMEGA) {
         if (mode != Mode.PRE_DECREMENT) {
           finishDelta = external ? 0 : 1;
         } else {
@@ -263,16 +263,16 @@ public final class Ld extends AbstractInstruction
                                            getCurrentDeviceMessage(clockState,
                                                                    device),
                                            ptr.name(),
-                                           HexIntAdapter.toHexString(ptrVal,
-                                                                     sram.getHexAddressStringWidth())));
+                                           Converter.printHexString(ptrVal,
+                                                                    sram.getHexAddressStringWidth())));
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                    ()
                    -> MessageFormat.format("{0} reading 0x{1} from sram @{2}{3}",
                                            getCurrentDeviceMessage(clockState,
                                                                    device),
                                            Integer.toHexString(pointeeVal),
-                                           HexIntAdapter.toHexString(ptrVal,
-                                                                     sram.getHexAddressStringWidth()),
+                                           Converter.printHexString(ptrVal,
+                                                                    sram.getHexAddressStringWidth()),
                                            external ? " ext" : ""));
       }
     }
@@ -318,8 +318,8 @@ public final class Ld extends AbstractInstruction
                                               getCurrentDeviceMessage(clockState,
                                                                       device),
                                               ptr.name(),
-                                              HexIntAdapter.toHexString(ptrVal,
-                                                                        sram.getHexAddressStringWidth())));
+                                              Converter.printHexString(ptrVal,
+                                                                       sram.getHexAddressStringWidth())));
       }
     }
   }

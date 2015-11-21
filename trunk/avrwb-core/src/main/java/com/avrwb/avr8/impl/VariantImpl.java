@@ -21,59 +21,62 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.annotations.Immutable;
-import com.avrwb.annotations.NotNull;
-import com.avrwb.avr8.RegisterBitGrpValue;
-import com.avrwb.schema.util.Converter;
-import java.util.Objects;
+import com.avrwb.avr8.Variant;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-@Immutable
-final class RegisterBitGrpValueImpl implements RegisterBitGrpValue
+final class VariantImpl implements Variant
 {
 
   private final String name;
-  private final String caption;
-  private final int value;
+  private final float vccMin;
+  private final float vccMax;
+  private final long speedMax;
 
-  RegisterBitGrpValueImpl(@NotNull String name,
-                          @NotNull String caption,
-                          int value)
+  VariantImpl(String name,
+              float vccMin,
+              float vccMax,
+              long speedMax)
   {
     this.name = name;
-    this.caption = caption;
-    this.value = value;
+    this.vccMin = vccMin;
+    this.vccMax = vccMax;
+    this.speedMax = speedMax;
   }
 
   @Override
-  @NotNull
   public String getName()
   {
     return name;
   }
 
   @Override
-  @NotNull
-  public String getCaption()
+  public float getVccMin()
   {
-    return caption;
+    return vccMin;
   }
 
   @Override
-  public int getValue()
+  public float getVccMax()
   {
-    return value;
+    return vccMax;
+  }
+
+  @Override
+  public long getSpeedMax()
+  {
+    return speedMax;
   }
 
   @Override
   public int hashCode()
   {
-    int hash = 3;
-    hash = 29 * hash + Objects.hashCode(this.name);
-    hash = 29 * hash + this.value;
+    int hash = 7;
+    hash = 97 * hash + Float.floatToIntBits(this.vccMin);
+    hash = 97 * hash + Float.floatToIntBits(this.vccMax);
+    hash = 97 * hash + (int) (this.speedMax ^ (this.speedMax >>> 32));
     return hash;
   }
 
@@ -89,19 +92,20 @@ final class RegisterBitGrpValueImpl implements RegisterBitGrpValue
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final RegisterBitGrpValueImpl other = (RegisterBitGrpValueImpl) obj;
-    if (this.value != other.value) {
+    final VariantImpl other = (VariantImpl) obj;
+    if (Float.floatToIntBits(this.vccMin) != Float.floatToIntBits(other.vccMin)) {
       return false;
     }
-    return Objects.equals(this.name,
-                          other.name);
+    if (Float.floatToIntBits(this.vccMax) != Float.floatToIntBits(other.vccMax)) {
+      return false;
+    }
+    return this.speedMax == other.speedMax;
   }
 
   @Override
   public String toString()
   {
-    return "RegisterBitGrpValueImpl{" + "name=" + name + ", value=" + Converter.printHexString(value,
-                                                                                               2) + '}';
+    return "VariantImpl{" + "vccMin=" + vccMin + ", vccMax=" + vccMax + ", speedMax=" + speedMax + '}';
   }
 
 }

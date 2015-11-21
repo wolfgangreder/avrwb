@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8;
 
+import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.Instruction;

@@ -27,8 +27,7 @@ import com.avrwb.annotations.NullAllowed;
 import com.avrwb.annotations.ProvidedModule;
 import com.avrwb.annotations.ProvidedModules;
 import com.avrwb.annotations.ThreadSave;
-import com.avrwb.avr8.AVRCoreVersion;
-import com.avrwb.avr8.Architecture;
+import com.avrwb.atmelschema.Architecture;
 import com.avrwb.avr8.ModuleBuilderFactory;
 import com.avrwb.avr8.helper.ModuleKey;
 import java.util.Arrays;
@@ -99,19 +98,19 @@ public final class ModuleResolver
 
   private void processFactory(ModuleBuilderFactory mf)
   {
-    List<ProvidedModule> m = getProviedModules(mf.getClass());
-    for (ProvidedModule pm : m) {
-      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.architecture(),
-                                                                        (Architecture a) -> new HashMap<>());
-      for (String n : pm.value()) {
-        for (AVRCoreVersion c : pm.core()) {
-          am.put(new ModuleKey(n,
-                               c,
-                               pm.architecture()),
-                 mf);
-        }
-      }
-    }
+//    List<ProvidedModule> m = getProviedModules(mf.getClass());
+//    for (ProvidedModule pm : m) {
+//      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.architecture(),
+//                                                                        (Architecture a) -> new HashMap<>());
+//      for (String n : pm.value()) {
+//        for (AVRCoreVersion c : pm.core()) {
+//          am.put(new ModuleKey(n,
+//                               c,
+//                               pm.architecture()),
+//                 mf);
+//        }
+//      }
+//    }
   }
 
   private void checkMap()
@@ -137,14 +136,14 @@ public final class ModuleResolver
     Objects.requireNonNull(moduleKey,
                            "moduleKey==null");
     checkMap();
-    Map<ModuleKey, ModuleBuilderFactory> map = modules.get(moduleKey.getArchitecture());
+//    Map<ModuleKey, ModuleBuilderFactory> map = modules.get(moduleKey.getArchitecture());
     ModuleBuilderFactory result = null;
-    if (map != null) {
-      result = map.get(moduleKey);
-      if (result == null) {
-        result = map.get(moduleKey.withVersion(AVRCoreVersion.ANY));
-      }
-    }
+//    if (map != null) {
+//      result = map.get(moduleKey);
+//      if (result == null) {
+//        result = map.get(moduleKey.withVersion(AVRCoreVersion.ANY));
+//      }
+//    }
     return result;
   }
 

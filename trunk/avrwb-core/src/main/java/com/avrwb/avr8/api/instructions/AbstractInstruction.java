@@ -21,10 +21,9 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.avr8.AVRCoreVersion;
+import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
@@ -33,6 +32,7 @@ import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResult;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -210,8 +210,8 @@ public abstract class AbstractInstruction implements Instruction
       currentDeviceStateMessage = MessageFormat.format("Exec \"{0}\" @ {1} | IP={2}, #CY={5,number,#.###}, PH={3}|",
                                                        toString(),
                                                        device.getName(),
-                                                       HexIntAdapter.toHexString(device.getCPU().getIP(),
-                                                                                 device.getFlash().getHexAddressStringWidth()),
+                                                       Converter.printHexString(device.getCPU().getIP(),
+                                                                                device.getFlash().getHexAddressStringWidth()),
                                                        clockState.getPhase().name(),
                                                        clockState.getCurrentNanos(),
                                                        clockState.getCycleCount());

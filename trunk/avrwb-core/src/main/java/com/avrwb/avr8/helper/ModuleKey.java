@@ -25,8 +25,9 @@ import com.avrwb.annotations.GuardedBy;
 import com.avrwb.annotations.Immutable;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.ProvidedModule;
-import com.avrwb.avr8.AVRCoreVersion;
-import com.avrwb.avr8.Architecture;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
+import com.avrwb.schema.ModuleClass;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -42,19 +43,27 @@ public final class ModuleKey
   @GuardedBy("this")
   private Pattern namePattern;
   private final String name;
-  private final AVRCoreVersion version;
-  private final Architecture architecture;
+  private final AvrCore version;
+  private final AvrFamily architecture;
+  private final ModuleClass moduleClass;
 
   public ModuleKey(@NotNull String name,
-                   @NotNull AVRCoreVersion version,
-                   @NotNull Architecture architecture)
+                   @NotNull AvrCore version,
+                   @NotNull AvrFamily family,
+                   @NotNull ModuleClass moduleClass)
   {
-    Objects.requireNonNull(name, "name==null");
-    Objects.requireNonNull(version, "version==null");
-    Objects.requireNonNull(architecture, "architecture==null");
+    Objects.requireNonNull(name,
+                           "name==null");
+    Objects.requireNonNull(version,
+                           "version==null");
+    Objects.requireNonNull(family,
+                           "family==null");
+    Objects.requireNonNull(moduleClass,
+                           "moduleclass==null");
     this.name = name;
     this.version = version;
-    this.architecture = architecture;
+    this.architecture = family;
+    this.moduleClass = moduleClass;
   }
 
   @NotNull
@@ -64,13 +73,13 @@ public final class ModuleKey
   }
 
   @NotNull
-  public AVRCoreVersion getVersion()
+  public AvrCore getVersion()
   {
     return version;
   }
 
   @NotNull
-  public Architecture getArchitecture()
+  public AvrFamily getArchitecture()
   {
     return architecture;
   }
@@ -78,19 +87,37 @@ public final class ModuleKey
   @NotNull
   public ModuleKey withName(@NotNull String newName)
   {
-    return new ModuleKey(newName, version, architecture);
+    return new ModuleKey(newName,
+                         version,
+                         architecture,
+                         moduleClass);
   }
 
   @NotNull
-  public ModuleKey withVersion(@NotNull AVRCoreVersion version)
+  public ModuleKey withVersion(@NotNull AvrCore version)
   {
-    return new ModuleKey(name, version, architecture);
+    return new ModuleKey(name,
+                         version,
+                         architecture,
+                         moduleClass);
   }
 
   @NotNull
-  public ModuleKey withArchitecture(@NotNull Architecture arch)
+  public ModuleKey withArchitecture(@NotNull AvrFamily arch)
   {
-    return new ModuleKey(name, version, arch);
+    return new ModuleKey(name,
+                         version,
+                         arch,
+                         moduleClass);
+  }
+
+  @NotNull
+  public ModuleKey withModuleClass(@NotNull ModuleClass mc)
+  {
+    return new ModuleKey(name,
+                         version,
+                         architecture,
+                         mc);
   }
 
   private synchronized Pattern getNamePattern() throws PatternSyntaxException
@@ -107,12 +134,12 @@ public final class ModuleKey
     if (pm == null) {
       return false;
     }
-    if (!pm.architecture().equals(architecture)) {
+    if (!pm.family().equals(architecture)) {
       return false;
     }
     boolean found = false;
-    for (AVRCoreVersion cv : pm.core()) {
-      if (cv.equals(version)) {
+    for (String cv : pm.core()) {
+      if (cv.equals(version.toString())) {
         found = true;
         break;
       }
@@ -160,7 +187,8 @@ public final class ModuleKey
       return false;
     }
     final ModuleKey other = (ModuleKey) obj;
-    if (!Objects.equals(this.name, other.name)) {
+    if (!Objects.equals(this.name,
+                        other.name)) {
       return false;
     }
     if (this.version != other.version) {

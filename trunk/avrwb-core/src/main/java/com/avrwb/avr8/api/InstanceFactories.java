@@ -29,12 +29,14 @@ import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.RegisterBitGrpBuilder;
 import com.avrwb.avr8.RegisterBitGrpValueBuilder;
 import com.avrwb.avr8.RegisterBuilder;
+import com.avrwb.avr8.VariantBuilder;
 import com.avrwb.avr8.api.instructions.InstructionResultBuilderImpl;
 import com.avrwb.avr8.impl.DeviceBuilderImpl;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;
 import com.avrwb.avr8.impl.RegisterBitBuilderImpl;
 import com.avrwb.avr8.impl.RegisterBitGrpValueBuilderImpl;
 import com.avrwb.avr8.impl.RegisterBuilderImpl;
+import com.avrwb.avr8.impl.VariantBuilderImpl;
 
 /**
  *
@@ -72,6 +74,11 @@ public final class InstanceFactories
   public static InstructionResultBuilder getInstructionResultBuilder(@NotNull Device device) throws NullPointerException
   {
     return new InstructionResultBuilderImpl(device);
+  }
+
+  public static VariantBuilder getVariantBuilder()
+  {
+    return new VariantBuilderImpl();
   }
 
   private InstanceFactories()

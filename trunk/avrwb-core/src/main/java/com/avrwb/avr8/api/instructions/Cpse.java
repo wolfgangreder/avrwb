@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.atmelschema.util.HexIntAdapter;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
@@ -29,6 +28,7 @@ import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 
 /**
@@ -83,8 +83,8 @@ public class Cpse extends Instruction_Rd_Rr
                                                             getCurrentDeviceMessage(clockState,
                                                                                     device),
                                                             nextInstruction.toString(),
-                                                            HexIntAdapter.toHexString(cpu.getIP() + 1,
-                                                                                      device.getFlash().getHexAddressStringWidth())));
+                                                            Converter.printHexString(cpu.getIP() + 1,
+                                                                                     device.getFlash().getHexAddressStringWidth())));
         }
         if (nextInstruction.getSize() == 2) {
           cycles = 2;
@@ -123,8 +123,8 @@ public class Cpse extends Instruction_Rd_Rr
                                                           getCurrentDeviceMessage(clockState,
                                                                                   device),
                                                           nextInstruction.toString(),
-                                                          HexIntAdapter.toHexString(nextIp,
-                                                                                    device.getFlash().getHexAddressStringWidth()),
+                                                          Converter.printHexString(nextIp,
+                                                                                   device.getFlash().getHexAddressStringWidth()),
                                                           cycles));
       }
     }

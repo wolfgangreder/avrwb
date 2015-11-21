@@ -19,44 +19,38 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8;
+package com.avrwb.avr8.helper;
 
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
 import java.util.Objects;
 
 /**
  *
  * @author wolfi
  */
-public final class AVRDeviceKey
+public final class AvrDeviceKey
 {
 
-  private final Family family;
-  private final AVRCoreVersion core;
-  private final Architecture architecture;
+  private final AvrFamily family;
+  private final AvrCore core;
   private final String id;
 
-  public AVRDeviceKey(Family family,
-                      Architecture architecture,
-                      AVRCoreVersion core,
+  public AvrDeviceKey(AvrFamily family,
+                      AvrCore core,
                       String id)
   {
     this.family = family;
     this.core = core;
     this.id = id;
-    this.architecture = architecture;
   }
 
-  public Family getFamily()
+  public AvrFamily getFamily()
   {
     return family;
   }
 
-  public Architecture getArchitecture()
-  {
-    return architecture;
-  }
-
-  public AVRCoreVersion getCore()
+  public AvrCore getCore()
   {
     return core;
   }
@@ -72,7 +66,6 @@ public final class AVRDeviceKey
     int hash = 5;
     hash = 89 * hash + Objects.hashCode(this.family);
     hash = 89 * hash + Objects.hashCode(this.core);
-    hash = 89 * hash + Objects.hashCode(this.architecture);
     hash = 89 * hash + Objects.hashCode(this.id);
     return hash;
   }
@@ -89,7 +82,7 @@ public final class AVRDeviceKey
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final AVRDeviceKey other = (AVRDeviceKey) obj;
+    final AvrDeviceKey other = (AvrDeviceKey) obj;
     if (!Objects.equals(this.id,
                         other.id)) {
       return false;
@@ -97,16 +90,13 @@ public final class AVRDeviceKey
     if (this.family != other.family) {
       return false;
     }
-    if (this.core != other.core) {
-      return false;
-    }
-    return this.architecture == other.architecture;
+    return this.core == other.core;
   }
 
   @Override
   public String toString()
   {
-    return "AVRDeviceKey{" + "family=" + family + ", core=" + core + ", architecture=" + architecture + ", id=" + id + '}';
+    return "AVRDeviceKey{" + "family=" + family + ", core=" + core + ", id=" + id + '}';
   }
 
 }

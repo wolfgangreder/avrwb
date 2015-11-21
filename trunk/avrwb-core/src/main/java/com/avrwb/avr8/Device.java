@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8;
 
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ public interface Device
 
   public String getName();
 
-  public AVRDeviceKey getDeviceKey();
+  public AvrDeviceKey getDeviceKey();
 
   public double getVoltageMin();
 
