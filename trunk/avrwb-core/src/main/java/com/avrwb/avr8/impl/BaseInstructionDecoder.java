@@ -23,6 +23,7 @@ package com.avrwb.avr8.impl;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
+import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.Instruction;
@@ -57,6 +58,7 @@ import org.openide.util.Exceptions;
  *
  * @author wolfi
  */
+@NotThreadSave
 public class BaseInstructionDecoder implements InstructionDecoder
 {
 
@@ -278,12 +280,15 @@ public class BaseInstructionDecoder implements InstructionDecoder
       }
       List<Descriptor> result = new LinkedList<>();
       for (InstructionImplementation i : annotations) {
-        int om = i.opcodeMask();
-        for (int bo : i.opcodes()) {
-          result.add(new Descriptor(clazz.getSimpleName(),
-                                    construcingFunction,
-                                    om,
-                                    bo));
+        if (acceptInstruction((Class<? extends Instruction>) clazz,
+                              i)) {
+          int om = i.opcodeMask();
+          for (int bo : i.opcodes()) {
+            result.add(new Descriptor(clazz.getSimpleName(),
+                                      construcingFunction,
+                                      om,
+                                      bo));
+          }
         }
       }
       return result;
@@ -296,10 +301,23 @@ public class BaseInstructionDecoder implements InstructionDecoder
     return null;
   }
 
+  /**
+   * Hier können abgeleitete Klassen einen Filter implementieren
+   *
+   * @param clazz class
+   * @param i annotation
+   * @return {@code true} wenn die instruction implementiert ist.
+   */
+  protected boolean acceptInstruction(Class<? extends Instruction> clazz,
+                                      InstructionImplementation i)
+  {
+    return true;
+  }
+
   @Override
-  public Instruction getInstruction(Device device,
-                                    int address) throws NullPointerException, IllegalArgumentException,
-                                                        InstructionNotAvailableException
+  public final Instruction getInstruction(Device device,
+                                          int address) throws NullPointerException, IllegalArgumentException,
+                                                              InstructionNotAvailableException
   {
     Objects.requireNonNull(device);
     if ((address % 2) != 0) {
@@ -319,18 +337,10 @@ public class BaseInstructionDecoder implements InstructionDecoder
     return result;
   }
 
-  protected Instruction filterInstruction(Instruction instruction,
-                                          AvrDeviceKey deviceKey,
-                                          int opcode,
-                                          int nextOpcode)
-  {
-    return instruction;
-  }
-
   @Override
-  public Instruction decodeInstruction(AvrDeviceKey deviceKey,
-                                       int opcode,
-                                       int nextOpcode) throws NullPointerException
+  public final Instruction decodeInstruction(AvrDeviceKey deviceKey,
+                                             int opcode,
+                                             int nextOpcode) throws NullPointerException
   {
     if (instructionRepository.isEmpty()) {
       fillInstructionRepository();
@@ -349,12 +359,9 @@ public class BaseInstructionDecoder implements InstructionDecoder
                                "found multiple instruction descriptors for opcode 0x{0}",
                                new Object[]{Integer.toHexString(opcode)});
     }
-    return filterInstruction(candidates.get(0).constructInstruction(deviceKey,
-                                                                    opcode,
-                                                                    nextOpcode),
-                             deviceKey,
-                             opcode,
-                             nextOpcode);
+    return candidates.get(0).constructInstruction(deviceKey,
+                                                  opcode,
+                                                  nextOpcode);
   }
 
 }
