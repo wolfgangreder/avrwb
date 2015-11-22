@@ -68,6 +68,7 @@ public class CPU_2ENGTest
                                              null);
     XmlModule module = findCPU(file);
     cpu = (CPU_2E) builder.
+            device(file.getDevice()).
             notFoundStrategy(NotFoundStrategy.ERROR).
             moduleDescriptor(module).
             build();

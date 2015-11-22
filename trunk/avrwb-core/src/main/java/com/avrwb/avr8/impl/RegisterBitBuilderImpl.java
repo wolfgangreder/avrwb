@@ -38,7 +38,7 @@ import java.util.Objects;
  * Standardimplementierung von {@link com.avrwb.avr8.RegisterBitGrpBuilder}
  *
  * @see com.avrwb.avr8.RegisterBitGrpBuilder
- * @see at.reder.avrwb.avr8.api.InstanceFactories
+ * @see com.avrwb.avr8.spi.InstanceFactories
  * @author Wolfgang Reder
  */
 public final class RegisterBitBuilderImpl implements RegisterBitGrpBuilder

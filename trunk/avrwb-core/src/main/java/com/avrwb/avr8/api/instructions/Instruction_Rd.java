@@ -58,7 +58,6 @@ public abstract class Instruction_Rd extends AbstractInstruction
                         String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     toStringVal = MessageFormat.format("{0} r{1,number,0}",
                                        getMnemonic(),

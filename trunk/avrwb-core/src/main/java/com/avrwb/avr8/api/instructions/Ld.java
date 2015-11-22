@@ -21,6 +21,8 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.SRAM;
@@ -38,6 +40,13 @@ import java.util.logging.Logger;
  *
  * @author wolfi
  */
+@InstructionImplementations(factoryMethod = "getInstance",
+                            value = {
+                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x900c, 0x900d, 0x900e}), // ld Rd,X
+                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8008, 0x9009, 0x900a}), // ld Rd,Y
+                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8008}), // ld Rd,Y+q
+                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8000, 0x9001, 0x9002}), // ld Rd,Z
+                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8000})})
 public final class Ld extends AbstractInstruction
 {
 
@@ -128,7 +137,8 @@ public final class Ld extends AbstractInstruction
   }
 
   public static Ld getInstance(AvrDeviceKey deviceKey,
-                               int opcode)
+                               int opcode,
+                               int nextOpcode)
   {
     int displacement = getDisplacement(opcode);
     Mode mode = getMode(opcode,
@@ -184,7 +194,6 @@ public final class Ld extends AbstractInstruction
              String toStringValue)
   {
     super(opcode,
-          0xc200,
           mnemonic);
     this.rdAddress = rdAddress;
     this.mode = mode;

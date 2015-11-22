@@ -1,0 +1,494 @@
+<?xml version="1.0"?>
+<!--
+$Id$
+
+Copyright (C) 2015 Wolfgang Reder <wolfgang.reder@aon.at>.
+
+This library is free software; you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public
+License as published by the Free Software Foundation; either
+version 3.0 of the License, or (at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301  USA
+
+-->
+
+<xs:schema version="1.0"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jxb="http://java.sun.com/xml/ns/jaxb" 
+           xmlns:avr="http://www.avrwb.com/schema/avr/partdescriptor-1.0"
+           jxb:version="2.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="qualified"
+           targetNamespace="http://www.avrwb.com/schema/avr/partdescriptor-1.0">
+  
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+             schemaLocation="http://www.w3.org/2009/01/xml.xsd"/>
+  
+  <xs:annotation>
+    <xs:appinfo>
+      <jxb:schemaBindings>
+        <jxb:nameXmlTransform>
+          <!--jxb:typeName prefix="Xml"/-->
+          <jxb:anonymousTypeName prefix="Xml"/>
+          <jxb:elementName prefix="Xml"/>
+        </jxb:nameXmlTransform>
+      </jxb:schemaBindings>
+    </xs:appinfo>
+  </xs:annotation>
+  
+  <xs:simpleType name="segment-type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="flash"/>
+      <xs:enumeration value="eeprom"/>
+      <xs:enumeration value="io"/>
+      <xs:enumeration value="register"/>
+      <xs:enumeration value="internal-ram"/>
+      <xs:enumeration value="external-ram"/>
+      <xs:enumeration value="mapped-eeprom"/>
+      <xs:enumeration value="mapped-flash"/>
+      <xs:enumeration value="fuse"/>
+      <xs:enumeration value="signature"/>
+      <xs:enumeration value="user-signature"/>
+      <xs:enumeration value="pro-signature"/>
+      <xs:enumeration value="lockbit"/>      
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="byte-order">
+    <xs:annotation>
+      <xs:appinfo>
+        <jxb:javaType name="java.nio.ByteOrder" 
+                      parseMethod="com.avrwb.schema.util.Converter.parseByteOrder" 
+                      printMethod="com.avrwb.schema.util.Converter.printByteOrder"/>              
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="little-endian"/>
+      <xs:enumeration value="big-endian"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="uint">
+    <xs:annotation>
+      <xs:appinfo>
+        <jxb:javaType name="int" 
+                      parseMethod="com.avrwb.schema.util.Converter.parseHexString" 
+                      printMethod="com.avrwb.schema.util.Converter.printHexString"/>              
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <!--xs:pattern value="(((0?x)|(#))[a..fA..F0..9]*)|([1..9][0..9]*)"/-->
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="access">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="r"/>  
+      <xs:enumeration value="w"/>  
+      <xs:enumeration value="x"/>  
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="name">
+    <xs:restriction base="xs:token"/>
+  </xs:simpleType>
+  
+  <xs:simpleType name="avr-family">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="tiny"/>
+      <xs:enumeration value="mega"/>
+      <xs:enumeration value="xmega"/>
+      <xs:enumeration value="mega32"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="avr-core">
+    <xs:annotation>
+      <xs:appinfo>
+        <jxb:javaType name="com.avrwb.schema.AvrCore"
+                      parseMethod="com.avrwb.schema.AvrCore.valueOf"
+                      printMethod="com.avrwb.schema.AvrCore.printAvrCore"/>
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:restriction base="xs:string"/>
+  </xs:simpleType>
+  
+  <xs:simpleType name="caption">
+    <xs:restriction base="xs:string">
+      <xs:whiteSpace value="collapse"/>      
+    </xs:restriction>  
+  </xs:simpleType>
+
+  <xs:simpleType name="mnemonic">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="adc"/>
+      <xs:enumeration value="add"/>
+      <xs:enumeration value="adiw"/>
+      <xs:enumeration value="and"/>
+      <xs:enumeration value="andi"/>
+      <xs:enumeration value="asr"/>
+      <xs:enumeration value="bclr"/>
+      <xs:enumeration value="bld"/>
+      <xs:enumeration value="brbc"/>
+      <xs:enumeration value="brbs"/>
+      <xs:enumeration value="brcc"/>
+      <xs:enumeration value="brcs"/>
+      <xs:enumeration value="break"/>
+      <xs:enumeration value="breq"/>
+      <xs:enumeration value="brge"/>
+      <xs:enumeration value="brhc"/>
+      <xs:enumeration value="brhs"/>
+      <xs:enumeration value="brid"/>
+      <xs:enumeration value="brie"/>
+      <xs:enumeration value="brlo"/>
+      <xs:enumeration value="brlt"/>
+      <xs:enumeration value="brmi"/>
+      <xs:enumeration value="brne"/>
+      <xs:enumeration value="brpl"/>
+      <xs:enumeration value="brsh"/>
+      <xs:enumeration value="brtc"/>
+      <xs:enumeration value="brts"/>
+      <xs:enumeration value="brvc"/>
+      <xs:enumeration value="brvs"/>
+      <xs:enumeration value="bset"/>
+      <xs:enumeration value="bst"/>
+      <xs:enumeration value="call"/>
+      <xs:enumeration value="cbi"/>
+      <xs:enumeration value="cbr"/>
+      <xs:enumeration value="clc"/>
+      <xs:enumeration value="clh"/>
+      <xs:enumeration value="cli"/>
+      <xs:enumeration value="cln"/>
+      <xs:enumeration value="clr"/>
+      <xs:enumeration value="cls"/>
+      <xs:enumeration value="clt"/>
+      <xs:enumeration value="clv"/>
+      <xs:enumeration value="clz"/>
+      <xs:enumeration value="com"/>
+      <xs:enumeration value="cp"/>
+      <xs:enumeration value="cpc"/>
+      <xs:enumeration value="cpi"/>
+      <xs:enumeration value="cpse"/>
+      <xs:enumeration value="dec"/>
+      <xs:enumeration value="des"/>
+      <xs:enumeration value="eicall"/>
+      <xs:enumeration value="eijmp"/>
+      <xs:enumeration value="elpm"/>
+      <xs:enumeration value="eor"/>
+      <xs:enumeration value="fmul"/>
+      <xs:enumeration value="fmuls"/>
+      <xs:enumeration value="fmulsu"/>
+      <xs:enumeration value="icall"/>
+      <xs:enumeration value="ijmp"/>
+      <xs:enumeration value="in"/>
+      <xs:enumeration value="inc"/>
+      <xs:enumeration value="jmp"/>
+      <xs:enumeration value="lac"/>
+      <xs:enumeration value="las"/>
+      <xs:enumeration value="lat"/>
+      <xs:enumeration value="ld"/>
+      <xs:enumeration value="ldd"/>
+      <xs:enumeration value="ldi"/>
+      <xs:enumeration value="lds"/>
+      <xs:enumeration value="lpm"/>
+      <xs:enumeration value="lsl"/>
+      <xs:enumeration value="lsr"/>
+      <xs:enumeration value="mov"/>
+      <xs:enumeration value="movw"/>
+      <xs:enumeration value="mul"/>
+      <xs:enumeration value="muls"/>
+      <xs:enumeration value="mulsu"/>
+      <xs:enumeration value="neg"/>
+      <xs:enumeration value="nop"/>
+      <xs:enumeration value="or"/>
+      <xs:enumeration value="ori"/>
+      <xs:enumeration value="out"/>
+      <xs:enumeration value="pop"/>
+      <xs:enumeration value="push"/>
+      <xs:enumeration value="rcall"/>
+      <xs:enumeration value="ret"/>
+      <xs:enumeration value="reti"/>
+      <xs:enumeration value="rjmp"/>
+      <xs:enumeration value="rol"/>
+      <xs:enumeration value="ror"/>
+      <xs:enumeration value="sbc"/>
+      <xs:enumeration value="sbci"/>
+      <xs:enumeration value="sbi"/>
+      <xs:enumeration value="sbic"/>
+      <xs:enumeration value="sbis"/>
+      <xs:enumeration value="sbiw"/>
+      <xs:enumeration value="sbr"/>
+      <xs:enumeration value="sbrc"/>
+      <xs:enumeration value="sbrs"/>
+      <xs:enumeration value="sec"/>
+      <xs:enumeration value="seh"/>
+      <xs:enumeration value="sei"/>
+      <xs:enumeration value="sen"/>
+      <xs:enumeration value="ser"/>
+      <xs:enumeration value="ses"/>
+      <xs:enumeration value="set"/>
+      <xs:enumeration value="sev"/>
+      <xs:enumeration value="sez"/>
+      <xs:enumeration value="sleep"/>
+      <xs:enumeration value="spm"/>
+      <xs:enumeration value="st"/>
+      <xs:enumeration value="std"/>
+      <xs:enumeration value="sts"/>
+      <xs:enumeration value="sub"/>
+      <xs:enumeration value="subi"/>
+      <xs:enumeration value="swap"/>
+      <xs:enumeration value="tst"/>
+      <xs:enumeration value="wdr"/>
+      <xs:enumeration value="xch"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="doc">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute ref="xml:lang"/>
+      </xs:extension>
+    </xs:simpleContent>  
+  </xs:complexType>
+  
+  <xs:simpleType name="module-class">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="cpu"/>
+      <xs:enumeration value="port"/>
+      <xs:enumeration value="timer"/>
+      <xs:enumeration value="adc"/>
+      <xs:enumeration value="dac"/>
+      <xs:enumeration value="comp"/>
+      <xs:enumeration value="watchdog"/>
+      <xs:enumeration value="uart"/>
+      <xs:enumeration value="usart"/>
+      <xs:enumeration value="usi"/>
+      <xs:enumeration value="spi"/>
+      <xs:enumeration value="twi"/>
+      <xs:enumeration value="eeprom"/>
+      <xs:enumeration value="ext-interrupt"/>
+      <xs:enumeration value="clk"/>
+      <xs:enumeration value="osc"/>
+      <xs:enumeration value="rtc"/>
+      <xs:enumeration value="other"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:element name="documentation">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element type="avr:doc" maxOccurs="unbounded" name="doc">
+          <xs:unique name="doc" id="lang">
+            <xs:selector xpath="."/>
+            <xs:field xpath="@lang"/>
+          </xs:unique>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="segment">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="start" type="avr:uint"/>
+        <xs:element name="size" type="avr:uint"/>
+        <xs:element name="access">
+          <xs:annotation>
+            <xs:appinfo>
+              <jxb:javaType name="com.avrwb.avr8.MemoryAccessSet"
+                            parseMethod="com.avrwb.schema.util.Converter.parseMemoryAccessSet"
+                            printMethod="com.avrwb.schema.util.Converter.printMemoryAccessSet"/>
+            </xs:appinfo>
+          </xs:annotation>
+          <xs:simpleType>
+            <xs:list itemType="avr:access"/>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="type" type="avr:segment-type"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="address-space">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="max-size" type="avr:uint"/>   
+        <xs:element name="byte-order" type="avr:byte-order"/>
+        <xs:element ref="avr:documentation" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="avr:segment" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:id" use="required"/>   
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="address-spaces">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:address-space" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="bitvalue">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>     
+        <xs:element name="caption" type="avr:caption" minOccurs="0"/>     
+        <xs:element name="bit-value" type="avr:uint"/>              
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="bitvalues">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:bitvalue" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="bitgroup">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="bitmask" type="avr:uint"/>
+        <xs:element ref="avr:bitvalues" minOccurs="0"/>
+        <xs:element name="caption" type="avr:caption" minOccurs="1"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="register">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="caption" type="avr:caption" minOccurs="0"/>
+        <xs:element name="io-address" type="avr:uint"/>
+        <xs:element name="ram-address" type="avr:uint"/>
+        <xs:element name="bitmask" type="avr:uint" minOccurs="0"/>
+        <xs:element name="size" type="avr:uint"/>
+        <xs:element ref="avr:bitgroup" minOccurs="0" maxOccurs="8"/>        
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="interrupt">
+    <xs:complexType>
+      <xs:all>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="vector" type="avr:uint"/>
+        <xs:element name="caption" type="avr:caption" minOccurs="0"/>
+      </xs:all>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="module">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="class" type="avr:module-class"/>
+        <xs:element ref="avr:register" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="avr:interrupt" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="modules">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:module" maxOccurs="unbounded" minOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="instructions">
+    <xs:simpleType>
+      <xs:list itemType="avr:mnemonic"/>
+    </xs:simpleType>
+  </xs:element>
+
+  <xs:element name="variant">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name" minOccurs="0"/>
+        <xs:element name="vcc-min">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="float"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:decimal">
+              <xs:minExclusive value="0"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="vcc-max">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="float"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:decimal">
+              <xs:minExclusive value="0"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:element>
+        <xs:element name="speed-max">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="long"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:positiveInteger"/>
+          </xs:simpleType>          
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>    
+  </xs:element>
+
+
+  <xs:element name="variants">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:variant" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="device">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>     
+        <xs:element name="family" type="avr:avr-family"/>
+        <xs:element name="avr-core" type="avr:avr-core"/>
+        <xs:element ref="avr:variants"/>
+        <xs:element ref="avr:documentation" minOccurs="0"/>
+        <xs:element ref="avr:address-spaces"/>
+        <xs:element ref="avr:modules"/>
+        <xs:element ref="avr:instructions"/>
+      </xs:sequence>
+      <xs:attribute name="uri" type="xs:anyURI" use="optional"/>
+      <xs:attribute name="datasheet" type="xs:anyURI" use="optional"/>    
+    </xs:complexType>    
+  </xs:element>
+  
+  <xs:element name="part">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:device" maxOccurs="1" minOccurs="1"/>
+      </xs:sequence>
+    </xs:complexType>        
+  </xs:element>
+  
+
+</xs:schema>

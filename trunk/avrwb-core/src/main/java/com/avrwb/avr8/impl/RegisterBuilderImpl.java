@@ -36,7 +36,7 @@ import java.util.Objects;
  * Standardimplementierung für {@link com.avrwb.avr8.RegisterBuilder}
  *
  * @see com.avrwb.avr8.RegisterBuilder
- * @see at.reder.avrwb.avr8.api.InstanceFactories
+ * @see com.avrwb.avr8.spi.InstanceFactories
  * @author Wolfgang Reder
  */
 @NotThreadSave
@@ -60,8 +60,16 @@ public final class RegisterBuilderImpl implements RegisterBuilder
     caption = register.getCaption();
     memoryAddress = register.getRamAddress();
     ioAddress = register.getIoAddress();
-    mask = register.getBitmask();
-    size = register.getSize();
+    if (register.getSize() != null) {
+      size = register.getSize();
+    } else {
+      size = 1;
+    }
+    if (register.getBitmask() != null) {
+      mask = register.getBitmask();
+    } else {
+      mask = (1 << (size * 8)) - 1;
+    }
     RegisterBitGrpBuilder builder = new RegisterBitBuilderImpl();
     for (XmlBitgroup bf : register.getBitgroup()) {
       registerBits.add(builder.fromDescriptor(bf).build());

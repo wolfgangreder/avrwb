@@ -21,12 +21,14 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -35,19 +37,19 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfe0e, opcodes = 0x940e, implementedCores = {"V2E"})
 public final class Call extends AbstractInstruction
 {
 
-  public static final int OPCODE = 0x940e0000;
   private final int callTarget;
   private boolean longCall;
   private final String toStringValue;
 
-  public Call(int opcode,
+  public Call(AvrDeviceKey deviceKey,
+              int opcode,
               int nextOpcode)
   {
     super(opcode << 16 | nextOpcode,
-          0xfe0effff,
           "call");
     int tmp = getOpcode();
     callTarget = (tmp & 0xffff) | ((tmp & 0x1f00000) >> 3) | (tmp & 0x10000);

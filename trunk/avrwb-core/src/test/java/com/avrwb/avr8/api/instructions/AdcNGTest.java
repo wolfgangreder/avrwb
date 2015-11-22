@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Adc;
 import org.testng.annotations.BeforeClass;
 
 /**

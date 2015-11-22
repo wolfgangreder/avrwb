@@ -21,24 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xffff, opcodes = {0x9519})
 public final class EICall extends AbstractInstruction
 {
 
-  public static final int OPCODE = 0x9519;
-
-  public EICall()
+  public EICall(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
-    super(OPCODE,
-          OPCODE,
+    super(0x9519,
           "eicall");
   }
 

@@ -61,7 +61,6 @@ public abstract class Instruction_Rdh_Rrh extends AbstractInstruction
                                 String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdhAddress = ((opcode & 0x70) >> 4) + 16;
     rrhAddress = (opcode & 0x7) + 16;

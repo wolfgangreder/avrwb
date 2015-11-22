@@ -21,21 +21,23 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfe0f, opcodes = 0x9000)
 public final class Lds extends Instruction_Rd_K16
 {
 
-  public static final int OPCODE = 0x9000_0000;
-
-  public Lds(int opcode,
+  public Lds(AvrDeviceKey deviceKey,
+             int opcode,
              int nextOpcode)
   {
     super((opcode << 16) | nextOpcode,

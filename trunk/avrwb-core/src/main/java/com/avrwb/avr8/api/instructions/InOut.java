@@ -21,11 +21,13 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -34,8 +36,25 @@ import java.util.logging.Logger;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xf800, opcodes = {0xb000, 0xb800})
 public final class InOut extends AbstractInstruction
 {
+
+  public static int composeOpcode(int baseOpcode,
+                                  int rd,
+                                  int io)
+  {
+    if ((baseOpcode & ~0xf800) != 0) {
+      throw new IllegalArgumentException("invalid opcode");
+    }
+    if (rd < 0 || rd > 31) {
+      throw new IllegalArgumentException("invalid rd");
+    }
+    if (io < 0 || io > 63) {
+      throw new IllegalArgumentException("invalid io");
+    }
+    return baseOpcode | (rd << 4) | (io & 0xf) | ((io & 0x30) << 5);
+  }
 
   public static final int OPCODE_IN = 0xb000;
   public static final int OPCODE_OUT = 0xb800;
@@ -46,10 +65,11 @@ public final class InOut extends AbstractInstruction
   private int registerVal;
   private int portVal;
 
-  public InOut(int opcode)
+  public InOut(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
-          0xf,
           decodeMnemonic(opcode));
     portAddress = ((opcode & 0x600) >> 5) | (opcode & 0xf);
     registerAddress = (opcode & 0x1f0) >> 4;

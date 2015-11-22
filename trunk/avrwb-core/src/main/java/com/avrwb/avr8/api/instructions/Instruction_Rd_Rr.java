@@ -40,7 +40,22 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rd_Rr extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xfc00;
+  public static int composeOpcode(int opcode,
+                                  int rd,
+                                  int rr)
+  {
+    if ((opcode & ~0xfc00) != 0) {
+      throw new IllegalArgumentException("invalid rd,rr opcode" + Integer.toHexString(opcode));
+    }
+    if (rd > 31 || rd < 0) {
+      throw new IllegalArgumentException("invalid register r" + rd);
+    }
+    if (rr > 31 || rr < 0) {
+      throw new IllegalArgumentException("invalid register r" + rr);
+    }
+    return opcode | (rd << 4) | ((rr & 0x10) << 5) | (rr & 0xf);
+  }
+
   protected int rdVal;
   protected int rrVal;
   private final String toStringVal;
@@ -51,7 +66,6 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
                            String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdAddress = (opcode & 0x1f0) >> 4;
     rrAddress = ((opcode & 0x200) >> 5) | (opcode & 0xf);

@@ -21,21 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = 0x2c00)
 public final class Mov extends Instruction_Rd_Rr
 {
 
   public static final int OPCODE = 0x2c00;
 
-  public Mov(int opcode)
+  public Mov(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "mov");

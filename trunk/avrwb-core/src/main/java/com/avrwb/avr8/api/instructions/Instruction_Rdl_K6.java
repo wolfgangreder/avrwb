@@ -37,7 +37,6 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rdl_K6 extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xff00;
   private final int rdlAddress;
   private final int k6;
   private final String toStringValue;
@@ -47,7 +46,6 @@ public abstract class Instruction_Rdl_K6 extends AbstractInstruction
                             String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdlAddress = ((opcode & 0x30) >> 3) + 24;
     k6 = (opcode & 0xf) + ((opcode & 0xc0) >> 2);

@@ -23,37 +23,33 @@ package com.avrwb.avr8.impl;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
-import com.avrwb.atmelschema.AVRCoreVersion;
-import com.avrwb.atmelschema.ModuleVector;
-import com.avrwb.atmelschema.XA_AvrToolsDeviceFile;
-import com.avrwb.atmelschema.XA_Module;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.Module;
+import com.avrwb.avr8.ModuleBuilderFactory;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.Variant;
-import com.avrwb.avr8.api.InstanceFactories;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.ModuleKey;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.avr8.helper.SimulationException;
-import com.avrwb.schema.AvrCore;
-import com.avrwb.schema.AvrFamily;
+import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.ModuleClass;
+import com.avrwb.schema.XmlAddressSpace;
 import com.avrwb.schema.XmlDevice;
+import com.avrwb.schema.XmlModule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 /**
  *
@@ -120,29 +116,21 @@ final class DeviceImpl implements Device
     } else {
       memories = Collections.unmodifiableList(tmpMemories);
       for (Memory m : memories) {
-        if (AVRWBDefaults.MEMNAME_FLASH.equals(m.getId())) {
+        if (AVRWBDefaults.MEMID_FLASH.equals(m.getId())) {
           tmpFlash = m;
           m.initialize(0xff);
-        } else if (AVRWBDefaults.MEMNAME_SRAM.equals(m.getId())) {
+        } else if (AVRWBDefaults.MEMID_SRAM.equals(m.getId())) {
           tmpSRAM = (SRAM) m;
         }
       }
     }
     flash = tmpFlash;
     sram = tmpSRAM;
-    if (!"AT90S1200".equals(name)) {
-      stack = new MemoryStack(cpu.getStackPointer(),
-                              sram);
-    } else {
-      stack = new HardwareStack();
-    }
-//    deviceKey = new AvrDeviceKey(device.getFamily(),
-//                                 device.getArchitecture(),
-//                                 cpu.getCoreVersion(),
-//                                 device.getName());
-    deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                 AvrCore.V1,
-                                 name);
+    stack = new MemoryStack(cpu.getStackPointer(),
+                            sram);
+    deviceKey = new AvrDeviceKey(device.getFamily(),
+                                 device.getAvrCore(),
+                                 device.getName());
   }
 
   private Logger createDeviceLogger(String deviceName)
@@ -165,63 +153,31 @@ final class DeviceImpl implements Device
     return deviceLogger;
   }
 
-  private static AVRCoreVersion extractCoreVersion(XA_AvrToolsDeviceFile file,
-                                                   String deviceName) throws ItemNotFoundException
-  {
-    XA_Module modCPU = file.findModule(new ModuleVector(deviceName,
-                                                        "CPU"));
-    AVRCoreVersion result = AVRCoreVersion.V1;
-    if (modCPU != null) {
-      String strProp = modCPU.getParameter().get(AVRWBDefaults.PROP_CORE_VERSION);
-      if (strProp != null) {
-        try {
-          result = AVRCoreVersion.valueOf(strProp);
-        } catch (IllegalArgumentException ex) {
-          Exceptions.printStackTrace(ex);
-          throw new ItemNotFoundException("cannot parse core version \"" + strProp + "\"");
-        }
-      }
-    }
-    return result;
-  }
-
   private static List<Module> initModules(XmlDevice device,
                                           NotFoundStrategy nfStrategy) throws ItemNotFoundException
   {
-//    final AVRCoreVersion version = extractCoreVersion(file,
-//                                                      device.getName());
-    final ModuleKey baseKey = new ModuleKey(".",
-                                            AvrCore.V1,
-                                            AvrFamily.TINY,
-                                            ModuleClass.OTHER);
+    ModuleKey baseKey = new ModuleKey("",
+                                      device.getAvrCore(),
+                                      device.getFamily(),
+                                      ModuleClass.OTHER);
     final ModuleResolver moduleResolver = ModuleResolver.getInstance();
     final List<Module> result = new ArrayList<>();
-//
-//    for (XA_DeviceModule moduleDescriptor : device.getModules()) {
-//      ModuleVector mv = new ModuleVector(device.getName(),
-//                                         moduleDescriptor.getName());
-//      XA_Module module = file.findModule(mv);
-//      if (module != null) {
-//        ModuleKey currentKey = baseKey.withName(moduleDescriptor.getName());
-//        ModuleBuilderFactory factory = moduleResolver.findModuleBuilder(currentKey);
-//        if (factory != null) {
-//          result.add(factory.createBuilder().
-//                  descriptor(file).
-//                  moduleDescriptor(module).
-//                  moduleVector(mv).
-//                  notFoundStrategy(nfStrategy).
-//                  build());
-//        } else {
-//          ItemNotFoundException.processItemNotFound(device.getName(),
-//                                                    moduleDescriptor.getName(),
-//                                                    nfStrategy);
-//        }
-//      } else {
-//        ItemNotFoundException.processItemNotFound(device.getName(),
-//                                                  moduleDescriptor.getName(),
-//                                                  nfStrategy);
-//      }
-//    }
+    for (XmlModule mod : device.getModules().getModule()) {
+      ModuleKey currentKey = baseKey.withNameAndClass(mod.getName(),
+                                                      mod.getClazz());
+      ModuleBuilderFactory factory = moduleResolver.findModuleBuilder(currentKey);
+      if (factory != null) {
+        result.add(factory.createBuilder().
+                moduleDescriptor(mod).
+                device(device).
+                notFoundStrategy(nfStrategy).
+                build());
+      } else {
+        ItemNotFoundException.processItemNotFound(device.getName(),
+                                                  mod.getName(),
+                                                  nfStrategy);
+      }
+    }
     return result;
   }
 
@@ -230,9 +186,9 @@ final class DeviceImpl implements Device
   {
     MemoryBuilder builder = InstanceFactories.getMemoryBuilder();
     List<Memory> result = new ArrayList<>();
-//    for (XA_AddressSpace space : device.getAdressSpaces()) {
-//      result.add(builder.fromAddressSpace(space).build());
-//    }
+    for (XmlAddressSpace space : device.getAddressSpaces().getAddressSpace()) {
+      result.add(builder.fromAddressSpace(space).build());
+    }
     return result;
   }
 

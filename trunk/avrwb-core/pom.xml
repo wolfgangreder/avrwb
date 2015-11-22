@@ -10,29 +10,7 @@
     <packaging>nbm</packaging>
     <build>
         <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>jaxb2-maven-plugin</artifactId>
-            <version>2.2</version>
-            <executions>
-              <execution>
-                <id>xjc</id>
-                <goals>
-                  <goal>xjc</goal>
-                </goals>
-              </execution>
-            </executions>
-            <configuration>
-              <packageName>com.avrwb.schema</packageName>
-              <addGeneratedAnnotation>true</addGeneratedAnnotation>
-              <sources>
-                <source>src/main/resources/com/avrwb/schema</source>
-              </sources>
-              <locale>en</locale>
-              <createJavaDocAnnotations>true</createJavaDocAnnotations>
-              <enableIntrospection>true</enableIntrospection>
-            </configuration>
-          </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
@@ -47,6 +25,7 @@
                         <publicPackage>com.avrwb.io</publicPackage>
                         <publicPackage>com.avrwb.avr8.helper</publicPackage>
                         <publicPackage>com.avrwb.schema.util</publicPackage>
+                        <publicPackage>com.avrwb.avr8.spi</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>
@@ -102,6 +81,11 @@
             <artifactId>org-openide-util</artifactId>
             <version>RELEASE81</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>com.avrwb.avrawb-base</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <properties>

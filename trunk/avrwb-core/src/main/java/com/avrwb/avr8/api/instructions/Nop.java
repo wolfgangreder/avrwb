@@ -21,26 +21,27 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockPhase;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xffff, opcodes = 0x0000)
 public final class Nop extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xffff;
-  public static final int OPCODE = 0x0000;
-
-  public Nop(int opcode)
+  public Nop(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(0x0,
-          0xffff,
           "nop");
   }
 

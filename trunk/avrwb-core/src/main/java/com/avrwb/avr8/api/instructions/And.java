@@ -21,21 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0x2000})
 public final class And extends Instruction_Rd_Rr
 {
 
   public static final int OPCODE = 0x2000;
 
-  public And(int opcode)
+  public And(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "and");

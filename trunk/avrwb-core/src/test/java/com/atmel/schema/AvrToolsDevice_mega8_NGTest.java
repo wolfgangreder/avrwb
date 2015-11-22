@@ -73,7 +73,7 @@ public class AvrToolsDevice_mega8_NGTest
   @Test
   public void testStreaming() throws IOException
   {
-    mega8URL = getClass().getResource("/com/avrwb/devices/ATmega8.xml");
+    mega8URL = getClass().getResource("/com/atmel/devices/ATmega8.xml");
     mega8 = XA_AvrToolsDeviceFile.load(mega8URL);
   }
 

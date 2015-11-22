@@ -36,7 +36,6 @@ public abstract class Instruction_K4 extends AbstractInstruction
                            String mnemomic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemomic);
     k4 = (opcode & ~OPCODE_MASK) >> 4;
     toStringVal = mnemomic + " " + k4;

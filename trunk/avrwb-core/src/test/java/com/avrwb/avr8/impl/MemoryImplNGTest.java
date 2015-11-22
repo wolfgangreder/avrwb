@@ -59,7 +59,7 @@ public class MemoryImplNGTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    mega8URL = MemoryImplNGTest.class.getResource("/com/atmel/devices/ATmega8.xml");
+    mega8URL = MemoryImplNGTest.class.getResource("/com/avrwb/devices/ATmega8.xml");
     mega8 = DeviceStreamer.loadDevice(mega8URL,
                                       null);
     for (XmlAddressSpace space : mega8.getDevice().getAddressSpaces().getAddressSpace()) {

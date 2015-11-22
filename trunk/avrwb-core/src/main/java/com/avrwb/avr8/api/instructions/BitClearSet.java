@@ -21,11 +21,13 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -34,18 +36,18 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x9408})
 public final class BitClearSet extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xff0f;
-  public static final int OPCODE = 0x9408;
   private final boolean setBit;
   private final int bitOffset;
 
-  public BitClearSet(int opcode)
+  public BitClearSet(AvrDeviceKey deviceKey,
+                     int opcode,
+                     int nextOpcode)
   {
     super(opcode,
-          0xff0f,
           decodeMnemonic(opcode));
     setBit = decodeSetBit(opcode);
     bitOffset = decodeBitOffset(opcode);

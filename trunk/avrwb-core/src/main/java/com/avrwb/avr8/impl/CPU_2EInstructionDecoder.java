@@ -25,7 +25,7 @@ package com.avrwb.avr8.impl;
  *
  * @author wolfi
  */
-public class CPU_2EInstructionDecoder extends DefaultInstructionDecoder
+public class CPU_2EInstructionDecoder extends DefaultInstructionDecoder2
 {
 
 }

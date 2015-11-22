@@ -19,23 +19,29 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.api;
+package com.avrwb.atmelschema.util;
 
-import com.avrwb.annotations.Invariants;
-import com.avrwb.annotations.NotNull;
-import com.avrwb.avr8.Device;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.avr8.MemoryAccessSet;
+import com.avrwb.schema.util.Converter;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  *
  * @author wolfi
  */
-public interface InstructionDecoder
+public final class MemoryAccessConverter extends XmlAdapter<String, MemoryAccessSet>
 {
 
-  @NotNull
-  Instruction getInstruction(@NotNull Device device,
-                             @Invariants("address mod 2 == 0") int address) throws NullPointerException, IllegalArgumentException,
-                                                                                   InstructionNotAvailableException;
+  @Override
+  public MemoryAccessSet unmarshal(String v)
+  {
+    return Converter.parseMemoryAccessSet(v);
+  }
+
+  @Override
+  public String marshal(MemoryAccessSet v)
+  {
+    return Converter.printMemoryAccessSet(v);
+  }
 
 }

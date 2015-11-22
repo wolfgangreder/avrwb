@@ -21,12 +21,14 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -35,7 +37,8 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-public class Cpse extends Instruction_Rd_Rr
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0x1000})
+public final class Cpse extends Instruction_Rd_Rr
 {
 
   public static final int OPCODE = 0x1000;
@@ -43,7 +46,9 @@ public class Cpse extends Instruction_Rd_Rr
   private int nextIpDelta = 1;
   private Instruction nextInstruction;
 
-  public Cpse(int opcode)
+  public Cpse(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "cpse");
