@@ -21,16 +21,22 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.avr8.helper.AvrDeviceKey;
+
 /**
  *
  * @author wolfi
  */
-public class Sub extends AbstractSub
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = 0x1800)
+public final class Sub extends AbstractSub
 {
 
   public static final int OPCODE = 0x1800;
 
-  public Sub(int opcode)
+  public Sub(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "sub",

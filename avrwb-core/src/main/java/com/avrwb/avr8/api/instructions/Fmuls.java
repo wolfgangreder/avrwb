@@ -21,21 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xff88, opcodes = {0x0380})
 public final class Fmuls extends Instruction_Rdh_Rrh
 {
 
   public static final int OPCODE = 0x0380;
 
-  public Fmuls(int opcode)
+  public Fmuls(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "fmuls");

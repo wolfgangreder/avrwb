@@ -21,23 +21,28 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfe0f, opcodes = 0x920f)
 public final class Push extends Instruction_Rd
 {
 
   public static final int OPCODE = 0x920f;
 
-  public Push(int opcode)
+  public Push(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "push");

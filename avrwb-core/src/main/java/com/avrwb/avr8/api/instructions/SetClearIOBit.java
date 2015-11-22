@@ -21,11 +21,13 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.text.MessageFormat;
 
@@ -33,14 +35,15 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xff00, opcodes = {0x9800, 0x9a00})
 public final class SetClearIOBit extends Instruction_P_b
 {
 
-  public static final int OPCODE_CBI = 0x9800;
-  public static final int OPCODE_SBI = 0x9a00;
   private final boolean setBit;
 
-  public SetClearIOBit(int opcode)
+  public SetClearIOBit(AvrDeviceKey deviceKey,
+                       int opcode,
+                       int nextOpcode)
   {
     super(opcode,
           decodeMnemonic(opcode));

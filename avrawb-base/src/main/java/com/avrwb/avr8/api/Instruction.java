@@ -53,18 +53,11 @@ public interface Instruction
   public int getCycleCount();
 
   /**
-   * Der Basisopcode (ohne Parameterwerte)
+   * Der Opcode.
    *
    * @return opcode
    */
   public int getOpcode();
-
-  /**
-   * Die Maske des Opcodes (= der unveränderlichen Bits des Opcodes).
-   *
-   * @return opcodeMask
-   */
-  public int getOpcodeMask();
 
   /**
    * Größe des Befehls in Byte.

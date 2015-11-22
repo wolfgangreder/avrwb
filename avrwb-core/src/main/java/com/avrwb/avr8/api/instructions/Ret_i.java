@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
@@ -28,6 +29,7 @@ import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -36,15 +38,17 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xffff, opcodes = {0x9508, 0x9518})
 public final class Ret_i extends AbstractInstruction
 {
 
   private boolean longRet;
 
-  public Ret_i(int opcode)
+  public Ret_i(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
-          0xffff,
           isReti(opcode) ? "reti" : "ret");
   }
 

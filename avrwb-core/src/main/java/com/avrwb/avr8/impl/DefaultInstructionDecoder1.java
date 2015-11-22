@@ -39,7 +39,6 @@ import com.avrwb.avr8.api.instructions.Bst;
 import com.avrwb.avr8.api.instructions.Call;
 import com.avrwb.avr8.api.instructions.Com;
 import com.avrwb.avr8.api.instructions.Cp;
-import com.avrwb.avr8.api.instructions.Cpc;
 import com.avrwb.avr8.api.instructions.Cpi;
 import com.avrwb.avr8.api.instructions.Cpse;
 import com.avrwb.avr8.api.instructions.Dec;
@@ -48,10 +47,8 @@ import com.avrwb.avr8.api.instructions.ICall;
 import com.avrwb.avr8.api.instructions.IJmp;
 import com.avrwb.avr8.api.instructions.InOut;
 import com.avrwb.avr8.api.instructions.Inc;
-import com.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
 import com.avrwb.avr8.api.instructions.Jmp;
 import com.avrwb.avr8.api.instructions.Ld;
-import com.avrwb.avr8.api.instructions.Ldi;
 import com.avrwb.avr8.api.instructions.Mov;
 import com.avrwb.avr8.api.instructions.Mul;
 import com.avrwb.avr8.api.instructions.Neg;
@@ -62,7 +59,6 @@ import com.avrwb.avr8.api.instructions.Push;
 import com.avrwb.avr8.api.instructions.Rcall;
 import com.avrwb.avr8.api.instructions.Ret_i;
 import com.avrwb.avr8.api.instructions.Ror;
-import com.avrwb.avr8.api.instructions.Sbc;
 import com.avrwb.avr8.api.instructions.Sbiw;
 import com.avrwb.avr8.api.instructions.SetClearIOBit;
 import com.avrwb.avr8.api.instructions.Sub;
@@ -107,37 +103,44 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
     return result;
   }
 
-  protected Instruction decodeInstruction(AvrDeviceKey deviceKey,
-                                          int opcode,
-                                          int nextOpcode)
+  @Override
+  public Instruction decodeInstruction(AvrDeviceKey deviceKey,
+                                       int opcode,
+                                       int nextOpcode)
   {
     switch (opcode & 0xc000) {
       case 0x0000:
         return decode_0xxx(deviceKey,
-                           opcode);
+                           opcode,
+                           nextOpcode);
       case 0x4000:
         return decode_4xxx(deviceKey,
-                           opcode);
+                           opcode,
+                           nextOpcode);
       case 0x8000:
         return decode_8xxx(deviceKey,
                            opcode,
                            nextOpcode);
       case 0xc000:
         return decode_cxxx(deviceKey,
-                           opcode);
+                           opcode,
+                           nextOpcode);
     }
     return null;
   }
 
   protected Instruction decode_0xxx(AvrDeviceKey deviceKey,
-                                    int opcode)
+                                    int opcode,
+                                    int nextOpcode)
   {
     switch (opcode & 0x3000) {
       case 0x0000:
         switch (opcode & 0x0c00) {
           case 0x0000:
             if (opcode == 0) {
-              return new Nop(opcode);
+              return new Nop(deviceKey,
+                             opcode,
+                             nextOpcode);
 //            } else if ((opcode & Operation_Rd_Rr.MASK) == Movw.OPCODE) {
 //              return Movw.getOperation(opcode);
 //            } else {
@@ -145,65 +148,90 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
             }
             break;
           case 0x0400:
-            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Cpc.OPCODE) {
-              return new Cpc(opcode);
-            }
+//            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Cpc.OPCODE) {
+//              return new Cpc(opcode);
+//            }
             break;
           case 0x0800:
-            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Sbc.OPCODE) {
-              return new Sbc(opcode);
-            }
+//            if ((opcode & Instruction_Rd_Rr.OPCODE_MASK) == Sbc.OPCODE) {
+//              return new Sbc(opcode);
+//            }
             break;
           case 0x0c00:
-            return new Add(opcode);
+            return new Add(deviceKey,
+                           opcode,
+                           nextOpcode);
         }
         break;
       case 0x1000:
         return decode_1xxx(deviceKey,
-                           opcode);
+                           opcode,
+                           nextOpcode);
       case 0x2000:
         return decode_2xxx(deviceKey,
-                           opcode);
+                           opcode,
+                           nextOpcode);
       case 0x3000:
-        return new Cpi(opcode);
+        return new Cpi(deviceKey,
+                       opcode,
+                       nextOpcode);
     }
     return null;
   }
 
   protected Instruction decode_1xxx(AvrDeviceKey deviceKey,
-                                    int opcode)
+                                    int opcode,
+                                    int nextOpcode)
   {
     switch (opcode & 0x0c00) {
       case 0x0000:
-        return new Cpse(opcode);
+        return new Cpse(deviceKey,
+                        opcode,
+                        nextOpcode);
       case 0x0400:
-        return new Cp(opcode);
+        return new Cp(deviceKey,
+                      opcode,
+                      nextOpcode);
       case 0x0800:
-        return new Sub(opcode);
+        return new Sub(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x0c00:
-        return new Adc(opcode);
+        return new Adc(deviceKey,
+                       opcode,
+                       opcode);
     }
     return null;
   }
 
   protected Instruction decode_2xxx(AvrDeviceKey deviceKey,
-                                    int opcode)
+                                    int opcode,
+                                    int nextOpcode)
   {
     switch (opcode & 0x0c00) {
       case 0x0000:
-        return new And(opcode);
+        return new And(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x0400:
-        return new Eor(opcode);
+        return new Eor(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x0800:
-        return new Or(opcode);
+        return new Or(deviceKey,
+                      opcode,
+                      nextOpcode);
       case 0x0c00:
-        return new Mov(opcode);
+        return new Mov(deviceKey,
+                       opcode,
+                       nextOpcode);
     }
     return null;
   }
 
   protected Instruction decode_4xxx(AvrDeviceKey deviceKey,
-                                    int opcode)
+                                    int opcode,
+                                    int nextOpcode)
   {
     switch (opcode & 0xf000) {
 //      case 0x4000:
@@ -213,20 +241,23 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
 //      case 0x6000:
 //        return Ori.getOperation(opcode);
       case 0x7000:
-        return new Andi(opcode);
+        return new Andi(deviceKey,
+                        opcode,
+                        nextOpcode);
     }
     return null;
   }
 
   protected Instruction decode_8xxx(AvrDeviceKey deviceKey,
                                     int opcode,
-                                    int nextopcode)
+                                    int nextOpcode)
   {
     switch (opcode & 0xf000) {
       case 0x8000:
         if ((opcode & 0x0200) == 0) {
           return Ld.getInstance(deviceKey,
-                                opcode);
+                                opcode,
+                                nextOpcode);
         } else {
 //          if ((opcode & 0x2c07) == 0) {
 //            return St.getOperation(opcode);
@@ -240,38 +271,48 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
           case 0x9100:
             return decode_90xx(deviceKey,
                                opcode,
-                               nextopcode);
+                               nextOpcode);
           case 0x9200:
           case 0x9300:
             return decode_92xx(deviceKey,
                                opcode,
-                               nextopcode);
+                               nextOpcode);
           case 0x9400:
           case 0x9500:
             return decode_94xx(deviceKey,
                                opcode,
-                               nextopcode);
+                               nextOpcode);
           case 0x9600:
             if (deviceKey.getCore() == AvrCore.V2E) {
-              return new Adiw(opcode);
+              return new Adiw(deviceKey,
+                              opcode,
+                              nextOpcode);
             }
             break;
           case 0x9700:
             if (deviceKey.getCore() == AvrCore.V2E) {
-              return new Sbiw(opcode);
+              return new Sbiw(deviceKey,
+                              opcode,
+                              nextOpcode);
             }
             break;
           case 0x9800:
-            return new SetClearIOBit(opcode);
+            return new SetClearIOBit(deviceKey,
+                                     opcode,
+                                     nextOpcode);
 //          case 0x9900:
 //            return Sbic.getOperation(opcode);
           case 0x9a00:
-            return new SetClearIOBit(opcode);
+            return new SetClearIOBit(deviceKey,
+                                     opcode,
+                                     nextOpcode);
 //          case 0x9b00:
 //            return Sbis.getOperation(opcode);
           case 0x9c00:
             if (deviceKey.getCore() == AvrCore.V2E) {
-              return new Mul(opcode);
+              return new Mul(deviceKey,
+                             opcode,
+                             nextOpcode);
             }
             break;
         }
@@ -280,7 +321,9 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
         switch (opcode & 0xf800) {
           case 0xb000:
           case 0xb800:
-            return new InOut(opcode);
+            return new InOut(deviceKey,
+                             opcode,
+                             nextOpcode);
         }
         break;
     }
@@ -314,7 +357,9 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
 //      case 0x900e:
 //        return Ld.getOperation(opcode);
       case 0x900f:
-        return new Pop(opcode);
+        return new Pop(deviceKey,
+                       opcode,
+                       nextopcode);
     }
     return null;
   }
@@ -340,7 +385,9 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
 //      case 0x920e:
 //        return St.getOperation(opcode);
       case 0x920f:
-        return new Push(opcode);
+        return new Push(deviceKey,
+                        opcode,
+                        nextOpcode);
     }
     return null;
   }
@@ -351,7 +398,9 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
   {
     switch (opcode) {
       case 0x9409:
-        return new IJmp();
+        return new IJmp(deviceKey,
+                        opcode,
+                        nextOpcode);
 //      case 0x9419:
 //        return Eijmp.getOperation();
       case 0x9408:
@@ -370,19 +419,29 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
       case 0x94d8:
       case 0x94e8:
       case 0x94f8:
-        return new BitClearSet(opcode);
+        return new BitClearSet(deviceKey,
+                               opcode,
+                               nextOpcode);
       case 0x9508:
-        return new Ret_i(opcode);
+        return new Ret_i(deviceKey,
+                         opcode,
+                         nextOpcode);
       case 0x9509:
-        return new ICall();
+        return new ICall(deviceKey,
+                         opcode,
+                         nextOpcode);
       case 0x9518:
-        return new Ret_i(opcode);
+        return new Ret_i(deviceKey,
+                         opcode,
+                         nextOpcode);
 //      case 0x9519:
 //        return Eicall.getOperation();
 //      case 0x9588:
 //        return Sleep.getOperation();
       case 0x9598:
-        return new Break();
+        return new Break(deviceKey,
+                         opcode,
+                         nextOpcode);
 //      case 0x95a8:
 //        return Wdr.getOperation();
 //      case 0x95c8:
@@ -394,55 +453,80 @@ public class DefaultInstructionDecoder1 implements InstructionDecoder
     }
     switch (opcode & 0xfe0f) {
       case 0x9400:
-        return new Com(opcode);
+        return new Com(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x9401:
-        return new Neg(opcode);
+        return new Neg(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x9402:
-        return new Swap(opcode);
+        return new Swap(deviceKey,
+                        opcode,
+                        nextOpcode);
       case 0x9403:
-        return new Inc(opcode);
+        return new Inc(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x9405:
-        return new Asr(opcode);
+        return new Asr(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x9407:
-        return new Ror(opcode);
+        return new Ror(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0x940a:
-        return new Dec(opcode);
+        return new Dec(deviceKey,
+                       opcode,
+                       nextOpcode);
     }
     switch (opcode & 0xfe0e) {
       case 0x940c:
-        return new Jmp(opcode,
+        return new Jmp(deviceKey,
+                       opcode,
                        nextOpcode);
       case 0x940e:
-        return new Call(opcode,
+        return new Call(deviceKey,
+                        opcode,
                         nextOpcode);
     }
     return null;
   }
 
   protected Instruction decode_cxxx(AvrDeviceKey deviceKey,
-                                    int opcode)
+                                    int opcode,
+                                    int nextOpcode)
   {
     switch (opcode & 0xf000) {
 //      case 0xc000:
 //        return Rjmp.getOperation(opcode);
       case 0xd000:
-        return new Rcall(opcode);
+        return new Rcall(deviceKey,
+                         opcode,
+                         nextOpcode);
       case 0xe000:
-        if ((opcode & Ldi.OPCODE) == Ldi.OPCODE) {
-          return new Ldi(opcode);
-        }
+//        if ((opcode & Ldi.OPCODE) == Ldi.OPCODE) {
+//          return new Ldi(opcode);
+//        }
       //return Ldi.getOperation(opcode);      //return Ldi.getOperation(opcode);
     }
     switch (opcode & 0xfc00) {
       case 0xf000:
       case 0xf400:
-        return new BranchInstruction(opcode);
+        return new BranchInstruction(deviceKey,
+                                     opcode,
+                                     nextOpcode);
     }
     switch (opcode & 0xfe00) {
       case 0xf800:
-        return new Bld(opcode);
+        return new Bld(deviceKey,
+                       opcode,
+                       nextOpcode);
       case 0xfa00:
-        return new Bst(opcode);
+        return new Bst(deviceKey,
+                       opcode,
+                       nextOpcode);
 //      case 0xfc00:
 //        return Sbrc.getOperation(opcode);
 //      case 0xfe00:

@@ -21,13 +21,8 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Ld;
-import com.avrwb.avr8.api.instructions.Instruction_K4;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.api.Instruction;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import static org.testng.AssertJUnit.*;
 
 /**
  *
@@ -36,27 +31,8 @@ import static org.testng.AssertJUnit.*;
 public class AbstractInstructionTest
 {
 
-  protected static void checkStaticField(Class<? extends Instruction> clazz,
-                                         String fieldName) throws Exception
-  {
-    Field field = clazz.getField(fieldName);
-    assertTrue(fieldName + " is not static",
-               Modifier.isStatic(field.getModifiers()));
-    assertTrue(fieldName + " is not final",
-               Modifier.isFinal(field.getModifiers()));
-    assertTrue(fieldName + " is not public",
-               Modifier.isPublic(field.getModifiers()));
-    Class<?> fieldClazz = field.getType();
-    assertEquals(fieldName + " is not of type int",
-                 Integer.TYPE,
-                 fieldClazz);
-
-  }
-
   protected static void testClass(Class<? extends Instruction> clazz) throws Exception
   {
-    assertTrue(clazz.getName() + " is not final",
-               Modifier.isFinal(clazz.getModifiers()));
   }
 
   protected int constructOpcodeCallJmp(int baseOpcode,

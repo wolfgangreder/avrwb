@@ -21,15 +21,27 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementations(value = {
+  @InstructionImplementation(opcodeMask = 0xffff,
+                             opcodes = 0x95d8,
+                             implementedCores = {"I6000"}),
+  @InstructionImplementation(opcodeMask = 0xfe0f,
+                             opcodes = {0x9006, 0x9007},
+                             implementedCores = {"I6000"}
+  )},
+                            factoryMethod = "getInstance")
 public final class Elpm extends AbstractInstruction
 {
 
@@ -39,11 +51,12 @@ public final class Elpm extends AbstractInstruction
   public static final int OPCODE_ELPM_RDP = 0x9007;
   public static final int OPCODE_MASK_ELPM_RD = 0xfe0f;
 
-  public static Elpm getInstance(int opcode)
+  public static Elpm getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
   {
     if (opcode == OPCODE_ELPM) {
       return new Elpm(opcode,
-                      OPCODE_MASK_ELPM,
                       0,
                       "elpm",
                       false);
@@ -57,7 +70,6 @@ public final class Elpm extends AbstractInstruction
         toStringVal.append("+");
       }
       return new Elpm(opcode,
-                      OPCODE_MASK_ELPM_RD,
                       rdAddress,
                       "elpm",
                       pi);
@@ -68,13 +80,11 @@ public final class Elpm extends AbstractInstruction
   private final boolean postIncrement;
 
   private Elpm(int opcode,
-               int opcodemask,
                int rdAddress,
                String mnemonic,
                boolean postIncrement)
   {
     super(opcode,
-          opcodemask,
           mnemonic);
     this.rdAddress = rdAddress;
     this.postIncrement = postIncrement;

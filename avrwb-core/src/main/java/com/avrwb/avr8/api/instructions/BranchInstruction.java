@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
@@ -28,6 +29,7 @@ import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
@@ -38,22 +40,40 @@ import java.util.logging.Level;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0xf000, 0xf400})
 public final class BranchInstruction extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xfc00;
   public static final int OPCODE_SET = 0xf000;
   public static final int OPCODE_CLR = 0xf400;
+
+  public static int composeOpcode(int baseOpcode,
+                                  int bit,
+                                  int offset)
+  {
+    if ((baseOpcode & ~0xfc00) != 0) {
+      throw new IllegalArgumentException("invalid opcode");
+    }
+    if (bit < 0 || bit > 7) {
+      throw new IllegalArgumentException("invalid bit");
+    }
+    if (offset < -64 || offset > 63) {
+      throw new IllegalArgumentException("invalid offset");
+    }
+    return baseOpcode | bit | ((offset & 0x7f) << 3);
+  }
+
   private final int bitOffset;
   private final int offset;
   private final boolean bitSet;
   private boolean branch;
   private final String toStringValue;
 
-  public BranchInstruction(int opcode)
+  public BranchInstruction(AvrDeviceKey deviceKey,
+                           int opcode,
+                           int nextOpcode)
   {
     super(opcode,
-          OPCODE_MASK,
           decodeMnemonic(opcode));
     offset = decodeOffset(opcode);
     bitOffset = decodeBitOffset(opcode);

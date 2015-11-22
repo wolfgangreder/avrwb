@@ -21,10 +21,12 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -33,18 +35,18 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfe0e, opcodes = {0x940c})
 public final class Jmp extends AbstractInstruction
 {
 
-  public static final int OPCODE = 0x940c0000;
   private final int callTarget;
   private final String toStringValue;
 
-  public Jmp(int opcode,
+  public Jmp(AvrDeviceKey deviceKey,
+             int opcode,
              int nextOpcode)
   {
     super(opcode << 16 | nextOpcode,
-          0xfe0effff,
           "jmp");
     int tmp = getOpcode();
     callTarget = (tmp & 0xffff) | ((tmp & 0x1f00000) >> 3) | (tmp & 0x10000);

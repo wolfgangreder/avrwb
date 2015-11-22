@@ -21,26 +21,29 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
-public final class Sbr extends Instruction_Rd_K8
+@InstructionImplementation(opcodeMask = 0xfe0f, opcodes = 0x9406)
+public final class Lsr extends Instruction_Rd
 {
 
-  public static final int OPCODE = 0x6000;
+  public static final int OPCODE = 0x9406;
 
-  public Sbr(int opcode)
+  public Lsr(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
-          "sbr");
+          "lsr");
   }
 
   @Override
@@ -48,29 +51,7 @@ public final class Sbr extends Instruction_Rd_K8
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    final SREG sreg = device.getCPU().getSREG();
-    final SRAM sram = device.getSRAM();
-    final int oldRd = rdVal;
-    final int oldSREG = sreg.getValue();
-    rdVal |= k8;
-    sreg.setZ(rdVal == 0);
-    sreg.setN((rdVal & 0x80) != 0);
-    sreg.setV(false);
-    sreg.fixSignBit();
-    if (oldSREG != sreg.getValue()) {
-      resultBuilder.addModifiedRegister(sreg);
-    }
-    if (oldRd != rdVal) {
-      sram.setByteAt(rdAddress,
-                     rdVal);
-      resultBuilder.addModifiedDataAddresses(rdAddress);
-    }
-    resultBuilder.finished(true,
-                           device.getCPU().getIP() + 1);
-    logExecutionResult(clockState,
-                       device,
-                       rdVal,
-                       rdAddress);
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

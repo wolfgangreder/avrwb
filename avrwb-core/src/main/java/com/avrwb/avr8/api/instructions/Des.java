@@ -21,21 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x940b}, implementedCores = {"I600"})
 public final class Des extends Instruction_K4
 {
 
   public static final int OPCODE = 0x940b;
 
-  public Des(int opcode)
+  public Des(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "des");

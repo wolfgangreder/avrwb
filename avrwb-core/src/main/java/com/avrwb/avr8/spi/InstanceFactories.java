@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.api;
+package com.avrwb.avr8.spi;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.Stateless;
@@ -30,6 +30,7 @@ import com.avrwb.avr8.RegisterBitGrpBuilder;
 import com.avrwb.avr8.RegisterBitGrpValueBuilder;
 import com.avrwb.avr8.RegisterBuilder;
 import com.avrwb.avr8.VariantBuilder;
+import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.api.instructions.InstructionResultBuilderImpl;
 import com.avrwb.avr8.impl.DeviceBuilderImpl;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;

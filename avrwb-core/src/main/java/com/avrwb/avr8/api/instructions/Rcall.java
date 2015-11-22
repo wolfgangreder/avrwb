@@ -21,12 +21,14 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -35,26 +37,19 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-public final class Rcall extends AbstractInstruction
+@InstructionImplementation(opcodeMask = 0xf000, opcodes = 0xd000)
+public final class Rcall extends Instruction_k12
 {
 
   public static final int OPCODE = 0xd000;
-  private final int callOffset;
   private boolean longCall;
-  private final String toStringValue;
 
-  public Rcall(int opcode)
+  public Rcall(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
-          OPCODE,
           "rcall");
-    int tmp = opcode & 0xfff;
-    if ((tmp & 0x800) != 0) {
-      tmp |= ((-1) & ~0xfff);
-    }
-    callOffset = tmp;
-    toStringValue = MessageFormat.format("rcall {0,number,0}",
-                                         callOffset);
   }
 
   @Override
@@ -99,7 +94,7 @@ public final class Rcall extends AbstractInstruction
           resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
         }
       }
-      final int targetIP = device.getCPU().getIP() + callOffset;
+      final int targetIP = device.getCPU().getIP() + k12;
       resultBuilder.finished(true,
                              targetIP);
       if (AVRWBDefaults.isDebugLoggingActive()) {
@@ -111,12 +106,6 @@ public final class Rcall extends AbstractInstruction
                                                                                    device.getFlash().getHexAddressStringWidth())));
       }
     }
-  }
-
-  @Override
-  public String toString()
-  {
-    return toStringValue;
   }
 
 }

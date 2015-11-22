@@ -21,22 +21,27 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xf000, opcodes = {0x7000})
 public final class Andi extends Instruction_Rd_K8
 {
 
   public static final int OPCODE = 0x7000;
 
-  public Andi(int opcode)
+  public Andi(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "andi");
@@ -70,5 +75,5 @@ public final class Andi extends Instruction_Rd_K8
                        rdVal,
                        rdAddress);
   }
-  
+
 }

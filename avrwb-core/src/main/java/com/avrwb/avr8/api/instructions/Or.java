@@ -21,21 +21,26 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
  * @author wolfi
  */
-public class Or extends Instruction_Rd_Rr
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = 0x2800)
+public final class Or extends Instruction_Rd_Rr
 {
 
   public static final int OPCODE = 0x2800;
 
-  public Or(int opcode)
+  public Or(AvrDeviceKey deviceKey,
+            int opcode,
+            int nextOpcode)
   {
     super(opcode,
           "or");

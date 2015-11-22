@@ -21,25 +21,30 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xf000, opcodes = {0x4000, 0x5000})
 public final class Sbci_Subi extends Instruction_Rd_K8
 {
 
-  public static final int OPCODE_SBCI = 0x4000;
   public static final int OPCODE_SUBI = 0x5000;
+  public static final int OPCODE_SBCI = 0x4000;
   private final boolean withCarry;
 
-  public Sbci_Subi(int opcode)
+  public Sbci_Subi(AvrDeviceKey deviceKey,
+                   int opcode,
+                   int nextOpcode)
   {
     super(opcode,
           (opcode & 0x1000) != 0 ? "subi" : "sbci");

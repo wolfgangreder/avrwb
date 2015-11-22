@@ -48,7 +48,6 @@ public abstract class Instruction_Rd_b extends AbstractInstruction
                              String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdAddress = (opcode & 0x1f0) >> 4;
     bit = (opcode & 0x7);

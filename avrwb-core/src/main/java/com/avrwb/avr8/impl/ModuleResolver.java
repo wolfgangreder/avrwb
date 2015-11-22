@@ -27,9 +27,10 @@ import com.avrwb.annotations.NullAllowed;
 import com.avrwb.annotations.ProvidedModule;
 import com.avrwb.annotations.ProvidedModules;
 import com.avrwb.annotations.ThreadSave;
-import com.avrwb.atmelschema.Architecture;
 import com.avrwb.avr8.ModuleBuilderFactory;
 import com.avrwb.avr8.helper.ModuleKey;
+import com.avrwb.schema.AvrCore;
+import com.avrwb.schema.AvrFamily;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,7 +57,7 @@ public final class ModuleResolver
   }
   private final Lookup.Result<ModuleBuilderFactory> lookupResult;
   @GuardedBy("lookupResult")
-  private final Map<Architecture, Map<ModuleKey, ModuleBuilderFactory>> modules = new HashMap<>();
+  private final Map<AvrFamily, Map<ModuleKey, ModuleBuilderFactory>> modules = new HashMap<>();
 
   /**
    * Liefert die Standardinstanz
@@ -98,19 +99,21 @@ public final class ModuleResolver
 
   private void processFactory(ModuleBuilderFactory mf)
   {
-//    List<ProvidedModule> m = getProviedModules(mf.getClass());
-//    for (ProvidedModule pm : m) {
-//      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.architecture(),
-//                                                                        (Architecture a) -> new HashMap<>());
-//      for (String n : pm.value()) {
-//        for (AVRCoreVersion c : pm.core()) {
-//          am.put(new ModuleKey(n,
-//                               c,
-//                               pm.architecture()),
-//                 mf);
-//        }
-//      }
-//    }
+    List<ProvidedModule> m = getProviedModules(mf.getClass());
+    for (ProvidedModule pm : m) {
+      Map<ModuleKey, ModuleBuilderFactory> am = modules.computeIfAbsent(pm.family(),
+                                                                        (AvrFamily a) -> new HashMap<>());
+      for (String n : pm.value()) {
+        for (String sc : pm.core()) {
+          AvrCore c = AvrCore.valueOf(sc);
+          am.put(new ModuleKey(n,
+                               c,
+                               pm.family(),
+                               pm.moduleClass()),
+                 mf);
+        }
+      }
+    }
   }
 
   private void checkMap()
@@ -136,14 +139,14 @@ public final class ModuleResolver
     Objects.requireNonNull(moduleKey,
                            "moduleKey==null");
     checkMap();
-//    Map<ModuleKey, ModuleBuilderFactory> map = modules.get(moduleKey.getArchitecture());
+    Map<ModuleKey, ModuleBuilderFactory> map = modules.get(moduleKey.getFamily());
     ModuleBuilderFactory result = null;
-//    if (map != null) {
-//      result = map.get(moduleKey);
-//      if (result == null) {
-//        result = map.get(moduleKey.withVersion(AVRCoreVersion.ANY));
-//      }
-//    }
+    if (map != null) {
+      result = map.get(moduleKey);
+      if (result == null) {
+        result = map.get(moduleKey.withVersion(AvrCore.ANY));
+      }
+    }
     return result;
   }
 

@@ -95,6 +95,7 @@
     <module>application</module>
     <module>avrwb-core</module>
     <module>avrwb-vdbg</module>
+    <module>avrawb-base</module>
   </modules>
 
   <properties>

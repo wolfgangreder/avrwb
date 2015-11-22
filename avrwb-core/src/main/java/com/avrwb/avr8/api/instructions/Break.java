@@ -21,25 +21,27 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.api.ClockPhase;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xffff, opcodes = {0x9598})
 public final class Break extends AbstractInstruction
 {
 
-  public static final int OPCODE = 0x9598;
-
-  public Break()
+  public Break(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
-    super(OPCODE,
-          0xffff,
+    super(0x9598,
           "break");
   }
 

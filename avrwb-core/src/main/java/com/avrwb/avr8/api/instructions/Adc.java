@@ -21,16 +21,22 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.avr8.helper.AvrDeviceKey;
+
 /**
  *
  * @author wolfi
  */
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0x1c00})
 public final class Adc extends AbstractAdd
 {
 
   public static final int OPCODE = 0x1c00;
 
-  public Adc(int opcode)
+  public Adc(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "adc",

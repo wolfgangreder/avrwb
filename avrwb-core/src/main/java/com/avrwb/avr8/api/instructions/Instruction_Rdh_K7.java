@@ -59,7 +59,6 @@ public abstract class Instruction_Rdh_K7 extends AbstractInstruction
                                String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdhAddress = ((opcode >> 4) & 0xf) + 16;
     k7 = ((opcode >> 4) & 0x70) | (opcode & 0xf);

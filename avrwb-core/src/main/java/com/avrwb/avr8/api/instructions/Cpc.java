@@ -21,16 +21,22 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.avr8.helper.AvrDeviceKey;
+
 /**
  *
  * @author wolfi
  */
-public class Cpc extends AbstractCp
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0x0400})
+public final class Cpc extends AbstractCp
 {
 
   public static final int OPCODE = 0x0400;
 
-  public Cpc(int opcode)
+  public Cpc(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "cpc",

@@ -33,7 +33,7 @@ import java.util.Objects;
  * Standardimplmenentierung von RegisterBitGrpValueBuilder
  *
  * @see com.avrwb.avr8.RegisterBitGrpValueBuilder
- * @see at.reder.avrwb.avr8.api.InstanceFactories
+ * @see com.avrwb.avr8.spi.InstanceFactories
  * @author Wolfgang Reder
  */
 @NotThreadSave

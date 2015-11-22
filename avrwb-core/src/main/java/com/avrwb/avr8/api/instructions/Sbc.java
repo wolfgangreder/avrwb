@@ -21,16 +21,22 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.avr8.helper.AvrDeviceKey;
+
 /**
  *
  * @author wolfi
  */
-public class Sbc extends AbstractSub
+@InstructionImplementation(opcodeMask = 0xfc00, opcodes = 0x0800)
+public final class Sbc extends AbstractSub
 {
 
   public static final int OPCODE = 0x0800;
 
-  public Sbc(int opcode)
+  public Sbc(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "sbc",

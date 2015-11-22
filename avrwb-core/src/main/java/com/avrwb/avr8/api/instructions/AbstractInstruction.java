@@ -27,11 +27,11 @@ import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
-import com.avrwb.avr8.api.InstanceFactories;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResult;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -49,17 +49,14 @@ public abstract class AbstractInstruction implements Instruction
 
   public static Set<AVRCoreVersion> ALL_CORES = Collections.unmodifiableSet(EnumSet.allOf(AVRCoreVersion.class));
   private final int opcode;
-  private final int opcodeMask;
   private final String mnemonic;
   private String currentDeviceStateMessage;
   protected long finishCycle = -1;
 
   protected AbstractInstruction(int opcode,
-                                int opcodeMask,
                                 String mnemonic)
   {
     this.opcode = opcode;
-    this.opcodeMask = opcodeMask;
     this.mnemonic = mnemonic;
   }
 
@@ -67,12 +64,6 @@ public abstract class AbstractInstruction implements Instruction
   public final int getOpcode()
   {
     return opcode;
-  }
-
-  @Override
-  public final int getOpcodeMask()
-  {
-    return opcodeMask;
   }
 
   @Override

@@ -60,7 +60,6 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
                                String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     rdAddress = (opcode >> 20) & 0x1f;
     k16 = opcode & 0xffff;

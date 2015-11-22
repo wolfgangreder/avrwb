@@ -45,7 +45,6 @@ public abstract class Instruction_P_b extends AbstractInstruction
                             String mnemonic)
   {
     super(opcode,
-          OPCODE_MASK,
           mnemonic);
     portAddress = (opcode & 0xf8) >> 3;
     bitOffset = opcode & 0x7;
