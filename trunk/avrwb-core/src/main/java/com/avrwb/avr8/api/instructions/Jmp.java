@@ -36,26 +36,18 @@ import java.text.MessageFormat;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xfe0e, opcodes = {0x940c})
-public final class Jmp extends AbstractInstruction
+public final class Jmp extends Instruction_K22
 {
 
-  private final int callTarget;
-  private final String toStringValue;
+  public static final int OPCODE = 0x940c;
 
   public Jmp(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)
   {
-    super(opcode << 16 | nextOpcode,
+    super(opcode,
+          nextOpcode,
           "jmp");
-    int tmp = getOpcode();
-    callTarget = (tmp & 0xffff) | ((tmp & 0x1f00000) >> 3) | (tmp & 0x10000);
-    toStringValue = "jmp 0x" + Integer.toHexString(callTarget);
-  }
-
-  public int getJumpTarget()
-  {
-    return callTarget;
   }
 
   @Override
@@ -74,6 +66,7 @@ public final class Jmp extends AbstractInstruction
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
     if (finishCycle == clockState.getCycleCount()) {
+      final int callTarget = getK22();
       resultBuilder.finished(true,
                              callTarget);
       if (AVRWBDefaults.isDebugLoggingActive()) {
@@ -86,12 +79,6 @@ public final class Jmp extends AbstractInstruction
       }
 
     }
-  }
-
-  @Override
-  public String toString()
-  {
-    return toStringValue;
   }
 
 }

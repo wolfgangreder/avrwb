@@ -39,6 +39,8 @@ import java.text.MessageFormat;
 public final class Bst extends Instruction_Rd_b
 {
 
+  public static final int OPCODE = 0xfa00;
+
   public Bst(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

@@ -41,6 +41,8 @@ public final class AvrCore
   public static final AvrCore V1 = valueOf("V1");
   public static final AvrCore V2 = valueOf("V2");
   public static final AvrCore V2E = valueOf("V2E");
+  public static final AvrCore V3 = valueOf("V3");
+  public static final AvrCore V3X = valueOf("V3X");
   public static final AvrCore I6000 = valueOf("I6000");
 
   @ThreadSave

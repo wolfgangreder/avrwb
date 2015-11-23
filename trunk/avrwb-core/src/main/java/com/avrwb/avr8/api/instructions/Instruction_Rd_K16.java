@@ -34,7 +34,7 @@ import com.avrwb.schema.util.Converter;
 public abstract class Instruction_Rd_K16 extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xfe0f0000;
+  public static final int OPCODE_MASK = 0xfe0f;
 
   public static int composeOpcode(int baseOpcode,
                                   int rdAddress,
@@ -49,7 +49,7 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
     if (k16 < 0 || k16 > 0xffff) {
       throw new IllegalArgumentException("illegal k16");
     }
-    return baseOpcode | ((rdAddress) << 20) | k16;
+    return (baseOpcode << 16) | ((rdAddress) << 20) | k16;
   }
 
   private final int rdAddress;

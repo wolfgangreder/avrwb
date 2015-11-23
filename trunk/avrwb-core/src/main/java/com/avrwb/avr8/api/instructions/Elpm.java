@@ -35,11 +35,9 @@ import com.avrwb.avr8.helper.SimulationException;
  */
 @InstructionImplementations(value = {
   @InstructionImplementation(opcodeMask = 0xffff,
-                             opcodes = 0x95d8,
-                             implementedCores = {"I6000"}),
+                             opcodes = 0x95d8),
   @InstructionImplementation(opcodeMask = 0xfe0f,
-                             opcodes = {0x9006, 0x9007},
-                             implementedCores = {"I6000"}
+                             opcodes = {0x9006, 0x9007}
   )},
                             factoryMethod = "getInstance")
 public final class Elpm extends AbstractInstruction

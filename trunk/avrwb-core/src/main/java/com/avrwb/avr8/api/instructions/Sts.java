@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sts extends Instruction_Rd_K16
 {
 
+  public static final int OPCODE = 0x9200;
+
   public Sts(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

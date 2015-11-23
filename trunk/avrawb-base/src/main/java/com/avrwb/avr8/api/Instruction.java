@@ -23,10 +23,8 @@ package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.helper.SimulationException;
-import java.util.Set;
 
 /**
  * Basisinterface zur Abbildung von Befehlen.
@@ -77,13 +75,5 @@ public interface Instruction
   @NotNull
   public InstructionResult execute(@NotNull ClockState clockState,
                                    @NotNull Device device) throws SimulationException;
-
-  /**
-   * In welchen Prozessorkernen ist der Befehl implementiert.
-   *
-   * @return set of coreversions
-   */
-  @NotNull
-  public Set<AVRCoreVersion> getCoresImplemented();
 
 }

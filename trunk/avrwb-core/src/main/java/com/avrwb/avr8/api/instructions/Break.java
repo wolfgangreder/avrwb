@@ -37,6 +37,8 @@ import com.avrwb.avr8.helper.AvrDeviceKey;
 public final class Break extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x9598;
+
   public Break(AvrDeviceKey deviceKey,
                int opcode,
                int nextOpcode)

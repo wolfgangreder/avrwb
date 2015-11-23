@@ -45,6 +45,4 @@ public @interface InstructionImplementation
 
   int[] opcodes();
 
-  String[] implementedCores() default {};
-
 }

@@ -37,23 +37,20 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xfe0e, opcodes = 0x940e, implementedCores = {"V2E"})
-public final class Call extends AbstractInstruction
+@InstructionImplementation(opcodeMask = 0xfe0e, opcodes = 0x940e)
+public final class Call extends Instruction_K22
 {
 
-  private final int callTarget;
+  public static final int OPCODE = 0x940e;
   private boolean longCall;
-  private final String toStringValue;
 
   public Call(AvrDeviceKey deviceKey,
               int opcode,
               int nextOpcode)
   {
-    super(opcode << 16 | nextOpcode,
+    super(opcode,
+          nextOpcode,
           "call");
-    int tmp = getOpcode();
-    callTarget = (tmp & 0xffff) | ((tmp & 0x1f00000) >> 3) | (tmp & 0x10000);
-    toStringValue = "call 0x" + Integer.toHexString(callTarget);
   }
 
   @Override
@@ -69,11 +66,6 @@ public final class Call extends AbstractInstruction
         finishCycle = clockState.getCycleCount() + 3;
       }
     }
-  }
-
-  public int getCallTarget()
-  {
-    return callTarget;
   }
 
   @Override
@@ -103,6 +95,7 @@ public final class Call extends AbstractInstruction
           resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
         }
       }
+      final int callTarget = getK22();
       resultBuilder.finished(true,
                              callTarget);
       if (AVRWBDefaults.isDebugLoggingActive()) {
@@ -115,12 +108,6 @@ public final class Call extends AbstractInstruction
       }
 
     }
-  }
-
-  @Override
-  public String toString()
-  {
-    return toStringValue;
   }
 
 }

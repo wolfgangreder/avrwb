@@ -23,7 +23,6 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
-import com.avrwb.atmelschema.AVRCoreVersion;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
@@ -34,10 +33,7 @@ import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.EnumSet;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  *
@@ -47,7 +43,6 @@ import java.util.Set;
 public abstract class AbstractInstruction implements Instruction
 {
 
-  public static Set<AVRCoreVersion> ALL_CORES = Collections.unmodifiableSet(EnumSet.allOf(AVRCoreVersion.class));
   private final int opcode;
   private final String mnemonic;
   private String currentDeviceStateMessage;
@@ -131,12 +126,6 @@ public abstract class AbstractInstruction implements Instruction
   public int getSize()
   {
     return 2;
-  }
-
-  @Override
-  public Set<AVRCoreVersion> getCoresImplemented()
-  {
-    return ALL_CORES;
   }
 
   @Override

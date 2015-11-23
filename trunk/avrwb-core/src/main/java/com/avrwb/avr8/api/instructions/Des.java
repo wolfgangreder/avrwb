@@ -32,7 +32,7 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x940b}, implementedCores = {"I600"})
+@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x940b})
 public final class Des extends Instruction_K4
 {
 

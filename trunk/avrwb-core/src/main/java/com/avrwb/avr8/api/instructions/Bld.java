@@ -32,9 +32,11 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xf808, opcodes = {0xf800})
+@InstructionImplementation(opcodeMask = 0xfe08, opcodes = {0xf800})
 public final class Bld extends Instruction_Rd_b
 {
+
+  public static final int OPCODE = 0xf800;
 
   public Bld(AvrDeviceKey deviceKey,
              int opcode,

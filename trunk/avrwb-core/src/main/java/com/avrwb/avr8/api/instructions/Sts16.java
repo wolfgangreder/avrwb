@@ -32,7 +32,7 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xfe00, opcodes = 0xa800, implementedCores = "V1")
+@InstructionImplementation(opcodeMask = 0xfe00, opcodes = 0xa800)
 public final class Sts16 extends Instruction_Rdh_K7
 {
 

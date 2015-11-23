@@ -47,94 +47,18 @@ import java.util.logging.Logger;
                               @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8008}), // ld Rd,Y+q
                               @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8000, 0x9001, 0x9002}), // ld Rd,Z
                               @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8000})})
-public final class Ld extends AbstractInstruction
+public final class Ld extends Instruction_LdSt
 {
 
-  public enum Mode
-  {
-    UNMODIFIED,
-    POST_INCREMENT,
-    PRE_DECREMENT,
-    DISPLACEMENT;
-  }
-
-  private final int rdAddress;
-  private final Mode mode;
-  private final Pointer ptr;
-  private final int displacement;
-  private final String toStringValue;
-  private int rdVal;
-  private int ptrVal;
-  private int pointeeVal;
-
-  private static Pointer getPtr(int opcode,
-                                Mode mode)
-  {
-    switch (mode) {
-      case UNMODIFIED:
-      case POST_INCREMENT:
-      case PRE_DECREMENT:
-        switch (opcode & 0xc) {
-          case 0:
-            return Pointer.Z;
-          case 8:
-            return Pointer.Y;
-          case 0xc:
-            return Pointer.X;
-          default:
-            return null;
-        }
-      case DISPLACEMENT:
-        switch (opcode & 0x8) {
-          case 0:
-            return Pointer.Z;
-          case 8:
-            return Pointer.Y;
-          default:
-            return null;
-        }
-      default:
-        return null;
-    }
-  }
-
-  private static int getDisplacement(int opcode)
-  {
-//    switch (opcode & 0xfe0f) {
-//      case 0x900c:
-//      case 0x900d:
-//      case 0x900e: // X
-//        return 0;
-//    }
-    int tmp1 = opcode & 0xd208;
-    if (tmp1 != 0x8008 && tmp1 != 0x8000) {
-      return 0;
-    }
-    tmp1 = opcode & 0x7;
-    int tmp2 = (opcode & 0xc00) >> 7;
-    int tmp3 = (opcode & 0x2000) >> 8;
-    return tmp1 + tmp2 + tmp3;
-  }
-
-  private static Mode getMode(int opcode,
-                              int displacement)
-  {
-    if (displacement == 0) {
-      switch (opcode & 0x3) {
-        case 0:
-          return Mode.UNMODIFIED;
-        case 1:
-          return Mode.POST_INCREMENT;
-        case 2:
-          return Mode.PRE_DECREMENT;
-        default:
-          return null;
-      }
-    } else {
-      return Mode.DISPLACEMENT;
-    }
-
-  }
+  public static final int OPCODE_LD_X = 0x900c;
+  public static final int OPCODE_LD_X_P = 0x900d;
+  public static final int OPCODE_LD_X_M = 0x900e;
+  public static final int OPCODE_LD_Y = 0x8008;
+  public static final int OPCODE_LD_Y_P = 0x9009;
+  public static final int OPCODE_LD_Y_M = 0x900a;
+  public static final int OPCODE_LD_Z = 0x8000;
+  public static final int OPCODE_LD_Z_P = 0x9001;
+  public static final int OPCODE_LD_Z_M = 0x9002;
 
   public static Ld getInstance(AvrDeviceKey deviceKey,
                                int opcode,
@@ -194,97 +118,12 @@ public final class Ld extends AbstractInstruction
              String toStringValue)
   {
     super(opcode,
-          mnemonic);
-    this.rdAddress = rdAddress;
-    this.mode = mode;
-    this.displacement = displacement;
-    this.toStringValue = toStringValue;
-    this.ptr = ptr;
-  }
-
-  public int getRdAddress()
-  {
-    return rdAddress;
-  }
-
-  public int getDisplacement()
-  {
-    return displacement;
-  }
-
-  public Pointer getPointer()
-  {
-    return ptr;
-  }
-
-  public Ld.Mode getMode()
-  {
-    return mode;
-  }
-
-  @Override
-  protected void doPrepare(ClockState clockState,
-                           Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
-  {
-    if (finishCycle == -1) {
-      SRAM sram = device.getSRAM();
-      rdVal = sram.getByteAt(rdAddress);
-      ptrVal = sram.getPointer(ptr);
-      pointeeVal = sram.getByteAt(ptrVal);
-      int finishDelta = 0;
-      if (mode == Mode.PRE_DECREMENT) {
-        ptrVal--;
-      } else if (displacement != 0) {
-        ptrVal += displacement;
-      }
-      final boolean external = sram.isAddressExternal(ptrVal);
-      if (mode == Mode.DISPLACEMENT) {
-        finishDelta = external ? 1 : 2;
-      } else if (device.getDeviceKey().getFamily() == AvrFamily.XMEGA) {
-        if (mode != Mode.PRE_DECREMENT) {
-          finishDelta = external ? 0 : 1;
-        } else {
-          finishDelta = external ? 1 : 2;
-        }
-      } else { // family!=Family.AVR_XMEGA
-        switch (mode) {
-          case POST_INCREMENT:
-            finishDelta = 1;
-            break;
-          case PRE_DECREMENT:
-            finishDelta = 2;
-        }
-      }
-      finishCycle = clockState.getCycleCount() + finishDelta;
-      if (AVRWBDefaults.isDebugLoggingActive()) {
-        final Logger logger = device.getLogger();
-        logger.log(AVRWBDefaults.getInstructionTraceLevel(),
-                   ()
-                   -> MessageFormat.format("{0} reading 0x{1,number,0} from r{2,number,0}",
-                                           getCurrentDeviceMessage(clockState,
-                                                                   device),
-                                           rdVal,
-                                           rdAddress));
-        logger.log(AVRWBDefaults.getInstructionTraceLevel(),
-                   ()
-                   -> MessageFormat.format("{0} pointer {1} points to {2}",
-                                           getCurrentDeviceMessage(clockState,
-                                                                   device),
-                                           ptr.name(),
-                                           Converter.printHexString(ptrVal,
-                                                                    sram.getHexAddressStringWidth())));
-        logger.log(AVRWBDefaults.getInstructionTraceLevel(),
-                   ()
-                   -> MessageFormat.format("{0} reading 0x{1} from sram @{2}{3}",
-                                           getCurrentDeviceMessage(clockState,
-                                                                   device),
-                                           Integer.toHexString(pointeeVal),
-                                           Converter.printHexString(ptrVal,
-                                                                    sram.getHexAddressStringWidth()),
-                                           external ? " ext" : ""));
-      }
-    }
+          mnemonic,
+          rdAddress,
+          mode,
+          displacement,
+          ptr,
+          toStringValue);
   }
 
   @Override
@@ -331,12 +170,6 @@ public final class Ld extends AbstractInstruction
                                                                        sram.getHexAddressStringWidth())));
       }
     }
-  }
-
-  @Override
-  public String toString()
-  {
-    return toStringValue;
   }
 
 }
