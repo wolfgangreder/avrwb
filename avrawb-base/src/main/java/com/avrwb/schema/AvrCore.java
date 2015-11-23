@@ -36,6 +36,8 @@ public final class AvrCore
 
   private static final ConcurrentHashMap<String, AvrCore> INSTANCES = new ConcurrentHashMap<>();
   public static final AvrCore ANY = valueOf("");
+  public static final AvrCore V0 = valueOf("V0");
+  public static final AvrCore V0E = valueOf("V0E");
   public static final AvrCore V1 = valueOf("V1");
   public static final AvrCore V2 = valueOf("V2");
   public static final AvrCore V2E = valueOf("V2E");
