@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sleep extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x9588;
+
   public Sleep(AvrDeviceKey deviceKey,
                int opcode,
                int nextOpcode)

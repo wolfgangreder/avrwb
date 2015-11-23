@@ -38,6 +38,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sbiw extends Instruction_Rdl_K6
 {
 
+  public static final int OPCODE = 0x9700;
+
   public Sbiw(AvrDeviceKey deviceKey,
               int opcode,
               int nextOpcode)

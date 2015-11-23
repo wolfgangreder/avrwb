@@ -34,9 +34,11 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xff00, opcodes = {0x9600}, implementedCores = {"V2E"})
+@InstructionImplementation(opcodeMask = 0xff00, opcodes = {0x9600})
 public final class Adiw extends Instruction_Rdl_K6
 {
+
+  public static final int OPCODE = 0x9600;
 
   public Adiw(AvrDeviceKey deviceKey,
               int opcode,

@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class EICall extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x9519;
+
   public EICall(AvrDeviceKey deviceKey,
                 int opcode,
                 int nextOpcode)

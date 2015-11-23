@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Lds extends Instruction_Rd_K16
 {
 
+  public static final int OPCODE = 0x9000;
+
   public Lds(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

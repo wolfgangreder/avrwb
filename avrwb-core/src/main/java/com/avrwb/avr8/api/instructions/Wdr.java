@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Wdr extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x95a8;
+
   public Wdr(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

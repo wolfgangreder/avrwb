@@ -36,10 +36,25 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x9408})
+@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x9408, 0x9488})
 public final class BitClearSet extends AbstractInstruction
 {
 
+  public static int composeOpcode(int baseOpcode,
+                                  boolean setBit,
+                                  int bit)
+  {
+    if ((baseOpcode & ~0xff8f) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (bit < 0 || bit > 7) {
+      throw new IllegalArgumentException("invalid bit");
+    }
+    return baseOpcode | (bit << 4) | (setBit ? 0x0 : 0x80);
+  }
+
+  public static final int OPCODE_BCLR = 0x9488;
+  public static final int OPCODE_BSET = 0x9408;
   private final boolean setBit;
   private final int bitOffset;
 
@@ -62,7 +77,7 @@ public final class BitClearSet extends AbstractInstruction
   {
     int bitOffset = decodeBitOffset(opcode);
     boolean set = decodeSetBit(opcode);
-    if (set) {
+    if (!set) {
       switch (bitOffset) {
         case 0:
           return "clc";
@@ -108,7 +123,17 @@ public final class BitClearSet extends AbstractInstruction
 
   private static boolean decodeSetBit(int opcode)
   {
-    return (opcode & 0x80) != 0;
+    return (opcode & 0x80) == 0;
+  }
+
+  public int getBit()
+  {
+    return bitOffset;
+  }
+
+  public boolean isBitSet()
+  {
+    return setBit;
   }
 
   @Override

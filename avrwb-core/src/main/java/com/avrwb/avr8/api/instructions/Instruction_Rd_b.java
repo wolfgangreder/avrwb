@@ -37,7 +37,23 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rd_b extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xfe00;
+  public static int composeOpcode(int baseOpcode,
+                                  int rd,
+                                  int b)
+  {
+    if ((baseOpcode & ~0xfe08) != 0) {
+      throw new IllegalArgumentException("invalid rd,b opcode" + Integer.toHexString(baseOpcode));
+    }
+    if (rd > 31 || rd < 0) {
+      throw new IllegalArgumentException("invalid register r" + rd);
+    }
+    if (b > 7 || b < 0) {
+      throw new IllegalArgumentException("invalid bit index " + b);
+    }
+    return baseOpcode | (rd << 4) | (b);
+  }
+
+  public static final int OPCODE_MASK = 0xfe08;
   protected final int rdAddress;
   protected final int bit;
   protected final int bitMask;

@@ -41,11 +41,15 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Lpm extends AbstractInstruction
 {
 
+  public static final int OPCODE_LPM = 0x95c8;
+  public static final int OPCODE_LPM_RD = 0x9004;
+  public static final int OPCODE_LPM_RD_P = 0x9005;
+
   public static final Lpm getInstance(AvrDeviceKey deviceKey,
                                       int opcode,
                                       int nextOpcode)
   {
-    return null;
+    return new Lpm(opcode);
   }
 
   private Lpm(int opcode)

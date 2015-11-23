@@ -42,6 +42,8 @@ import java.text.MessageFormat;
 public final class Ret_i extends AbstractInstruction
 {
 
+  public static int OPCODE_RET = 0x9508;
+  public static int OPCODE_RETI = 0x9518;
   private boolean longRet;
 
   public Ret_i(AvrDeviceKey deviceKey,

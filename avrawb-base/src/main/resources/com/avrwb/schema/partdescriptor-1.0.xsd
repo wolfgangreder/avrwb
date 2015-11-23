@@ -103,6 +103,7 @@ MA 02110-1301  USA
   
   <xs:simpleType name="avr-family">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="basic"/>
       <xs:enumeration value="tiny"/>
       <xs:enumeration value="mega"/>
       <xs:enumeration value="xmega"/>

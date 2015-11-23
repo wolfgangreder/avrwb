@@ -22,50 +22,25 @@
 package com.avrwb.avr8.impl;
 
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
-import com.avrwb.avr8.api.instructions.Adc;
-import com.avrwb.avr8.api.instructions.Add;
-import com.avrwb.avr8.api.instructions.And;
-import com.avrwb.avr8.api.instructions.Andi;
-import com.avrwb.avr8.api.instructions.Asr;
+import com.avrwb.avr8.api.instructions.BitClearSet;
 import com.avrwb.avr8.api.instructions.BranchInstruction;
-import com.avrwb.avr8.api.instructions.Com;
-import com.avrwb.avr8.api.instructions.Cp;
-import com.avrwb.avr8.api.instructions.Cpc;
-import com.avrwb.avr8.api.instructions.Cpi;
-import com.avrwb.avr8.api.instructions.Cpse;
-import com.avrwb.avr8.api.instructions.Dec;
-import com.avrwb.avr8.api.instructions.Eor;
+import com.avrwb.avr8.api.instructions.Elpm;
 import com.avrwb.avr8.api.instructions.InOut;
-import com.avrwb.avr8.api.instructions.Inc;
+import com.avrwb.avr8.api.instructions.Instruction_K22;
+import com.avrwb.avr8.api.instructions.Instruction_LdSt;
 import com.avrwb.avr8.api.instructions.Instruction_Rd;
+import com.avrwb.avr8.api.instructions.Instruction_Rd_K16;
 import com.avrwb.avr8.api.instructions.Instruction_Rd_K8;
 import com.avrwb.avr8.api.instructions.Instruction_Rd_Rr;
+import com.avrwb.avr8.api.instructions.Instruction_Rd_b;
+import com.avrwb.avr8.api.instructions.Instruction_Rdl_K6;
 import com.avrwb.avr8.api.instructions.Instruction_k12;
-import com.avrwb.avr8.api.instructions.Lac;
-import com.avrwb.avr8.api.instructions.Las;
-import com.avrwb.avr8.api.instructions.Lat;
-import com.avrwb.avr8.api.instructions.Ldi;
-import com.avrwb.avr8.api.instructions.Lsr;
-import com.avrwb.avr8.api.instructions.Mov;
-import com.avrwb.avr8.api.instructions.Mul;
-import com.avrwb.avr8.api.instructions.Neg;
-import com.avrwb.avr8.api.instructions.Or;
-import com.avrwb.avr8.api.instructions.Ori;
-import com.avrwb.avr8.api.instructions.Pop;
-import com.avrwb.avr8.api.instructions.Push;
-import com.avrwb.avr8.api.instructions.Rcall;
-import com.avrwb.avr8.api.instructions.Rjmp;
-import com.avrwb.avr8.api.instructions.Ror;
-import com.avrwb.avr8.api.instructions.Sbc;
-import com.avrwb.avr8.api.instructions.Sbci_Subi;
-import com.avrwb.avr8.api.instructions.Sub;
-import com.avrwb.avr8.api.instructions.Swap;
+import com.avrwb.avr8.api.instructions.Ld;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
-import com.avrwb.schema.AvrCore;
-import com.avrwb.schema.AvrFamily;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,9 +48,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -90,12 +62,18 @@ public class BaseInstructionDecoderNGTest
   }
 
   private static final Set<Integer> TESTED_OPCODES = new HashSet<>();
-  private static InstructionDecoder decoder;
+  protected static InstructionDecoder decoder;
+  protected static AvrDeviceKey deviceKey;
 
-  private static final class ProtocollDecoder implements InstructionDecoder
+  protected static final class ProtocollDecoder implements InstructionDecoder
   {
 
-    private final BaseInstructionDecoder decoder = new BaseInstructionDecoder();
+    private final InstructionDecoder decoder;
+
+    public ProtocollDecoder(InstructionDecoder decoder)
+    {
+      this.decoder = decoder;
+    }
 
     @Override
     public Instruction getInstruction(Device device,
@@ -121,14 +99,7 @@ public class BaseInstructionDecoderNGTest
 
   }
 
-  @BeforeClass
-  public static void createDecoder()
-  {
-    decoder = new ProtocollDecoder();
-  }
-
-  @AfterClass
-  public static void afterClass()
+  protected static void afterClass()
   {
     double coverage = TESTED_OPCODES.size();
     coverage /= 65535d;
@@ -137,35 +108,10 @@ public class BaseInstructionDecoderNGTest
                                             coverage * 100));
   }
 
-  @DataProvider(name = "rdRrProvider")
-  public Object[][] rdRrProvider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, Adc.OPCODE, Adc.class, "adc", true},
-      {deviceKey, Add.OPCODE, Add.class, "add", true},
-      {deviceKey, And.OPCODE, And.class, "and", true},
-      {deviceKey, Cp.OPCODE, Cp.class, "cp", true},
-      {deviceKey, Cpc.OPCODE, Cpc.class, "cpc", true},
-      {deviceKey, Cpse.OPCODE, Cpse.class, "cpse", true},
-      {deviceKey, Eor.OPCODE, Eor.class, "eor", true},
-      {deviceKey, Mov.OPCODE, Mov.class, "mov", true},
-      {deviceKey, Mul.OPCODE, Mul.class, "mul", true},
-      {deviceKey, Or.OPCODE, Or.class, "or", true},
-      {deviceKey, Sbc.OPCODE, Sbc.class, "sbc", true},
-      {deviceKey, Sub.OPCODE, Sub.class, "sub", true}
-    };
-
-  }
-
-  @Test(dataProvider = "rdRrProvider")
-  public void test_Rd_Rr(AvrDeviceKey deviceKey,
-                         int baseOpcode,
-                         Class<? extends Instruction_Rd_Rr> clazz,
-                         String menmonic,
-                         boolean expectToFind)
+  protected void test_Rd_Rr(int baseOpcode,
+                            Class<? extends Instruction_Rd_Rr> clazz,
+                            String menmonic,
+                            boolean expectToFind)
   {
     String context = clazz.getName() + "@" + deviceKey.toString() + " ";
     for (int rd = 0; rd < 32; ++rd) {
@@ -197,35 +143,10 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  @DataProvider(name = "rdProvider")
-  public Object[][] rdProvider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, Asr.OPCODE, Asr.class, "asr", true},
-      {deviceKey, Com.OPCODE, Com.class, "com", true},
-      {deviceKey, Dec.OPCODE, Dec.class, "dec", true},
-      {deviceKey, Inc.OPCODE, Inc.class, "inc", true},
-      {deviceKey, Lac.OPCODE, Lac.class, "lac", true},
-      {deviceKey, Las.OPCODE, Las.class, "las", true},
-      {deviceKey, Lat.OPCODE, Lat.class, "lat", true},
-      {deviceKey, Lsr.OPCODE, Lsr.class, "lsr", true},
-      {deviceKey, Neg.OPCODE, Neg.class, "neg", true},
-      {deviceKey, Pop.OPCODE, Pop.class, "pop", true},
-      {deviceKey, Push.OPCODE, Push.class, "push", true},
-      {deviceKey, Ror.OPCODE, Ror.class, "ror", true},
-      {deviceKey, Swap.OPCODE, Swap.class, "swap", true}
-    };
-  }
-
-  @Test(dataProvider = "rdProvider")
-  public void test_Rd(AvrDeviceKey deviceKey,
-                      int baseOpcode,
-                      Class<? extends Instruction_Rd> clazz,
-                      String mnemonic,
-                      boolean expectToFind)
+  protected void test_Rd(int baseOpcode,
+                         Class<? extends Instruction_Rd> clazz,
+                         String mnemonic,
+                         boolean expectToFind)
   {
     for (int rd = 0; rd < 32; ++rd) {
       String context = mnemonic + " r" + rd + " | ";
@@ -251,27 +172,10 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  @DataProvider(name = "rdK8Provider")
-  public Object[][] rdK8Provider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, Andi.OPCODE, Andi.class, "andi", true},
-      {deviceKey, Cpi.OPCODE, Cpi.class, "cpi", true},
-      {deviceKey, Ldi.OPCODE, Ldi.class, "ldi", true},
-      {deviceKey, Ori.OPCODE, Ori.class, "ori", true},
-      {deviceKey, Sbci_Subi.OPCODE_SBCI, Sbci_Subi.class, "sbci", true},
-      {deviceKey, Sbci_Subi.OPCODE_SUBI, Sbci_Subi.class, "subi", true}};
-  }
-
-  @Test(dataProvider = "rdK8Provider")
-  public void test_Rd_K8(AvrDeviceKey deviceKey,
-                         int baseOpcode,
-                         Class<? extends Instruction_Rd_K8> clazz,
-                         String mnemonic,
-                         boolean expectToFind)
+  protected void test_Rd_K8(int baseOpcode,
+                            Class<? extends Instruction_Rd_K8> clazz,
+                            String mnemonic,
+                            boolean expectToFind)
   {
     for (int rd = 16; rd < 32; ++rd) {
       for (int k8 = 0; k8 < 0xff; ++k8) {
@@ -309,24 +213,10 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  @DataProvider(name = "branchProvider")
-  public Object[][] brachProvider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, BranchInstruction.OPCODE_SET, BranchInstruction.class, "BR?S", true},
-      {deviceKey, BranchInstruction.OPCODE_CLR, BranchInstruction.class, "BR?C", false}
-    };
-  }
-
-  @Test(dataProvider = "branchProvider")
-  public void testBranch(AvrDeviceKey deviceKey,
-                         int baseOpcode,
-                         Class<? extends BranchInstruction> clazz,
-                         String mnemonic,
-                         boolean bitSet)
+  protected void testBranch(int baseOpcode,
+                            Class<? extends BranchInstruction> clazz,
+                            String mnemonic,
+                            boolean bitSet)
   {
     for (int b = 0; b < 7; ++b) {
       for (int dist = -64; dist < 64; ++dist) {
@@ -356,24 +246,10 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  @DataProvider(name = "k12Provider")
-  public Object[][] k12Provider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, Rcall.OPCODE, Rcall.class, "rcall", true},
-      {deviceKey, Rjmp.OPCODE, Rjmp.class, "rjmp", true}
-    };
-  }
-
-  @Test(dataProvider = "k12Provider")
-  public void testInstruction_k12(AvrDeviceKey deviceKey,
-                                  int baseOpcode,
-                                  Class<? extends Instruction_k12> clazz,
-                                  String mnemonic,
-                                  boolean expectToFind)
+  protected void testInstruction_k12(int baseOpcode,
+                                     Class<? extends Instruction_k12> clazz,
+                                     String mnemonic,
+                                     boolean expectToFind)
   {
     for (int k = -2048; k < 2048; ++k) {
       int opcode = Instruction_k12.composeOpcode(baseOpcode,
@@ -400,22 +276,8 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  @DataProvider(name = "inOutProvider")
-  public Object[][] inOutProvider()
-  {
-    AvrDeviceKey deviceKey = new AvrDeviceKey(AvrFamily.TINY,
-                                              AvrCore.V2,
-                                              "ATtiny4313");
-    return new Object[][]{
-      {deviceKey, InOut.OPCODE_IN, "in"},
-      {deviceKey, InOut.OPCODE_OUT, "out"}
-    };
-  }
-
-  @Test(dataProvider = "inOutProvider")
-  public void testInOut(AvrDeviceKey deviceKey,
-                        int baseOpcode,
-                        String mnemonic)
+  protected void testInOut(int baseOpcode,
+                           String mnemonic)
   {
     for (int rd = 0; rd < 32; ++rd) {
       for (int p = 0; p < 64; ++p) {
@@ -440,6 +302,467 @@ public class BaseInstructionDecoderNGTest
         assertEquals(io.getMnemonic(),
                      mnemonic,
                      context + "mnemonic");
+      }
+    }
+  }
+
+  protected void testRdlK6(int baseOpcode,
+                           Class<? extends Instruction_Rdl_K6> clazz,
+                           String mnemonic,
+                           boolean expectToFind)
+  {
+    for (int rdl = 24; rdl < 32; rdl += 2) {
+      for (int k6 = 0; k6 < 64; ++k6) {
+        int opcode = Instruction_Rdl_K6.composeOpcode(baseOpcode,
+                                                      rdl,
+                                                      k6);
+        String context = mnemonic + " r" + rdl + ":r" + (rdl + 1) + ", " + k6 + " | ";
+        Instruction i = decoder.decodeInstruction(deviceKey,
+                                                  opcode,
+                                                  0);
+        if (expectToFind) {
+          assertNotNull(i,
+                        context + "nulltest");
+          assertTrue(clazz.isInstance(i),
+                     context + "classtest");
+          Instruction_Rdl_K6 ik6 = clazz.cast(i);
+          assertEquals(ik6.getRdlAddress(),
+                       rdl,
+                       context + "rdl");
+          assertEquals(ik6.getK6(),
+                       k6,
+                       context + "K6");
+          assertEquals(ik6.getMnemonic(),
+                       mnemonic,
+                       context + "mnemonic");
+        } else {
+          assertFalse(clazz.isInstance(i),
+                      context + "classtest");
+        }
+      }
+    }
+  }
+
+  protected void testBitClearSet()
+  {
+    for (int b = 0; b < 7; ++b) {
+      int opcode = BitClearSet.composeOpcode(BitClearSet.OPCODE_BCLR,
+                                             false,
+                                             b);
+      String context = "BCLR" + " " + b + " | ";
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                opcode,
+                                                0);
+      assertNotNull(i,
+                    context + "nulltest");
+      assertTrue(i instanceof BitClearSet,
+                 context);
+      BitClearSet bcs = (BitClearSet) i;
+      assertEquals(bcs.getBit(),
+                   b,
+                   context + "bit");
+      assertFalse(bcs.isBitSet(),
+                  context + "bitSet");
+    }
+    for (int b = 0; b < 7; ++b) {
+      int opcode = BitClearSet.composeOpcode(BitClearSet.OPCODE_BSET,
+                                             true,
+                                             b);
+      String context = "BCLR" + " " + b + " | ";
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                opcode,
+                                                0);
+      assertNotNull(i,
+                    context + "nulltest");
+      assertTrue(i instanceof BitClearSet,
+                 context);
+      BitClearSet bcs = (BitClearSet) i;
+      assertEquals(bcs.getBit(),
+                   b,
+                   context + "bit");
+      assertTrue(bcs.isBitSet(),
+                 context + "bitSet");
+    }
+  }
+
+  @Test(dataProvider = "testRdb")
+  public void testRdb(int baseOpcode,
+                      Class<? extends Instruction_Rd_b> clazz,
+                      String mnemonic,
+                      boolean expectToFind)
+  {
+    for (int rd = 0; rd < 32; ++rd) {
+      for (int b = 0; b < 8; ++b) {
+        int opcode = Instruction_Rd_b.composeOpcode(baseOpcode,
+                                                    rd,
+                                                    b);
+        String context = mnemonic + " r" + rd + ", " + b + " | ";
+        Instruction i = decoder.decodeInstruction(deviceKey,
+                                                  opcode,
+                                                  0);
+        if (expectToFind) {
+          assertNotNull(i,
+                        context + "nulltest");
+          assertTrue(clazz.isInstance(i),
+                     context + "class");
+          Instruction_Rd_b rdb = clazz.cast(i);
+          assertEquals(rdb.getRdAddress(),
+                       rd,
+                       context + "rd");
+          assertEquals(rdb.getBit(),
+                       b,
+                       context + "bit");
+          assertEquals(rdb.getMnemonic(),
+                       mnemonic,
+                       context + "mnemonic");
+        } else {
+          assertFalse(clazz.isInstance(i),
+                      context + "class");
+        }
+      }
+    }
+  }
+
+  protected void testSimple(int opcode,
+                            Class<? extends Instruction> clazz,
+                            String mnemonic,
+                            boolean expectToFind)
+  {
+    Instruction i = decoder.decodeInstruction(deviceKey,
+                                              opcode,
+                                              0);
+    if (expectToFind) {
+      assertNotNull(i,
+                    mnemonic + "|nulltest");
+      assertTrue(clazz.isInstance(i),
+                 mnemonic + "|class");
+      assertEquals(i.getMnemonic(),
+                   mnemonic);
+    } else {
+      assertFalse(clazz.isInstance(i),
+                  mnemonic + "|class");
+    }
+  }
+
+  protected void testK22(int baseOpcode,
+                         Class<? extends Instruction_K22> clazz,
+                         String mnemonic,
+                         boolean expectToFind)
+  {
+    for (int k = 0; k < 0x40; ++k) {
+      int k22 = k << 16;
+      int opcode = Instruction_K22.composeOpcode(baseOpcode,
+                                                 k22);
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                (opcode >> 16) & 0xffff,
+                                                opcode & 0xffff);
+      String context = mnemonic + " 0x" + Integer.toHexString(k22) + " | ";
+      if (expectToFind) {
+        assertNotNull(i,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(i),
+                   context + "classtest");
+        assertEquals(clazz.cast(i).getK22(),
+                     k22,
+                     context + "k22");
+        assertEquals(i.getMnemonic(),
+                     mnemonic,
+                     context + "mnemonic");
+      } else {
+        assertFalse(clazz.isInstance(i),
+                    context + "classtest");
+      }
+    }
+    for (int k = 0; k < 0x40; ++k) {
+      int k22 = (k << 16) | 0xffff;
+      int opcode = Instruction_K22.composeOpcode(baseOpcode,
+                                                 k22);
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                (opcode >> 16) & 0xffff,
+                                                opcode & 0xffff);
+      String context = mnemonic + " 0x" + Integer.toHexString(k22) + " | ";
+      if (expectToFind) {
+        assertNotNull(i,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(i),
+                   context + "classtest");
+        assertEquals(clazz.cast(i).getK22(),
+                     k22,
+                     context + "k22");
+        assertEquals(i.getMnemonic(),
+                     mnemonic,
+                     context + "mnemonic");
+      } else {
+        assertFalse(clazz.isInstance(i),
+                    context + "classtest");
+
+      }
+    }
+  }
+
+  protected void test_Elpm(int baseOpcode,
+                           Class<? extends Elpm> clazz,
+                           String mnemonic,
+                           boolean expectToFind)
+  {
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = mnemonic + " r" + rd + " | ";
+      int opcode = Instruction_Rd.composeOpcode(baseOpcode,
+                                                rd);
+      Instruction inst = decoder.decodeInstruction(deviceKey,
+                                                   opcode,
+                                                   0);
+      if (expectToFind) {
+        assertTrue(clazz.isInstance(inst),
+                   context + "class");
+        Elpm ird = clazz.cast(inst);
+        assertEquals(rd,
+                     ird.getRdAddress(),
+                     context + "rd");
+        assertEquals(mnemonic,
+                     ird.getMnemonic(),
+                     context + "mnemonic");
+      } else {
+        assertFalse(clazz.isInstance(inst),
+                    context + "class");
+      }
+    }
+  }
+
+  protected void testrdK16(int baseOpcode,
+                           Class<? extends Instruction_Rd_K16> clazz,
+                           String mnemonic,
+                           boolean expectToFind)
+  {
+    for (int rd = 0; rd < 32; ++rd) {
+      int opcode = Instruction_Rd_K16.composeOpcode(baseOpcode,
+                                                    rd,
+                                                    0);
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                (opcode >> 16) & 0xffff,
+                                                opcode & 0xffff);
+      String context = mnemonic + " r" + rd + ", 0x" + Integer.toHexString(rd) + " | ";
+      if (expectToFind) {
+        assertNotNull(i,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(i),
+                   context + "classtest");
+        Instruction_Rd_K16 ik16 = clazz.cast(i);
+        assertEquals(ik16.getRdAddress(),
+                     rd,
+                     context + "rd");
+        assertEquals(ik16.getK16(),
+                     0,
+                     context + "k16");
+      } else {
+        assertFalse(clazz.isInstance(i),
+                    context + "classtest");
+      }
+    }
+    for (int rd = 0; rd < 32; ++rd) {
+      int opcode = Instruction_Rd_K16.composeOpcode(baseOpcode,
+                                                    rd,
+                                                    0xffff);
+      Instruction i = decoder.decodeInstruction(deviceKey,
+                                                (opcode >> 16) & 0xffff,
+                                                opcode & 0xffff);
+      String context = mnemonic + " r" + rd + ", 0x" + Integer.toHexString(rd);
+      if (expectToFind) {
+        assertNotNull(i,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(i),
+                   context + "classtest");
+        Instruction_Rd_K16 ik16 = clazz.cast(i);
+        assertEquals(ik16.getRdAddress(),
+                     rd,
+                     context + "rd");
+        assertEquals(ik16.getK16(),
+                     0xffff,
+                     context + "k16");
+      } else {
+        assertFalse(clazz.isInstance(i),
+                    context + "classtest");
+
+      }
+    }
+  }
+
+  protected void testLdPtr(int baseOpcode,
+                           Class<? extends Instruction_LdSt> clazz,
+                           Pointer pointer,
+                           String mnemonic,
+                           boolean expectFind,
+                           boolean expectFind_PI,
+                           boolean expectFind_PD,
+                           boolean expectFind_Q)
+  {
+    Instruction instruction;
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", " + pointer.name() + " | ";
+      int opcode = Instruction_LdSt.composeOpcode(pointer,
+                                                  rd,
+                                                  Instruction_LdSt.Mode.UNMODIFIED,
+                                                  0);
+      instruction = decoder.decodeInstruction(deviceKey,
+                                              opcode,
+                                              0);
+      if (expectFind) {
+        assertNotNull(instruction,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(instruction),
+                   context + "class");
+        Instruction_LdSt ld = clazz.cast(instruction);
+        assertEquals(ld.getMnemonic(),
+                     mnemonic,
+                     context + "mnemonic");
+        assertEquals(ld.getRdAddress(),
+                     rd,
+                     context + "rd");
+        assertEquals(ld.getPointer(),
+                     pointer,
+                     context + "ptr");
+        assertEquals(ld.getDisplacement(),
+                     0,
+                     context + "disp");
+        assertEquals(ld.getMode(),
+                     Instruction_LdSt.Mode.UNMODIFIED,
+                     context + "mode");
+      } else {
+        assertFalse(clazz.isInstance(instruction),
+                    context + "class");
+
+      }
+    }
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", " + pointer.name() + "+ | ";
+      int opcode = Instruction_LdSt.composeOpcode(pointer,
+                                                  rd,
+                                                  Instruction_LdSt.Mode.POST_INCREMENT,
+                                                  0);
+      instruction = decoder.decodeInstruction(deviceKey,
+                                              opcode,
+                                              0);
+      if (expectFind_PI) {
+        assertNotNull(instruction,
+                      context + "nulltest");
+        assertTrue(clazz.isInstance(instruction),
+                   context + "class");
+        Instruction_LdSt ld = clazz.cast(instruction);
+        assertEquals(ld.getMnemonic(),
+                     mnemonic,
+                     context + "mnemonic");
+        assertEquals(ld.getRdAddress(),
+                     rd,
+                     context + "rd");
+        assertEquals(ld.getPointer(),
+                     pointer,
+                     context + "ptr");
+        assertEquals(ld.getDisplacement(),
+                     0,
+                     context + "disp");
+        assertEquals(ld.getMode(),
+                     Instruction_LdSt.Mode.POST_INCREMENT);
+      } else {
+        assertFalse(clazz.isInstance(instruction),
+                    context + "class");
+      }
+    }
+    for (int rd = 0; rd < 32; ++rd) {
+      String context = "ld r" + rd + ", -" + pointer.name() + " | ";
+      int opcode = Instruction_LdSt.composeOpcode(pointer,
+                                                  rd,
+                                                  Instruction_LdSt.Mode.PRE_DECREMENT,
+                                                  0);
+      instruction = decoder.decodeInstruction(deviceKey,
+                                              opcode,
+                                              0);
+      if (expectFind_PD) {
+        assertFalse(clazz.isInstance(instruction),
+                    context + "class");
+        Ld ld = (Ld) instruction;
+        assertEquals(ld.getMnemonic(),
+                     mnemonic,
+                     context + "mnemonic");
+        assertEquals(ld.getRdAddress(),
+                     rd,
+                     context + "rd");
+        assertEquals(ld.getPointer(),
+                     pointer,
+                     context + "ptr");
+        assertEquals(ld.getDisplacement(),
+                     0,
+                     context + "disp");
+        assertEquals(ld.getMode(),
+                     Instruction_LdSt.Mode.PRE_DECREMENT);
+      } else {
+        assertFalse(clazz.isInstance(instruction),
+                    context + "class");
+      }
+    }
+    if (pointer != Pointer.X) {
+      for (int rd = 0; rd < 32; ++rd) {
+        for (int q = 0; q < 64; ++q) {
+          String context = "ldd r" + rd + ", " + pointer.name() + "+" + q + " | ";
+          int opcode = Instruction_LdSt.composeOpcode(pointer,
+                                                      rd,
+                                                      Instruction_LdSt.Mode.DISPLACEMENT,
+                                                      q);
+          instruction = decoder.decodeInstruction(deviceKey,
+                                                  opcode,
+                                                  0);
+          if (q != 0) {
+            if (expectFind_Q) {
+              assertFalse(clazz.isInstance(instruction),
+                          context + "class");
+              Ld ld = (Ld) instruction;
+              assertEquals(ld.getMnemonic(),
+                           mnemonic + "d",
+                           context + "mnemonic");
+              assertEquals(ld.getRdAddress(),
+                           rd,
+                           context + "rd");
+              assertEquals(ld.getPointer(),
+                           pointer,
+                           context + "ptr");
+              assertEquals(ld.getDisplacement(),
+                           q,
+                           context + "disp");
+              assertEquals(ld.getMode(),
+                           Instruction_LdSt.Mode.DISPLACEMENT);
+            } else {
+              assertFalse(clazz.isInstance(instruction),
+                          context + "class");
+            }
+          } else // q==0
+          {
+            if (expectFind) {
+              assertNotNull(instruction,
+                            context + "nulltest");
+              assertTrue(clazz.isInstance(instruction),
+                         context + "class");
+              Instruction_LdSt ld = clazz.cast(instruction);
+              assertEquals(ld.getMnemonic(),
+                           mnemonic,
+                           context + "mnemonic");
+              assertEquals(ld.getRdAddress(),
+                           rd,
+                           context + "rd");
+              assertEquals(ld.getPointer(),
+                           pointer,
+                           context + "ptr");
+              assertEquals(ld.getDisplacement(),
+                           0,
+                           context + "disp");
+              assertEquals(ld.getMode(),
+                           Instruction_LdSt.Mode.UNMODIFIED,
+                           context + "mode");
+            } else {
+              assertFalse(clazz.isInstance(instruction),
+                          context + "class");
+
+            }
+          }
+        }
       }
     }
   }

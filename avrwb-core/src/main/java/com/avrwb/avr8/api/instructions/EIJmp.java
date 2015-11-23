@@ -36,6 +36,8 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class EIJmp extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x9419;
+
   public EIJmp(AvrDeviceKey deviceKey,
                int opcode,
                int nextOpcode)

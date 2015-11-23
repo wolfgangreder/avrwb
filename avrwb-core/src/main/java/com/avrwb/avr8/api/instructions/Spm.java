@@ -36,6 +36,9 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Spm extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x95e8;
+  public static final int OPCODE_ZI = 0x95f8;
+
   public Spm(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

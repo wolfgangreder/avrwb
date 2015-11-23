@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8.impl;
 
+import com.avrwb.annotations.InOut;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.annotations.NotThreadSave;
@@ -117,15 +118,15 @@ public class BaseInstructionDecoder implements InstructionDecoder
 
   }
 
-  private static final class Descriptor
+  protected static final class Descriptor
   {
 
-    private final String instruction;
+    private final Class<?> instruction;
     private final int opcodeMask;
     private final int baseOpcode;
     private final TriFunction<AvrDeviceKey, Integer, Integer, Instruction> ctrFunc;
 
-    public Descriptor(String instruction,
+    public Descriptor(Class<?> instruction,
                       TriFunction<AvrDeviceKey, Integer, Integer, Instruction> ctrFunc,
                       int opcodeMask,
                       int baseOpcode)
@@ -134,6 +135,21 @@ public class BaseInstructionDecoder implements InstructionDecoder
       this.ctrFunc = ctrFunc;
       this.opcodeMask = opcodeMask;
       this.baseOpcode = baseOpcode;
+    }
+
+    public Class<?> getInstruction()
+    {
+      return instruction;
+    }
+
+    public int getOpcodeMask()
+    {
+      return opcodeMask;
+    }
+
+    public int getBaseOpcode()
+    {
+      return baseOpcode;
     }
 
     public Instruction constructInstruction(AvrDeviceKey deviceKey,
@@ -188,7 +204,7 @@ public class BaseInstructionDecoder implements InstructionDecoder
           List<Descriptor> lineResult = processLine(line);
           if (lineResult != null && !lineResult.isEmpty()) {
             for (Descriptor d : lineResult) {
-              if (d != null) {
+              if (d != null && acceptDescriptor(d)) {
                 instructionRepository.add(d);
               }
             }
@@ -196,6 +212,11 @@ public class BaseInstructionDecoder implements InstructionDecoder
         }
       }
     }
+  }
+
+  protected boolean acceptDescriptor(Descriptor d)
+  {
+    return true;
   }
 
   private List<Descriptor> processLine(String line)
@@ -280,15 +301,12 @@ public class BaseInstructionDecoder implements InstructionDecoder
       }
       List<Descriptor> result = new LinkedList<>();
       for (InstructionImplementation i : annotations) {
-        if (acceptInstruction((Class<? extends Instruction>) clazz,
-                              i)) {
-          int om = i.opcodeMask();
-          for (int bo : i.opcodes()) {
-            result.add(new Descriptor(clazz.getSimpleName(),
-                                      construcingFunction,
-                                      om,
-                                      bo));
-          }
+        int om = i.opcodeMask();
+        for (int bo : i.opcodes()) {
+          result.add(new Descriptor(clazz,
+                                    construcingFunction,
+                                    om,
+                                    bo));
         }
       }
       return result;
@@ -301,19 +319,6 @@ public class BaseInstructionDecoder implements InstructionDecoder
     return null;
   }
 
-  /**
-   * Hier können abgeleitete Klassen einen Filter implementieren
-   *
-   * @param clazz class
-   * @param i annotation
-   * @return {@code true} wenn die instruction implementiert ist.
-   */
-  protected boolean acceptInstruction(Class<? extends Instruction> clazz,
-                                      InstructionImplementation i)
-  {
-    return true;
-  }
-
   @Override
   public final Instruction getInstruction(Device device,
                                           int address) throws NullPointerException, IllegalArgumentException,
@@ -323,18 +328,35 @@ public class BaseInstructionDecoder implements InstructionDecoder
     if ((address % 2) != 0) {
       throw new IllegalArgumentException("address mod 2 !=0");
     }
-    Memory flash = device.getFlash();
-    int word = flash.getWordAt(address);
-    int nextWord = flash.getWordAt(address + 2);
-    Instruction result = instructionCache.computeIfAbsent(word,
-                                                          (Integer opcode) -> decodeInstruction(device.getDeviceKey(),
-                                                                                                opcode,
-                                                                                                nextWord));
+    Instruction result = instructionCache.computeIfAbsent(address,
+                                                          (Integer t) -> {
+                                                            Memory flash = device.getFlash();
+                                                            int word = flash.getWordAt(address);
+                                                            int nextWord = flash.getWordAt(address + 2);
+                                                            return decodeInstruction(device.getDeviceKey(),
+                                                                                     word,
+                                                                                     nextWord);
+                                                          });
     if (result == null) {
+      Memory flash = device.getFlash();
+      int word = flash.getWordAt(address);
       throw new InstructionNotAvailableException("Unknown opcode " + Converter.printHexString(word,
-                                                                                              4));
+                                                                                              flash.getHexAddressStringWidth()));
     }
     return result;
+  }
+
+  protected boolean acceptOpcode(int opcode,
+                                 int nextOpcode)
+  {
+    return true;
+  }
+
+  protected boolean filterCandicates(int opcode,
+                                     int nextOpcode,
+                                     @InOut List<? extends Descriptor> candicates)
+  {
+    return true;
   }
 
   @Override
@@ -345,11 +367,20 @@ public class BaseInstructionDecoder implements InstructionDecoder
     if (instructionRepository.isEmpty()) {
       fillInstructionRepository();
     }
+    if (!acceptOpcode(opcode,
+                      nextOpcode)) {
+      return null;
+    }
     List<Descriptor> candidates = new LinkedList<>();
     for (Descriptor d : instructionRepository) {
       if (d.matches(opcode)) {
         candidates.add(d);
       }
+    }
+    if (!filterCandicates(opcode,
+                          nextOpcode,
+                          candidates)) {
+      return null;
     }
     if (candidates.isEmpty()) {
       return null;

@@ -37,6 +37,8 @@ import com.avrwb.avr8.helper.AvrDeviceKey;
 public final class Nop extends AbstractInstruction
 {
 
+  public static final int OPCODE = 0x0000;
+
   public Nop(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)
