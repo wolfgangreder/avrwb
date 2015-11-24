@@ -71,6 +71,7 @@ final class DeviceImpl implements Device
   private final Memory flash;
   private final SRAM sram;
   private final Stack stack;
+  private Object instructionContext;
 
   DeviceImpl(@NotNull XmlDevice device,
              Variant variant,
@@ -269,6 +270,23 @@ final class DeviceImpl implements Device
   public Stack getStack()
   {
     return stack;
+  }
+
+  @Override
+  public void setInstructionContext(Object instructionContext)
+  {
+    this.instructionContext = instructionContext;
+  }
+
+  @Override
+  public <IC> IC getInstructionContext(Class<? extends IC> clazz)
+  {
+    Objects.requireNonNull(clazz,
+                           "clazz==null");
+    if (clazz.isInstance(instructionContext)) {
+      return clazz.cast(instructionContext);
+    }
+    return null;
   }
 
   @Override

@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -57,6 +58,7 @@ public class DummyDevice implements Device
   private final List<Memory> memories;
   private final Stack stack;
   private final AvrDeviceKey deviceKey;
+  private Object instructionContext;
 
   public DummyDevice(CPU cpu)
   {
@@ -199,6 +201,23 @@ public class DummyDevice implements Device
       mod.reset(this,
                 source);
     }
+  }
+
+  @Override
+  public void setInstructionContext(Object instructionContext)
+  {
+    this.instructionContext = instructionContext;
+  }
+
+  @Override
+  public <IC> IC getInstructionContext(Class<? extends IC> clazz)
+  {
+    Objects.requireNonNull(clazz,
+                           "clazz==null");
+    if (clazz.isInstance(instructionContext)) {
+      return clazz.cast(instructionContext);
+    }
+    return null;
   }
 
 }
