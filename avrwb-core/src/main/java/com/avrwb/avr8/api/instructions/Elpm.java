@@ -33,13 +33,12 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementations(value = {
+@InstructionImplementations({
   @InstructionImplementation(opcodeMask = 0xffff,
                              opcodes = 0x95d8),
   @InstructionImplementation(opcodeMask = 0xfe0f,
                              opcodes = {0x9006, 0x9007}
-  )},
-                            factoryMethod = "getInstance")
+  )})
 public final class Elpm extends AbstractInstruction
 {
 

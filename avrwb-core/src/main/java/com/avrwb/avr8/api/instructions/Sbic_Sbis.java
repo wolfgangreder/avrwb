@@ -36,12 +36,24 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sbic_Sbis extends Instruction_P_b
 {
 
-  public Sbic_Sbis(AvrDeviceKey deviceKey,
-                   int opcode,
-                   int nextOpcode)
+  public static final int OPCODE_SBIC = 0x9900;
+  public static final int OPCODE_SBIS = 0x9b00;
+
+  public static Sbic_Sbis getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return new Sbic_Sbis(deviceKey,
+                         opcode,
+                         nextOpcode);
+  }
+
+  private Sbic_Sbis(AvrDeviceKey deviceKey,
+                    int opcode,
+                    int nextOpcode)
   {
     super(opcode,
-          "???");
+          ((opcode & OPCODE_MASK) == OPCODE_SBIS) ? "sbis" : "sbic");
   }
 
   @Override

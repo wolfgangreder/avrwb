@@ -39,9 +39,18 @@ public final class Ror extends Instruction_Rd
 
   public static final int OPCODE = 0x9407;
 
-  public Ror(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Ror getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Ror(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Ror(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "ror");

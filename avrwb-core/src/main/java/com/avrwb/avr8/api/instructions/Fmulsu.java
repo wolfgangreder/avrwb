@@ -33,12 +33,23 @@ import com.avrwb.avr8.helper.SimulationException;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xff88, opcodes = {0x0388})
-public final class Fmulsu extends Instruction_Rdh_Rrh
+public final class Fmulsu extends Instruction_Rdh23_Rrh23
 {
 
-  public Fmulsu(AvrDeviceKey deviceKey,
-                int opcode,
-                int nextOpcode)
+  public static final int OPCODE = 0x0388;
+
+  public static Fmulsu getInstance(AvrDeviceKey deviceKey,
+                                   int opcode,
+                                   int nextOpcode)
+  {
+    return new Fmulsu(deviceKey,
+                      opcode,
+                      nextOpcode);
+  }
+
+  private Fmulsu(AvrDeviceKey deviceKey,
+                 int opcode,
+                 int nextOpcode)
   {
     super(opcode,
           "fmulsu");

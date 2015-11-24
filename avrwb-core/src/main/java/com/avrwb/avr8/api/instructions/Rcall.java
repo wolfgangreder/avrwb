@@ -44,9 +44,18 @@ public final class Rcall extends Instruction_k12
   public static final int OPCODE = 0xd000;
   private boolean longCall;
 
-  public Rcall(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static Rcall getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Rcall(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Rcall(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           "rcall");

@@ -39,9 +39,18 @@ public final class Inc extends Instruction_Rd
 
   public static final int OPCODE = 0x9403;
 
-  public Inc(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Inc getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Inc(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Inc(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "inc");

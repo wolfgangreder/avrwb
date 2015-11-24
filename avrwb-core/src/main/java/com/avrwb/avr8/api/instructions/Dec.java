@@ -39,6 +39,15 @@ public final class Dec extends Instruction_Rd
 
   public static final int OPCODE = 0x940a;
 
+  public static Dec getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Dec(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
   public Dec(AvrDeviceKey deviceKey,
              int opcode,
              int nextOpcode)

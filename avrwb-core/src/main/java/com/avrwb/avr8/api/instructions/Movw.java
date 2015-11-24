@@ -33,12 +33,23 @@ import com.avrwb.avr8.helper.SimulationException;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xff00, opcodes = 0x0100)
-public final class Movw extends AbstractInstruction
+public final class Movw extends Instruction_Rdh_Rrh
 {
 
-  public Movw(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static final int OPCODE = 0x0100;
+
+  public static Movw getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Movw(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Movw(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "movw");

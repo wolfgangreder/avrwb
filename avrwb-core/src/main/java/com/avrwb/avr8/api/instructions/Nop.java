@@ -39,9 +39,18 @@ public final class Nop extends AbstractInstruction
 
   public static final int OPCODE = 0x0000;
 
-  public Nop(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Nop getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Nop(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Nop(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(0x0,
           "nop");

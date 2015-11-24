@@ -41,7 +41,7 @@ import java.util.logging.Level;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xfc00, opcodes = {0xf000, 0xf400})
-public final class BranchInstruction extends AbstractInstruction
+public final class Brbs_Brbc extends AbstractInstruction
 {
 
   public static final int OPCODE_SET = 0xf000;
@@ -63,15 +63,24 @@ public final class BranchInstruction extends AbstractInstruction
     return baseOpcode | bit | ((offset & 0x7f) << 3);
   }
 
+  public static Brbs_Brbc getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return new Brbs_Brbc(deviceKey,
+                         opcode,
+                         nextOpcode);
+  }
+
   private final int bitOffset;
   private final int offset;
   private final boolean bitSet;
   private boolean branch;
   private final String toStringValue;
 
-  public BranchInstruction(AvrDeviceKey deviceKey,
-                           int opcode,
-                           int nextOpcode)
+  private Brbs_Brbc(AvrDeviceKey deviceKey,
+                    int opcode,
+                    int nextOpcode)
   {
     super(opcode,
           decodeMnemonic(opcode));

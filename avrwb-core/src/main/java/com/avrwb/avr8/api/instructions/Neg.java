@@ -39,9 +39,18 @@ public final class Neg extends Instruction_Rd
 
   public static final int OPCODE = 0x9401;
 
-  public Neg(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Neg getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Neg(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Neg(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "neg");

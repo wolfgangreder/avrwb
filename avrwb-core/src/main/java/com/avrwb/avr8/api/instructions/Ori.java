@@ -38,9 +38,18 @@ public final class Ori extends Instruction_Rd_K8
 
   public static final int OPCODE = 0x6000;
 
-  public Ori(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Ori getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Ori(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Ori(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "ori");

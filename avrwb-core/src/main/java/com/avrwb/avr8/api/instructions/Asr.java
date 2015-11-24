@@ -38,11 +38,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Asr extends Instruction_Rd
 {
 
+  public static Asr getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Asr(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
   public static final int OPCODE = 0x9405;
 
-  public Asr(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  private Asr(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "asr");

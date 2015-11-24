@@ -39,9 +39,18 @@ public final class Com extends Instruction_Rd
 
   public static final int OPCODE = 0x9400;
 
-  public Com(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Com getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Com(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Com(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "com");

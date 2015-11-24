@@ -38,9 +38,18 @@ public final class Ldi extends Instruction_Rd_K8
 
   public static final int OPCODE = 0xe000;
 
-  public Ldi(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Ldi getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Ldi(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Ldi(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "ldi");

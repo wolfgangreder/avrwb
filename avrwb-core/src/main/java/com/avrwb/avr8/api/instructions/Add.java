@@ -32,11 +32,20 @@ import com.avrwb.avr8.helper.AvrDeviceKey;
 public final class Add extends AbstractAdd
 {
 
+  public static Add getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Add(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
   public static final int OPCODE = 0x0c00;
 
-  public Add(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  private Add(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "add",

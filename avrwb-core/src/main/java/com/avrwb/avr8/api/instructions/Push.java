@@ -40,9 +40,18 @@ public final class Push extends Instruction_Rd
 
   public static final int OPCODE = 0x920f;
 
-  public Push(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static Push getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Push(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Push(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "push");

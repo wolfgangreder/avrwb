@@ -37,8 +37,6 @@ import java.lang.annotation.Target;
 public @interface InstructionImplementations
 {
 
-  String factoryMethod() default "";
-
   InstructionImplementation[] value();
 
 }

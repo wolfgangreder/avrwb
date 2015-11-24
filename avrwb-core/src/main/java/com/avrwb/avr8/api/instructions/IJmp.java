@@ -43,9 +43,18 @@ public final class IJmp extends AbstractInstruction
   public static final int OPCODE = 0x9409;
   private int callTarget;
 
-  public IJmp(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static IJmp getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new IJmp(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private IJmp(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(OPCODE,
           "ijmp");

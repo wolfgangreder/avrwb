@@ -21,29 +21,21 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.BitClearSet;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
  * @author wolfi
  */
-public class BitClearSetNGTest extends AbstractInstructionTest
+public class Bclr_BsetNGTest extends AbstractInstructionTest
 {
 
-  public BitClearSetNGTest()
+  public Bclr_BsetNGTest()
   {
   }
 
   @BeforeClass
   public static void setUpClass() throws Exception
-  {
-    testClass(BitClearSet.class);
-  }
-
-  @Test
-  public void testDoExecute() throws Exception
   {
   }
 

@@ -38,9 +38,18 @@ public final class EICall extends AbstractInstruction
 
   public static final int OPCODE = 0x9519;
 
-  public EICall(AvrDeviceKey deviceKey,
-                int opcode,
-                int nextOpcode)
+  public static EICall getInstance(AvrDeviceKey deviceKey,
+                                   int opcode,
+                                   int nextOpcode)
+  {
+    return new EICall(deviceKey,
+                      opcode,
+                      nextOpcode);
+  }
+
+  private EICall(AvrDeviceKey deviceKey,
+                 int opcode,
+                 int nextOpcode)
   {
     super(0x9519,
           "eicall");

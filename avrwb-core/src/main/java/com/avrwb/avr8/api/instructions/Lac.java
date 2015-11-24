@@ -38,9 +38,18 @@ public final class Lac extends Instruction_Rd
 
   public static final int OPCODE = 0x9206;
 
-  public Lac(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Lac getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Lac(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Lac(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "lac");

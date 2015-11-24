@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.ICall;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -38,8 +37,6 @@ public class ICallNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(ICall.class
-    );
   }
 
 }

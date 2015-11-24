@@ -22,7 +22,6 @@
 package com.avrwb.avr8.api.instructions;
 
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -37,12 +36,6 @@ public class ComNGTest extends AbstractInstructionTest
 
   @BeforeClass
   public static void setUpClass() throws Exception
-  {
-    testClass(Com.class);
-  }
-
-  @Test
-  public void testDoExecute() throws Exception
   {
   }
 

@@ -46,9 +46,18 @@ public final class ICall extends AbstractInstruction
   private int callTarget;
   private boolean longCall;
 
-  public ICall(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static ICall getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new ICall(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private ICall(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(OPCODE,
           "icall");

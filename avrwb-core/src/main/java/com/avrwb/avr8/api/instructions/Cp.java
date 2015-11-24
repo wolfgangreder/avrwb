@@ -34,9 +34,18 @@ public final class Cp extends AbstractCp
 
   public static final int OPCODE = 0x1400;
 
-  public Cp(AvrDeviceKey deviceKey,
-            int opcode,
-            int nextOpcode)
+  public static Cp getInstance(AvrDeviceKey deviceKey,
+                               int opcode,
+                               int nextOpcode)
+  {
+    return new Cp(deviceKey,
+                  opcode,
+                  nextOpcode);
+  }
+
+  private Cp(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "cp",

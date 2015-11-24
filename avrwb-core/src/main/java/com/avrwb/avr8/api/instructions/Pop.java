@@ -40,9 +40,18 @@ public final class Pop extends Instruction_Rd
 
   public static final int OPCODE = 0x900f;
 
-  public Pop(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Pop getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Pop(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Pop(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "pop");

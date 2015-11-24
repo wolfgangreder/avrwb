@@ -33,15 +33,27 @@ import com.avrwb.avr8.helper.SimulationException;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xfe08, opcodes = {0xfc00, 0xfe00})
-public final class Sbrc_Sbrs extends AbstractInstruction
+public final class Sbrc_Sbrs extends Instruction_Rd_b
 {
 
-  public Sbrc_Sbrs(AvrDeviceKey deviceKey,
-                   int opcode,
-                   int nextOpcode)
+  public static final int OPCODE_SBRC = 0xfc00;
+  public static final int OPCODE_SBRS = 0xfe00;
+
+  public static Sbrc_Sbrs getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return new Sbrc_Sbrs(deviceKey,
+                         opcode,
+                         nextOpcode);
+  }
+
+  private Sbrc_Sbrs(AvrDeviceKey deviceKey,
+                    int opcode,
+                    int nextOpcode)
   {
     super(opcode,
-          "???");
+          ((opcode & OPCODE_MASK) == OPCODE_SBRS) ? "sbrs" : "sbrc");
   }
 
   @Override

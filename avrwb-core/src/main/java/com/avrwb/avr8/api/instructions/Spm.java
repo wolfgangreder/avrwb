@@ -39,9 +39,18 @@ public final class Spm extends AbstractInstruction
   public static final int OPCODE = 0x95e8;
   public static final int OPCODE_ZI = 0x95f8;
 
-  public Spm(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Spm getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Spm(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Spm(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "spm");

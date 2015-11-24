@@ -42,9 +42,18 @@ public final class Sbci_Subi extends Instruction_Rd_K8
   public static final int OPCODE_SBCI = 0x4000;
   private final boolean withCarry;
 
-  public Sbci_Subi(AvrDeviceKey deviceKey,
-                   int opcode,
-                   int nextOpcode)
+  public static Sbci_Subi getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return new Sbci_Subi(deviceKey,
+                         opcode,
+                         nextOpcode);
+  }
+
+  private Sbci_Subi(AvrDeviceKey deviceKey,
+                    int opcode,
+                    int nextOpcode)
   {
     super(opcode,
           (opcode & 0x1000) != 0 ? "subi" : "sbci");

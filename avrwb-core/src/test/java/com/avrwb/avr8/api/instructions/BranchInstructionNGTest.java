@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.BranchInstruction;
 import static org.testng.AssertJUnit.assertEquals;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,7 +39,6 @@ public class BranchInstructionNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(BranchInstruction.class);
   }
 
   @Test
@@ -49,25 +47,25 @@ public class BranchInstructionNGTest extends AbstractInstructionTest
     final int opcodemask = 0xfc07;
     int opcode = opcodemask;
     int expected = 0;
-    int result = BranchInstruction.decodeOffset(opcode);
+    int result = Brbs_Brbc.decodeOffset(opcode);
     assertEquals("opcode " + Integer.toHexString(opcode),
                  expected,
                  result);
     opcode = opcodemask | 0x3f8;
     expected = -1;
-    result = BranchInstruction.decodeOffset(opcode);
+    result = Brbs_Brbc.decodeOffset(opcode);
     assertEquals("opcode " + Integer.toHexString(opcode),
                  expected,
                  result);
     opcode = opcodemask | 0x1f8;
     expected = 63;
-    result = BranchInstruction.decodeOffset(opcode);
+    result = Brbs_Brbc.decodeOffset(opcode);
     assertEquals("opcode " + Integer.toHexString(opcode),
                  expected,
                  result);
     opcode = opcodemask | 0x200;
     expected = -64;
-    result = BranchInstruction.decodeOffset(opcode);
+    result = Brbs_Brbc.decodeOffset(opcode);
     assertEquals("opcode " + Integer.toHexString(opcode),
                  expected,
                  result);

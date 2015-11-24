@@ -34,9 +34,18 @@ public final class Sbc extends AbstractSub
 
   public static final int OPCODE = 0x0800;
 
-  public Sbc(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Sbc getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Sbc(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Sbc(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "sbc",

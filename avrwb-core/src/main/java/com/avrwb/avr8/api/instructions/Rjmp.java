@@ -44,9 +44,18 @@ public final class Rjmp extends Instruction_k12
   public static final int OPCODE = 0xc000;
   private boolean longCall;
 
-  public Rjmp(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static Rjmp getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Rjmp(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Rjmp(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "rjmp");

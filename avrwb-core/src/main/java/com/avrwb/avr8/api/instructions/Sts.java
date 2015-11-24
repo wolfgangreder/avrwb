@@ -38,9 +38,18 @@ public final class Sts extends Instruction_Rd_K16
 
   public static final int OPCODE = 0x9200;
 
-  public Sts(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Sts getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Sts(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Sts(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super((opcode << 16) | nextOpcode,
           "sts");

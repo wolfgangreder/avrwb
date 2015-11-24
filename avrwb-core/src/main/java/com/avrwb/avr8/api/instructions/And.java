@@ -36,11 +36,20 @@ import com.avrwb.avr8.helper.AvrDeviceKey;
 public final class And extends Instruction_Rd_Rr
 {
 
+  public static And getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new And(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
   public static final int OPCODE = 0x2000;
 
-  public And(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  private And(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "and");

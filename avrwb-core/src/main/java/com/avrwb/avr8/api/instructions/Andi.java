@@ -37,11 +37,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Andi extends Instruction_Rd_K8
 {
 
+  public static Andi getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Andi(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
   public static final int OPCODE = 0x7000;
 
-  public Andi(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  private Andi(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "andi");

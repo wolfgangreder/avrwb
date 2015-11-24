@@ -49,7 +49,6 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -63,10 +62,6 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import org.openide.util.lookup.ServiceProvider;
 
-/**
- *
- * @author wolfi
- */
 @ServiceProvider(service = Processor.class)
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({"com.avrwb.annotations.InstructionImplementation", "com.avrwb.annotations.InstructionImplementations"})
@@ -79,9 +74,6 @@ public class InstructionImplementationProcessor extends AbstractProcessor
   private TypeMirror typeDeviceKey;
   private TypeMirror typeInt;
 
-  /**
-   * For access by subclasses.
-   */
   public InstructionImplementationProcessor()
   {
   }
@@ -95,9 +87,6 @@ public class InstructionImplementationProcessor extends AbstractProcessor
     typeInt = processingEnv.getTypeUtils().getPrimitiveType(TypeKind.INT);
   }
 
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public final boolean process(Set<? extends TypeElement> annotations,
                                RoundEnvironment roundEnv)
@@ -116,14 +105,6 @@ public class InstructionImplementationProcessor extends AbstractProcessor
     }
   }
 
-  /**
-   * <p>
-   * handleProcess.</p>
-   *
-   * @param annotations a {@link java.util.Set} object.
-   * @param roundEnv a {@link javax.annotation.processing.RoundEnvironment} object.
-   * @return a boolean.
-   */
   protected boolean handleProcess(Set<? extends TypeElement> annotations,
                                   RoundEnvironment roundEnv)
   {
@@ -160,8 +141,7 @@ public class InstructionImplementationProcessor extends AbstractProcessor
       return false;
     }
     return register(clazz,
-                    InstructionImplementation.class,
-                    svc.factoryMethod());
+                    InstructionImplementation.class);
   }
 
   private boolean register(TypeElement clazz,
@@ -173,52 +153,23 @@ public class InstructionImplementationProcessor extends AbstractProcessor
       return false;
     }
     return register(clazz,
-                    InstructionImplementations.class,
-                    svc.factoryMethod());
+                    InstructionImplementations.class);
   }
 
-  /**
-   * <p>
-   * register.</p>
-   *
-   * @param clazz a {@link javax.lang.model.element.TypeElement} object.
-   * @param annotation a {@link java.lang.Class} object.
-   * @param constr a {@link java.lang.String} object.
-   * @return a boolean.
-   */
   protected final boolean register(TypeElement clazz,
-                                   Class<? extends Annotation> annotation,
-                                   String constr)
+                                   Class<? extends Annotation> annotation)
   {
     Boolean verify = verifiedClasses.get(clazz);
     if (verify == null) {
       verify = verifyServiceProviderSignature(clazz,
-                                              annotation,
-                                              constr);
+                                              annotation);
       verifiedClasses.put(clazz,
                           verify);
     }
     if (!verify) {
       return false;
     }
-    TypeMirror instructionType = processingEnv.getElementUtils().getTypeElement("com.avrwb.avr8.api.Instruction").asType();
     final String className = processingEnv.getElementUtils().getBinaryName(clazz).toString();
-    String impl = className;
-    if (!(constr == null || constr.trim().isEmpty())) {
-      impl += "=" + constr;
-    }
-    if (!processingEnv.getTypeUtils().isAssignable(clazz.asType(),
-                                                   instructionType)) {
-      AnnotationMirror ann = findAnnotationMirror(clazz,
-                                                  annotation);
-      processingEnv.getMessager().printMessage(Kind.ERROR,
-                                               className + " is not assignable to " + instructionType,
-                                               clazz,
-                                               ann,
-                                               findAnnotationValue(ann,
-                                                                   "provider"));
-      return false;
-    }
     String path = "META-INF/avr/" + Instruction.class.getName();
     processingEnv.getMessager().printMessage(Kind.NOTE,
                                              className + " to be registered as a instruction");
@@ -283,13 +234,12 @@ public class InstructionImplementationProcessor extends AbstractProcessor
       outputFiles.put(rsrc,
                       lines);
     }
-    lines.add(impl);
+    lines.add(className);
     return true;
   }
 
   private boolean checkConstructingElement(ExecutableElement method,
-                                           TypeElement clazz,
-                                           boolean ctor)
+                                           TypeElement clazz)
   {
     if (!method.getModifiers().contains(Modifier.PUBLIC)) {
       return false;
@@ -297,12 +247,10 @@ public class InstructionImplementationProcessor extends AbstractProcessor
     if (method.getParameters().size() != 3) {
       return false;
     }
-    if (!ctor) {
-      TypeMirror type = method.getReturnType();
-      if (!processingEnv.getTypeUtils().isAssignable(type,
-                                                     clazz.asType())) {
-        return false;
-      }
+    TypeMirror type = method.getReturnType();
+    if (!processingEnv.getTypeUtils().isAssignable(type,
+                                                   clazz.asType())) {
+      return false;
     }
     VariableElement ve = method.getParameters().get(0);
     TypeMirror tm = ve.asType();
@@ -323,8 +271,7 @@ public class InstructionImplementationProcessor extends AbstractProcessor
   }
 
   private boolean verifyServiceProviderSignature(TypeElement clazz,
-                                                 Class<? extends Annotation> annotation,
-                                                 String contrs)
+                                                 Class<? extends Annotation> annotation)
   {
     AnnotationMirror ann = findAnnotationMirror(clazz,
                                                 annotation);
@@ -335,30 +282,12 @@ public class InstructionImplementationProcessor extends AbstractProcessor
                                                ann);
       return false;
     }
-    if (!clazz.getModifiers().contains(Modifier.FINAL)) {
-      processingEnv.getMessager().printMessage(Kind.ERROR,
-                                               clazz + " must be final",
-                                               clazz,
-                                               ann);
-      return false;
-    }
 
     boolean hasCtor = false;
     for (ExecutableElement method : ElementFilter.methodsIn(clazz.getEnclosedElements())) {
-      if (method.getModifiers().contains(Modifier.STATIC) && method.getSimpleName().contentEquals(contrs)) {
+      if (method.getModifiers().contains(Modifier.STATIC) && method.getSimpleName().contentEquals("getInstance")) {
         if (hasCtor = checkConstructingElement(method,
-                                               clazz,
-                                               false)) {
-          break;
-
-        }
-      }
-    }
-    if (!hasCtor) {
-      for (ExecutableElement method : ElementFilter.constructorsIn(clazz.getEnclosedElements())) {
-        if (hasCtor = checkConstructingElement(method,
-                                               clazz,
-                                               true)) {
+                                               clazz)) {
           break;
 
         }
@@ -366,7 +295,7 @@ public class InstructionImplementationProcessor extends AbstractProcessor
     }
     if (!hasCtor) {
       processingEnv.getMessager().printMessage(Kind.ERROR,
-                                               clazz + " must have a public constructor or static method named " + contrs
+                                               clazz + " must have a static method named getInstance"
                                                        + " with signature (com.avrwb.avr8.helper.AvrDeviceKey,int,int) and a return type assignable to "
                                                + "com.avrawb.avr8.api.Instruction");
       return false;
@@ -375,11 +304,6 @@ public class InstructionImplementationProcessor extends AbstractProcessor
     return true;
   }
 
-  /**
-   * @param element a source element
-   * @param annotation a type of annotation
-   * @return the instance of that annotation on the element, or null if not found
-   */
   private AnnotationMirror findAnnotationMirror(Element element,
                                                 Class<? extends Annotation> annotation)
   {
@@ -387,24 +311,6 @@ public class InstructionImplementationProcessor extends AbstractProcessor
       if (processingEnv.getElementUtils().getBinaryName((TypeElement) ann.getAnnotationType().asElement()).
               contentEquals(annotation.getName())) {
         return ann;
-      }
-    }
-    return null;
-  }
-
-  /**
-   * @param annotation an annotation instance (null permitted)
-   * @param name the name of an attribute of that annotation
-   * @return the corresponding value if found
-   */
-  private AnnotationValue findAnnotationValue(AnnotationMirror annotation,
-                                              String name)
-  {
-    if (annotation != null) {
-      for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : annotation.getElementValues().entrySet()) {
-        if (entry.getKey().getSimpleName().contentEquals(name)) {
-          return entry.getValue();
-        }
       }
     }
     return null;

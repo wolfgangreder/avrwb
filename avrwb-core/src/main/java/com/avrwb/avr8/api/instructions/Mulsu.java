@@ -33,12 +33,23 @@ import com.avrwb.avr8.helper.SimulationException;
  * @author wolfi
  */
 @InstructionImplementation(opcodeMask = 0xfc88, opcodes = 0x0300)
-public final class Mulsu extends Instruction_Rdh_Rrh
+public final class Mulsu extends Instruction_Rdh23_Rrh23
 {
 
-  public Mulsu(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static final int OPCODE = 0x0300;
+
+  public static Mulsu getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Mulsu(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Mulsu(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           "mulsu");

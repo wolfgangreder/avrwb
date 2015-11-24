@@ -32,25 +32,27 @@ import com.avrwb.avr8.api.InstructionDecoder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.InstructionNotAvailableException;
-import com.avrwb.avr8.helper.TriFunction;
 import com.avrwb.schema.util.Converter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
@@ -63,71 +65,16 @@ import org.openide.util.Exceptions;
 public class BaseInstructionDecoder implements InstructionDecoder
 {
 
-  private static final class CtorConstructor implements TriFunction<AvrDeviceKey, Integer, Integer, Instruction>
-  {
-
-    private final Constructor<?> ctor;
-
-    public CtorConstructor(Constructor<?> ctor)
-    {
-      this.ctor = ctor;
-    }
-
-    @Override
-    public Instruction apply(AvrDeviceKey deviceKey,
-                             Integer opcode,
-                             Integer nextOpcode)
-    {
-      try {
-        return (Instruction) ctor.newInstance(deviceKey,
-                                              opcode,
-                                              nextOpcode);
-      } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-        Exceptions.printStackTrace(ex);
-      }
-      return null;
-    }
-
-  }
-
-  private static final class MethConstructor implements TriFunction<AvrDeviceKey, Integer, Integer, Instruction>
-  {
-
-    private final Method ctor;
-
-    public MethConstructor(Method ctor)
-    {
-      this.ctor = ctor;
-    }
-
-    @Override
-    public Instruction apply(AvrDeviceKey deviceKey,
-                             Integer opcode,
-                             Integer nextOpcode)
-    {
-      try {
-        return (Instruction) ctor.invoke(null,
-                                         deviceKey,
-                                         opcode,
-                                         nextOpcode);
-      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-        Exceptions.printStackTrace(ex);
-      }
-      return null;
-    }
-
-  }
-
-  protected static final class Descriptor
+  protected static final class Descriptor implements Comparable<Descriptor>
   {
 
     private final Class<?> instruction;
     private final int opcodeMask;
     private final int baseOpcode;
-    private final TriFunction<AvrDeviceKey, Integer, Integer, Instruction> ctrFunc;
+    private final Method ctrFunc;
 
     public Descriptor(Class<?> instruction,
-                      TriFunction<AvrDeviceKey, Integer, Integer, Instruction> ctrFunc,
+                      Method ctrFunc,
                       int opcodeMask,
                       int baseOpcode)
     {
@@ -156,14 +103,32 @@ public class BaseInstructionDecoder implements InstructionDecoder
                                             int opcode,
                                             int nextOpcode)
     {
-      return ctrFunc.apply(deviceKey,
-                           opcode,
-                           nextOpcode);
+      try {
+        return (Instruction) ctrFunc.invoke(null,
+                                            deviceKey,
+                                            opcode,
+                                            nextOpcode);
+      } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        Exceptions.printStackTrace(ex);
+      }
+      return null;
     }
 
     public boolean matches(int opcode)
     {
       return baseOpcode == (opcode & opcodeMask);
+    }
+
+    @Override
+    public int compareTo(Descriptor o)
+    {
+      int result = Integer.compare(Integer.bitCount(opcodeMask),
+                                   Integer.bitCount(o.opcodeMask));
+      if (result == 0) {
+        result = Integer.compare(baseOpcode,
+                                 o.baseOpcode);
+      }
+      return result;
     }
 
     @Override
@@ -183,6 +148,8 @@ public class BaseInstructionDecoder implements InstructionDecoder
 
   private void fillInstructionRepository()
   {
+    instructionRepository.clear();
+    instructionCache.clear();
     try {
       Enumeration<URL> urlEnum = getClass().getClassLoader().getResources("META-INF/avr/" + Instruction.class.getName());
       while (urlEnum.hasMoreElements()) {
@@ -190,6 +157,8 @@ public class BaseInstructionDecoder implements InstructionDecoder
       }
     } catch (IOException ex) {
       Exceptions.printStackTrace(ex);
+    } finally {
+      Collections.sort(instructionRepository);
     }
   }
 
@@ -221,28 +190,13 @@ public class BaseInstructionDecoder implements InstructionDecoder
 
   private List<Descriptor> processLine(String line)
   {
-    String clazzName;
-    String factoryMethodName;
-    int equalIndex = line.indexOf('=');
-    if (equalIndex > 0) {
-      clazzName = line.substring(0,
-                                 equalIndex);
-      if (equalIndex < line.length() - 1) {
-        factoryMethodName = line.substring(equalIndex + 1);
-      } else {
-        factoryMethodName = null;
-      }
-    } else {
-      clazzName = line;
-      factoryMethodName = null;
-    }
     final Logger logger = AVRWBDefaults.LOGGER;
     try {
-      Class<?> clazz = Class.forName(clazzName);
+      Class<?> clazz = Class.forName(line);
       if (!Instruction.class.isAssignableFrom(clazz)) {
         logger.log(Level.WARNING,
                    "Class {0}is not assignable from {1}",
-                   new Object[]{clazzName,
+                   new Object[]{line,
                                 Instruction.class.getName()});
         return null;
       }
@@ -251,34 +205,20 @@ public class BaseInstructionDecoder implements InstructionDecoder
                    "class implementing a instruction must be final and public");
         return null;
       }
-      TriFunction<AvrDeviceKey, Integer, Integer, Instruction> construcingFunction;
-      if (factoryMethodName == null || factoryMethodName.trim().isEmpty()) {
-        Constructor<?> ctor = clazz.getConstructor(AvrDeviceKey.class,
-                                                   Integer.TYPE,
-                                                   Integer.TYPE);
-        if (!Modifier.isPublic(ctor.getModifiers())) {
-          logger.log(Level.WARNING,
-                     "class implementig a instruction must have a public constructor");
-          return null;
-        }
-        construcingFunction = new CtorConstructor(ctor);
-      } else {
-        Method method = clazz.getDeclaredMethod(factoryMethodName,
-                                                AvrDeviceKey.class,
-                                                Integer.TYPE,
-                                                Integer.TYPE);
-        if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isStatic(method.getModifiers())) {
-          logger.log(Level.WARNING,
-                     "instruction factory method must be public and static");
-          return null;
-        }
-        if (!Instruction.class.isAssignableFrom(method.getReturnType())) {
-          logger.log(Level.WARNING,
-                     "return type of factory method must be assignable to {0}",
-                     new Object[]{Instruction.class.getName()});
-          return null;
-        }
-        construcingFunction = new MethConstructor(method);
+      Method method = clazz.getDeclaredMethod("getInstance",
+                                              AvrDeviceKey.class,
+                                              Integer.TYPE,
+                                              Integer.TYPE);
+      if (!Modifier.isPublic(method.getModifiers()) || !Modifier.isStatic(method.getModifiers())) {
+        logger.log(Level.WARNING,
+                   "instruction factory method must be public and static");
+        return null;
+      }
+      if (!Instruction.class.isAssignableFrom(method.getReturnType())) {
+        logger.log(Level.WARNING,
+                   "return type of factory method must be assignable to {0}",
+                   new Object[]{Instruction.class.getName()});
+        return null;
       }
       List<InstructionImplementation> annotations = new LinkedList<>();
       InstructionImplementations implementations = clazz.getAnnotation(InstructionImplementations.class);
@@ -304,7 +244,7 @@ public class BaseInstructionDecoder implements InstructionDecoder
         int om = i.opcodeMask();
         for (int bo : i.opcodes()) {
           result.add(new Descriptor(clazz,
-                                    construcingFunction,
+                                    method,
                                     om,
                                     bo));
         }
@@ -314,7 +254,6 @@ public class BaseInstructionDecoder implements InstructionDecoder
       AVRWBDefaults.LOGGER.log(Level.WARNING,
                                "error while processing instruction descriptor line " + line,
                                ex);
-      Exceptions.printStackTrace(ex);
     }
     return null;
   }
@@ -359,6 +298,25 @@ public class BaseInstructionDecoder implements InstructionDecoder
     return true;
   }
 
+  private boolean checkDuplicates(List<? extends Descriptor> candidates)
+  {
+    ConcurrentHashMap<Integer, LongAdder> map = new ConcurrentHashMap<>();
+    for (Descriptor d : candidates) {
+      map.computeIfAbsent(d.baseOpcode,
+                          k -> new LongAdder()).increment();
+    }
+    ListIterator<? extends Descriptor> iter = candidates.listIterator();
+    while (iter.hasNext()) {
+      Descriptor d = iter.next();
+      LongAdder adder = map.get(d.baseOpcode);
+      if (adder.sum() > 1) {
+        iter.remove();
+        adder.decrement();
+      }
+    }
+    return candidates.size() == 1;
+  }
+
   @Override
   public final Instruction decodeInstruction(AvrDeviceKey deviceKey,
                                              int opcode,
@@ -386,9 +344,12 @@ public class BaseInstructionDecoder implements InstructionDecoder
       return null;
     }
     if (candidates.size() > 1) {
-      AVRWBDefaults.LOGGER.log(Level.WARNING,
-                               "found multiple instruction descriptors for opcode 0x{0}",
-                               new Object[]{Integer.toHexString(opcode)});
+      checkDuplicates(candidates);
+      if (candidates.size() > 1) {
+        AVRWBDefaults.LOGGER.log(Level.WARNING,
+                                 "found multiple instruction descriptors for opcode 0x{0}",
+                                 new Object[]{Integer.toHexString(opcode)});
+      }
     }
     return candidates.get(0).constructInstruction(deviceKey,
                                                   opcode,

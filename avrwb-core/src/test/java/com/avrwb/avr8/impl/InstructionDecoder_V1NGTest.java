@@ -118,16 +118,16 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
+public class InstructionDecoder_V1NGTest extends BaseInstructionDecoderNGTest
 {
 
   @BeforeClass
   public static void createDecoder()
   {
-    decoder = new ProtocollDecoder(new InstructionDecoder_V0());
+    decoder = new ProtocollDecoder(new InstructionDecoder_V1());
     deviceKey = new AvrDeviceKey(AvrFamily.BASIC,
-                                 AvrCore.V0,
-                                 "AT90S1200");
+                                 AvrCore.V1,
+                                 "AT90S8515");
   }
 
   @AfterClass
@@ -181,8 +181,8 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
       {Lat.OPCODE, Lat.class, "lat", false},
       {Lsr.OPCODE, Lsr.class, "lsr", true},
       {Neg.OPCODE, Neg.class, "neg", true},
-      {Pop.OPCODE, Pop.class, "pop", false},
-      {Push.OPCODE, Push.class, "push", false},
+      {Pop.OPCODE, Pop.class, "pop", true},
+      {Push.OPCODE, Push.class, "push", true},
       {Ror.OPCODE, Ror.class, "ror", true},
       {Swap.OPCODE, Swap.class, "swap", true},
       {Xch.OPCODE, Xch.class, "xch", false}
@@ -228,7 +228,7 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   }
 
   @DataProvider(name = "branchProvider")
-  public Object[][] brachProvider()
+  public Object[][] branchProvider()
   {
     return new Object[][]{
       {Brbs_Brbc.OPCODE_SET, Brbs_Brbc.class, "BR?S", true},
@@ -293,8 +293,8 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] rdlK6Provider()
   {
     return new Object[][]{
-      {Adiw.OPCODE, Adiw.class, "adiw", false},
-      {Sbiw.OPCODE, Sbiw.class, "sbiw", false}
+      {Adiw.OPCODE, Adiw.class, "adiw", true},
+      {Sbiw.OPCODE, Sbiw.class, "sbiw", true}
     };
   }
 
@@ -302,8 +302,8 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] rdK16Provider()
   {
     return new Object[][]{
-      {Lds.OPCODE, Lds.class, "lds", false},
-      {Sts.OPCODE, Sts.class, "sts", false}
+      {Lds.OPCODE, Lds.class, "lds", true},
+      {Sts.OPCODE, Sts.class, "sts", true}
     };
   }
 
@@ -352,9 +352,9 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
       {EICall.OPCODE, EICall.class, "eicall", false},
       {EIJmp.OPCODE, EIJmp.class, "eijmp", false},
       {Elpm.OPCODE_ELPM, Elpm.class, "elpm", false},
-      {ICall.OPCODE, ICall.class, "icall", false},
-      {IJmp.OPCODE, IJmp.class, "ijmp", false},
-      {Lpm.OPCODE_LPM, Lpm.class, "lpm", false},
+      {ICall.OPCODE, ICall.class, "icall", true},
+      {IJmp.OPCODE, IJmp.class, "ijmp", true},
+      {Lpm.OPCODE_LPM, Lpm.class, "lpm", true},
       {Nop.OPCODE, Nop.class, "nop", true},
       {Ret_i.OPCODE_RET, Ret_i.class, "ret", true},
       {Ret_i.OPCODE_RETI, Ret_i.class, "reti", true},
@@ -382,8 +382,8 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] k22Provider()
   {
     return new Object[][]{
-      {Call.OPCODE, Call.class, "call", false},
-      {Jmp.OPCODE, Jmp.class, "jmp", false}
+      {Call.OPCODE, Call.class, "call", true},
+      {Jmp.OPCODE, Jmp.class, "jmp", true}
     };
   }
 
@@ -445,11 +445,11 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] ldPtrProvider()
   {
     return new Object[][]{
-      {Ld.OPCODE_LD_X, Ld.class, Pointer.X, "ld", false},
-      {Ld.OPCODE_LD_Y, Ld.class, Pointer.Y, "ld", false},
+      {Ld.OPCODE_LD_X, Ld.class, Pointer.X, "ld", true},
+      {Ld.OPCODE_LD_Y, Ld.class, Pointer.Y, "ld", true},
       {Ld.OPCODE_LD_Z, Ld.class, Pointer.Z, "ld", true},
-      {St.OPCODE_ST_X, St.class, Pointer.X, "st", false},
-      {St.OPCODE_ST_Y, St.class, Pointer.Y, "st", false},
+      {St.OPCODE_ST_X, St.class, Pointer.X, "st", true},
+      {St.OPCODE_ST_Y, St.class, Pointer.Y, "st", true},
       {St.OPCODE_ST_Z, St.class, Pointer.Z, "st", true}};
   }
 
@@ -472,12 +472,12 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] ldPDPtrProvider()
   {
     return new Object[][]{
-      {Ld.OPCODE_LD_X_M, Ld.class, Pointer.X, "ld", false},
-      {Ld.OPCODE_LD_Y_M, Ld.class, Pointer.Y, "ld", false},
-      {Ld.OPCODE_LD_Z_M, Ld.class, Pointer.Z, "ld", false},
-      {St.OPCODE_ST_X_M, St.class, Pointer.X, "st", false},
-      {St.OPCODE_ST_Y_M, St.class, Pointer.Y, "st", false},
-      {St.OPCODE_ST_Z_M, St.class, Pointer.Z, "st", false}};
+      {Ld.OPCODE_LD_X_M, Ld.class, Pointer.X, "ld", true},
+      {Ld.OPCODE_LD_Y_M, Ld.class, Pointer.Y, "ld", true},
+      {Ld.OPCODE_LD_Z_M, Ld.class, Pointer.Z, "ld", true},
+      {St.OPCODE_ST_X_M, St.class, Pointer.X, "st", true},
+      {St.OPCODE_ST_Y_M, St.class, Pointer.Y, "st", true},
+      {St.OPCODE_ST_Z_M, St.class, Pointer.Z, "st", true}};
   }
 
   @Test(dataProvider = "ldPDProvider")
@@ -499,12 +499,12 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] ldPIPtrProvider()
   {
     return new Object[][]{
-      {Ld.OPCODE_LD_X_P, Ld.class, Pointer.X, "ld", false},
-      {Ld.OPCODE_LD_Y_P, Ld.class, Pointer.Y, "ld", false},
-      {Ld.OPCODE_LD_Z_P, Ld.class, Pointer.Z, "ld", false},
-      {St.OPCODE_ST_X_P, St.class, Pointer.X, "st", false},
-      {St.OPCODE_ST_Y_P, St.class, Pointer.Y, "st", false},
-      {St.OPCODE_ST_Z_P, St.class, Pointer.Z, "st", false}};
+      {Ld.OPCODE_LD_X_P, Ld.class, Pointer.X, "ld", true},
+      {Ld.OPCODE_LD_Y_P, Ld.class, Pointer.Y, "ld", true},
+      {Ld.OPCODE_LD_Z_P, Ld.class, Pointer.Z, "ld", true},
+      {St.OPCODE_ST_X_P, St.class, Pointer.X, "st", true},
+      {St.OPCODE_ST_Y_P, St.class, Pointer.Y, "st", true},
+      {St.OPCODE_ST_Z_P, St.class, Pointer.Z, "st", true}};
   }
 
   @Test(dataProvider = "ldPIProvider")
@@ -526,10 +526,10 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
   public Object[][] ldPtrDISPProvider()
   {
     return new Object[][]{
-      {Ld.OPCODE_LD_Y, Ld.class, Pointer.Y, "ld", false},
-      {Ld.OPCODE_LD_Z, Ld.class, Pointer.Z, "ld", false},
-      {St.OPCODE_ST_Y, St.class, Pointer.Y, "st", false},
-      {St.OPCODE_ST_Z, St.class, Pointer.Z, "st", false}
+      {Ld.OPCODE_LD_Y, Ld.class, Pointer.Y, "ld", true},
+      {Ld.OPCODE_LD_Z, Ld.class, Pointer.Z, "ld", true},
+      {St.OPCODE_ST_Y, St.class, Pointer.Y, "st", true},
+      {St.OPCODE_ST_Z, St.class, Pointer.Z, "st", true}
     };
   }
 
