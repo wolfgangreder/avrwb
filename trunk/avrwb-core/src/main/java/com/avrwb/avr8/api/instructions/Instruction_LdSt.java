@@ -43,7 +43,8 @@ public abstract class Instruction_LdSt extends AbstractInstruction
   public static final int OPCODE_MASK = 0xfe0f;
   public static final int OPCODE_MASK_Q = 0xd208;
 
-  public static int composeOpcode(Pointer ptr,
+  public static int composeOpcode(int baseOpcode,
+                                  Pointer ptr,
                                   int rd,
                                   Instruction_LdSt.Mode mode,
                                   int displacement)
@@ -51,20 +52,21 @@ public abstract class Instruction_LdSt extends AbstractInstruction
     if (rd > 31 || rd < 0) {
       throw new IllegalArgumentException("invalid register r" + rd);
     }
-    int result = 0;
-    switch (ptr) {
-      case X: {
-        result = 0x900c;
-      }
-      break;
-      case Y: {
-        result = 0x8008;
-      }
-      break;
-      case Z: {
-        result = 0x8000;
-      }
-    }
+    int result = baseOpcode;
+//    int result = 0;
+//    switch (ptr) {
+//      case X: {
+//        result = 0x900c;
+//      }
+//      break;
+//      case Y: {
+//        result = 0x8008;
+//      }
+//      break;
+//      case Z: {
+//        result = 0x8000;
+//      }
+//    }
     if (null != mode) {
       switch (mode) {
         case POST_INCREMENT:
