@@ -31,7 +31,6 @@ import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
-import com.avrwb.schema.AvrFamily;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -40,13 +39,12 @@ import java.util.logging.Logger;
  *
  * @author wolfi
  */
-@InstructionImplementations(factoryMethod = "getInstance",
-                            value = {
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x900c, 0x900d, 0x900e}), // ld Rd,X
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8008, 0x9009, 0x900a}), // ld Rd,Y
-                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8008}), // ld Rd,Y+q
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8000, 0x9001, 0x9002}), // ld Rd,Z
-                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8000})})
+@InstructionImplementations({
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x900c, 0x900d, 0x900e}), // ld Rd,X
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8008, 0x9009, 0x900a}), // ld Rd,Y
+  @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8008}), // ld Rd,Y+q
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8000, 0x9001, 0x9002}), // ld Rd,Z
+  @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8000})})
 public final class Ld extends Instruction_LdSt
 {
 
@@ -72,9 +70,6 @@ public final class Ld extends Instruction_LdSt
     }
     if (displacement == 0 && mode == Mode.DISPLACEMENT) {
       mode = Mode.UNMODIFIED;
-    }
-    if (deviceKey.getFamily() != AvrFamily.XMEGA && mode == Mode.DISPLACEMENT) {
-      return null;
     }
     Pointer ptr = getPtr(opcode,
                          mode);

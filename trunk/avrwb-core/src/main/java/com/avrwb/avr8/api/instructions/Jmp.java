@@ -41,9 +41,18 @@ public final class Jmp extends Instruction_K22
 
   public static final int OPCODE = 0x940c;
 
-  public Jmp(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Jmp getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Jmp(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Jmp(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           nextOpcode,

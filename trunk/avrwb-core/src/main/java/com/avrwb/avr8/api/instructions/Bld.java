@@ -36,11 +36,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Bld extends Instruction_Rd_b
 {
 
+  public static Bld getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Bld(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
   public static final int OPCODE = 0xf800;
 
-  public Bld(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  private Bld(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "bld");

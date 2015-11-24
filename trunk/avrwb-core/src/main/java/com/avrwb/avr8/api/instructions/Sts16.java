@@ -36,9 +36,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sts16 extends Instruction_Rdh_K7
 {
 
-  public Sts16(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static final int OPCODE = 0xa800;
+
+  public static Sts16 getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Sts16(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Sts16(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           "sts");

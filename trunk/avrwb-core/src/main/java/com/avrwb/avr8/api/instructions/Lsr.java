@@ -38,9 +38,18 @@ public final class Lsr extends Instruction_Rd
 
   public static final int OPCODE = 0x9406;
 
-  public Lsr(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Lsr getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Lsr(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Lsr(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "lsr");

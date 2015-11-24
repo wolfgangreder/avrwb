@@ -36,8 +36,8 @@ import java.text.MessageFormat;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xff0f, opcodes = {0x9408, 0x9488})
-public final class BitClearSet extends AbstractInstruction
+@InstructionImplementation(opcodeMask = 0xff8f, opcodes = {0x9408, 0x9488})
+public final class Bclr_Bset extends AbstractInstruction
 {
 
   public static int composeOpcode(int baseOpcode,
@@ -53,14 +53,23 @@ public final class BitClearSet extends AbstractInstruction
     return baseOpcode | (bit << 4) | (setBit ? 0x0 : 0x80);
   }
 
+  public static Bclr_Bset getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return new Bclr_Bset(deviceKey,
+                         opcode,
+                         nextOpcode);
+  }
+
   public static final int OPCODE_BCLR = 0x9488;
   public static final int OPCODE_BSET = 0x9408;
   private final boolean setBit;
   private final int bitOffset;
 
-  public BitClearSet(AvrDeviceKey deviceKey,
-                     int opcode,
-                     int nextOpcode)
+  private Bclr_Bset(AvrDeviceKey deviceKey,
+                    int opcode,
+                    int nextOpcode)
   {
     super(opcode,
           decodeMnemonic(opcode));

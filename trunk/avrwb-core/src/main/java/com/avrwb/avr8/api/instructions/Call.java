@@ -44,9 +44,18 @@ public final class Call extends Instruction_K22
   public static final int OPCODE = 0x940e;
   private boolean longCall;
 
-  public Call(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static Call getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Call(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Call(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           nextOpcode,

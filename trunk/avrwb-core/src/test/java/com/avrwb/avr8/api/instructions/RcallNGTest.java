@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Rcall;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -38,7 +37,6 @@ public class RcallNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Rcall.class);
   }
 
 }

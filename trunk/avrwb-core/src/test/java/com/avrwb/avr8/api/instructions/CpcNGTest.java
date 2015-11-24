@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Cpc;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -38,7 +37,6 @@ public class CpcNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Cpc.class);
   }
 
 }

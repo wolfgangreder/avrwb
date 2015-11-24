@@ -38,9 +38,18 @@ public final class Sleep extends AbstractInstruction
 
   public static final int OPCODE = 0x9588;
 
-  public Sleep(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static Sleep getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Sleep(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Sleep(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           "sleep");

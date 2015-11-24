@@ -36,9 +36,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Xch extends Instruction_Rd
 {
 
-  public Xch(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static final int OPCODE = 0x9204;
+
+  public static Xch getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Xch(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Xch(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "xch");

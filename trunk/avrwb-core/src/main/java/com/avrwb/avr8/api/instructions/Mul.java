@@ -44,9 +44,18 @@ public final class Mul extends Instruction_Rd_Rr
 
   public static final int OPCODE = 0x9c00;
 
-  public Mul(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Mul getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Mul(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Mul(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "mul");

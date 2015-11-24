@@ -33,10 +33,6 @@ import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
-/**
- *
- * @author wolfi
- */
 public abstract class Instruction_LdSt extends AbstractInstruction
 {
 
@@ -53,20 +49,6 @@ public abstract class Instruction_LdSt extends AbstractInstruction
       throw new IllegalArgumentException("invalid register r" + rd);
     }
     int result = baseOpcode;
-//    int result = 0;
-//    switch (ptr) {
-//      case X: {
-//        result = 0x900c;
-//      }
-//      break;
-//      case Y: {
-//        result = 0x8008;
-//      }
-//      break;
-//      case Z: {
-//        result = 0x8000;
-//      }
-//    }
     if (null != mode) {
       switch (mode) {
         case POST_INCREMENT:
@@ -144,8 +126,8 @@ public abstract class Instruction_LdSt extends AbstractInstruction
 
   protected static int getDisplacement(int opcode)
   {
-    int tmp1 = opcode & 0xd208;
-    if (tmp1 != 0x8008 && tmp1 != 0x8000) {
+    int tmp1 = opcode & OPCODE_MASK_Q;
+    if (tmp1 != 0x8208 && tmp1 != 0x8200 && tmp1 != 0x8008 && tmp1 != 0x8000) {
       return 0;
     }
     tmp1 = opcode & 0x7;

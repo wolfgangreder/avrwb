@@ -34,9 +34,18 @@ public final class Sub extends AbstractSub
 
   public static final int OPCODE = 0x1800;
 
-  public Sub(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Sub getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Sub(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Sub(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "sub",

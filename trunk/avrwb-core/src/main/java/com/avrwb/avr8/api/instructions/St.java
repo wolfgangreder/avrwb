@@ -31,7 +31,6 @@ import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
-import com.avrwb.schema.AvrFamily;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -40,13 +39,12 @@ import java.util.logging.Logger;
  *
  * @author wolfi
  */
-@InstructionImplementations(factoryMethod = "getInstance",
-                            value = {
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x920c, 0x920d, 0x920e}), // ld Rd,X
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8208, 0x9209, 0x920a}), // ld Rd,Y
-                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8208}), // ld Rd,Y+q
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8200, 0x9201, 0x9202}), // ld Rd,Z
-                              @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8200})})
+@InstructionImplementations({
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x920c, 0x920d, 0x920e}), // ld Rd,X
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8208, 0x9209, 0x920a}), // ld Rd,Y
+  @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8208}), // ld Rd,Y+q
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x8200, 0x9201, 0x9202}), // ld Rd,Z
+  @InstructionImplementation(opcodeMask = 0xd208, opcodes = {0x8200})})
 public final class St extends Instruction_LdSt
 {
 
@@ -73,15 +71,12 @@ public final class St extends Instruction_LdSt
     if (displacement == 0 && mode == Mode.DISPLACEMENT) {
       mode = Mode.UNMODIFIED;
     }
-    if (deviceKey.getFamily() != AvrFamily.XMEGA && mode == Mode.DISPLACEMENT) {
-      return null;
-    }
     Pointer ptr = getPtr(opcode,
                          mode);
     if (ptr == null) {
       return null;
     }
-    StringBuilder strBuilder = new StringBuilder("ld");
+    StringBuilder strBuilder = new StringBuilder("st");
     if (mode == Mode.DISPLACEMENT) {
       strBuilder.append('d');
     }

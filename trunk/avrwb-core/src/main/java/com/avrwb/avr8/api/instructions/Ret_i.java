@@ -46,9 +46,18 @@ public final class Ret_i extends AbstractInstruction
   public static int OPCODE_RETI = 0x9518;
   private boolean longRet;
 
-  public Ret_i(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static Ret_i getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Ret_i(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Ret_i(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           isReti(opcode) ? "reti" : "ret");

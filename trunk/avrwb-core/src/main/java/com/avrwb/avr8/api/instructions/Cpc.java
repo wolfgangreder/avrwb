@@ -34,9 +34,18 @@ public final class Cpc extends AbstractCp
 
   public static final int OPCODE = 0x0400;
 
-  public Cpc(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Cpc getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Cpc(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Cpc(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "cpc",

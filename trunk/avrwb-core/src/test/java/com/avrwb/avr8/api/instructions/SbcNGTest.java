@@ -21,7 +21,6 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Sbc;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -38,7 +37,6 @@ public class SbcNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Sbc.class);
   }
 
 }

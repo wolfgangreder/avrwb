@@ -41,9 +41,18 @@ public final class Cpi extends Instruction_Rd_K8
 
   public static final int OPCODE = 0x3000;
 
-  public Cpi(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Cpi getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Cpi(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Cpi(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "cpi");

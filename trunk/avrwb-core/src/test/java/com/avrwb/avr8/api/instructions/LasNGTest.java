@@ -21,9 +21,7 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.api.instructions.Las;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /**
  *
@@ -38,12 +36,6 @@ public class LasNGTest extends AbstractInstructionTest
 
   @BeforeClass
   public static void setUpClass() throws Exception
-  {
-    testClass(Las.class);
-  }
-
-  @Test
-  public void testDoExecute() throws Exception
   {
   }
 

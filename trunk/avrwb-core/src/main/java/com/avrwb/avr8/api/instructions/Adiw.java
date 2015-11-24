@@ -38,11 +38,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Adiw extends Instruction_Rdl_K6
 {
 
+  public static Adiw getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Adiw(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
   public static final int OPCODE = 0x9600;
 
-  public Adiw(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  private Adiw(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "adiw");

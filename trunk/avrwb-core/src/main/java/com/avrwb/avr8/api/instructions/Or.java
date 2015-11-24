@@ -38,9 +38,18 @@ public final class Or extends Instruction_Rd_Rr
 
   public static final int OPCODE = 0x2800;
 
-  public Or(AvrDeviceKey deviceKey,
-            int opcode,
-            int nextOpcode)
+  public static Or getInstance(AvrDeviceKey deviceKey,
+                               int opcode,
+                               int nextOpcode)
+  {
+    return new Or(deviceKey,
+                  opcode,
+                  nextOpcode);
+  }
+
+  private Or(AvrDeviceKey deviceKey,
+             int opcode,
+             int nextOpcode)
   {
     super(opcode,
           "or");

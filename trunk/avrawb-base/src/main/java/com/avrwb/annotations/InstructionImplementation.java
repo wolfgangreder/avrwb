@@ -39,8 +39,6 @@ import java.lang.annotation.Target;
 public @interface InstructionImplementation
 {
 
-  String factoryMethod() default "";
-
   int opcodeMask();
 
   int[] opcodes();

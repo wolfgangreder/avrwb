@@ -28,6 +28,18 @@ package com.avrwb.avr8.api.instructions;
 public abstract class Instruction_K4 extends AbstractInstruction
 {
 
+  public static final int composeOpcode(int baseOpcode,
+                                        int k4)
+  {
+    if ((baseOpcode & ~Instruction_K4.OPCODE_MASK) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if (k4 < 0 || k4 > 15) {
+      throw new IllegalArgumentException("invalid k4");
+    }
+    return baseOpcode | (k4 << 4);
+  }
+
   public static final int OPCODE_MASK = 0xff0f;
   protected final int k4;
   private final String toStringVal;

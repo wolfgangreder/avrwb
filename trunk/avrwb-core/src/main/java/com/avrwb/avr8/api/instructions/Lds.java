@@ -38,9 +38,18 @@ public final class Lds extends Instruction_Rd_K16
 
   public static final int OPCODE = 0x9000;
 
-  public Lds(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Lds getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Lds(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Lds(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super((opcode << 16) | nextOpcode,
           "lds");

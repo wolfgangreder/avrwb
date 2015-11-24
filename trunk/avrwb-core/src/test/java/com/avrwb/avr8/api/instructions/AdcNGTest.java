@@ -37,7 +37,6 @@ public class AdcNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Adc.class);
   }
 
 }

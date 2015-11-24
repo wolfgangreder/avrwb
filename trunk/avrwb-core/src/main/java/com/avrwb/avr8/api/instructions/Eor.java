@@ -38,9 +38,18 @@ public final class Eor extends Instruction_Rd_Rr
 
   public static final int OPCODE = 0x2400;
 
-  public Eor(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Eor getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Eor(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Eor(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "eor");

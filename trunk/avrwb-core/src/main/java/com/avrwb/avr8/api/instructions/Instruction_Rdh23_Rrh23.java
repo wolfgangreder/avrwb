@@ -30,10 +30,10 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-public abstract class Instruction_Rdh_Rrh extends AbstractInstruction
+public abstract class Instruction_Rdh23_Rrh23 extends AbstractInstruction
 {
 
-  public static final int OPCODE_MASK = 0xff00;
+  public static final int OPCODE_MASK = 0xff88;
 
   public static int composeOpcode(int baseOpcode,
                                   int rdh,
@@ -42,13 +42,13 @@ public abstract class Instruction_Rdh_Rrh extends AbstractInstruction
     if ((baseOpcode & ~OPCODE_MASK) != 0) {
       throw new IllegalArgumentException("invalid base opcode");
     }
-    if (rdh < 16 || rdh > 32) {
+    if (rdh < 16 || rdh > 23) {
       throw new IllegalArgumentException("invalid rdh");
     }
-    if (rrh < 16 || rrh > 32) {
+    if (rrh < 16 || rrh > 23) {
       throw new IllegalArgumentException("invalid rrh");
     }
-    return baseOpcode | ((rdh & 0xf) << 4) | (rrh & 0xf);
+    return baseOpcode | ((rdh & 0x7) << 4) | (rrh & 0x7);
   }
 
   private final int rdhAddress;
@@ -57,8 +57,8 @@ public abstract class Instruction_Rdh_Rrh extends AbstractInstruction
   private int rdh;
   private int rdl;
 
-  protected Instruction_Rdh_Rrh(int opcode,
-                                String mnemonic)
+  protected Instruction_Rdh23_Rrh23(int opcode,
+                                    String mnemonic)
   {
     super(opcode,
           mnemonic);

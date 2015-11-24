@@ -38,9 +38,18 @@ public final class Wdr extends AbstractInstruction
 
   public static final int OPCODE = 0x95a8;
 
-  public Wdr(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Wdr getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Wdr(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Wdr(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "wdr");

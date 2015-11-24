@@ -66,13 +66,13 @@ public class CPU_2E implements CPU
   private final AvrCore version;
 
   CPU_2E(@NotNull XmlDevice device,
-         XmlModule module,
+         @NotNull XmlModule module,
          @NotNull NotFoundStrategy nfStrategy) throws NullPointerException, ItemNotFoundException
   {
     Objects.requireNonNull(device,
                            "file==null");
     Objects.requireNonNull(module,
-                           "moduleVector==null");
+                           "module==null");
     Objects.requireNonNull(nfStrategy,
                            "nfStrategy==null");
     if (module.getClazz() != ModuleClass.CPU) {

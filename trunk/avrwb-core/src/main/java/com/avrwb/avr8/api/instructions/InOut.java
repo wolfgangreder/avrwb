@@ -65,9 +65,18 @@ public final class InOut extends AbstractInstruction
   private int registerVal;
   private int portVal;
 
-  public InOut(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static InOut getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new InOut(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private InOut(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           decodeMnemonic(opcode));

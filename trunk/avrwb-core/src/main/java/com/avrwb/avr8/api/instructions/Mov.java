@@ -38,9 +38,18 @@ public final class Mov extends Instruction_Rd_Rr
 
   public static final int OPCODE = 0x2c00;
 
-  public Mov(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Mov getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Mov(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Mov(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "mov");

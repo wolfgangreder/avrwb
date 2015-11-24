@@ -46,9 +46,18 @@ public final class Cpse extends Instruction_Rd_Rr
   private int nextIpDelta = 1;
   private Instruction nextInstruction;
 
-  public Cpse(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static Cpse getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Cpse(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Cpse(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "cpse");

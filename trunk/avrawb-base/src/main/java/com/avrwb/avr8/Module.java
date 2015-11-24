@@ -45,7 +45,7 @@ public interface Module extends Resetable, ClockSink
   /**
    * Liste der Register des Moduls.
    *
-   * @return
+   * @return register
    */
   @NotNull
   public List<Register> getRegister();

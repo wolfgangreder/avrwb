@@ -38,9 +38,18 @@ public final class Las extends Instruction_Rd
 
   public static final int OPCODE = 0x9205;
 
-  public Las(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Las getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Las(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Las(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "las");

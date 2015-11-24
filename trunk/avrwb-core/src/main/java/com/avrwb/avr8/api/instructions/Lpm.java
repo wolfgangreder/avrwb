@@ -33,21 +33,22 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementations(factoryMethod = "getInstance",
-                            value = {
-                              @InstructionImplementation(opcodeMask = 0xffff, opcodes = 0x95c8),
-                              @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x9004, 0x9005})
-                            })
+@InstructionImplementations({
+  @InstructionImplementation(opcodeMask = 0xffff, opcodes = 0x95c8),
+  @InstructionImplementation(opcodeMask = 0xfe0f, opcodes = {0x9004, 0x9005})
+})
 public final class Lpm extends AbstractInstruction
 {
 
+  public static final int OPCODE_MASK_LPM = 0xffff;
+  public static final int OPCODE_MASK_LPM_RD = 0xfe0f;
   public static final int OPCODE_LPM = 0x95c8;
   public static final int OPCODE_LPM_RD = 0x9004;
   public static final int OPCODE_LPM_RD_P = 0x9005;
 
-  public static final Lpm getInstance(AvrDeviceKey deviceKey,
-                                      int opcode,
-                                      int nextOpcode)
+  public static Lpm getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
   {
     return new Lpm(opcode);
   }

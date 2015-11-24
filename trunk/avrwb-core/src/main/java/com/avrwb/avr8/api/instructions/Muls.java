@@ -32,13 +32,24 @@ import com.avrwb.avr8.helper.SimulationException;
  *
  * @author wolfi
  */
-@InstructionImplementation(opcodeMask = 0xfc00, opcodes = 0x0200)
-public final class Muls extends Instruction_Rd_Rr
+@InstructionImplementation(opcodeMask = 0xff00, opcodes = 0x0200)
+public final class Muls extends Instruction_Rdh_Rrh
 {
 
-  public Muls(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static final int OPCODE = 0x0200;
+
+  public static Muls getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Muls(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Muls(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "muls");

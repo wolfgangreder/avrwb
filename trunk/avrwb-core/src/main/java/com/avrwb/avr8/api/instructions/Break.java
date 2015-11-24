@@ -39,9 +39,18 @@ public final class Break extends AbstractInstruction
 
   public static final int OPCODE = 0x9598;
 
-  public Break(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static Break getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Break(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Break(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(0x9598,
           "break");

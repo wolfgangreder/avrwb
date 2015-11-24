@@ -36,9 +36,20 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Lds16 extends Instruction_Rdh_K7
 {
 
-  public Lds16(AvrDeviceKey deviceKey,
-               int opcode,
-               int nextOpcode)
+  public static final int OPCODE = 0xa000;
+
+  public static Lds16 getInstance(AvrDeviceKey deviceKey,
+                                  int opcode,
+                                  int nextOpcode)
+  {
+    return new Lds16(deviceKey,
+                     opcode,
+                     nextOpcode);
+  }
+
+  private Lds16(AvrDeviceKey deviceKey,
+                int opcode,
+                int nextOpcode)
   {
     super(opcode,
           "lds");

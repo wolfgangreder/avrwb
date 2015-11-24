@@ -41,9 +41,18 @@ public final class Bst extends Instruction_Rd_b
 
   public static final int OPCODE = 0xfa00;
 
-  public Bst(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Bst getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Bst(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Bst(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "bst");

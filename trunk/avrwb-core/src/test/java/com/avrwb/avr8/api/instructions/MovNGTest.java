@@ -55,7 +55,6 @@ public class MovNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
-    testClass(Mov.class);
     file = DeviceStreamer.loadDevice(DeviceImplTest.class.getResource("/com/avrwb/devices/ATmega8.xml"),
                                      DeviceStreamer.Version.V_1_0);
     assertNotNull(file);

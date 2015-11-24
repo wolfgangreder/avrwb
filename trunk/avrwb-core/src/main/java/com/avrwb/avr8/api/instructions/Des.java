@@ -38,9 +38,18 @@ public final class Des extends Instruction_K4
 
   public static final int OPCODE = 0x940b;
 
-  public Des(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Des getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Des(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Des(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "des");

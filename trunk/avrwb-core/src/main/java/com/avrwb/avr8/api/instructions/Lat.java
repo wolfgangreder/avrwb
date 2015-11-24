@@ -38,9 +38,18 @@ public final class Lat extends Instruction_Rd
 
   public static final int OPCODE = 0x9207;
 
-  public Lat(AvrDeviceKey deviceKey,
-             int opcode,
-             int nextOpcode)
+  public static Lat getInstance(AvrDeviceKey deviceKey,
+                                int opcode,
+                                int nextOpcode)
+  {
+    return new Lat(deviceKey,
+                   opcode,
+                   nextOpcode);
+  }
+
+  private Lat(AvrDeviceKey deviceKey,
+              int opcode,
+              int nextOpcode)
   {
     super(opcode,
           "lat");

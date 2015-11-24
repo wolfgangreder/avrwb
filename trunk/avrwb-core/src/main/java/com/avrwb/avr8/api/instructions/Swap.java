@@ -38,9 +38,18 @@ public final class Swap extends Instruction_Rd
 
   public static final int OPCODE = 0x9402;
 
-  public Swap(AvrDeviceKey deviceKey,
-              int opcode,
-              int nextOpcode)
+  public static Swap getInstance(AvrDeviceKey deviceKey,
+                                 int opcode,
+                                 int nextOpcode)
+  {
+    return new Swap(deviceKey,
+                    opcode,
+                    nextOpcode);
+  }
+
+  private Swap(AvrDeviceKey deviceKey,
+               int opcode,
+               int nextOpcode)
   {
     super(opcode,
           "swap");
