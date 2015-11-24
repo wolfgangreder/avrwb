@@ -101,11 +101,11 @@ public class InstructionDecoder_V0 extends BaseInstructionDecoder
     while (iter.hasNext()) {
       Descriptor d = iter.next();
       if (Ld.class == d.getInstruction()) {
-        if (opcode != Ld.OPCODE_LD_Z) {
+        if ((opcode & Ld.OPCODE_MASK) != Ld.OPCODE_LD_Z) {
           iter.remove();
         }
       } else if (St.class == d.getInstruction()) {
-        if (opcode != St.OPCODE_ST_Z) {
+        if ((opcode & St.OPCODE_MASK) != St.OPCODE_ST_Z) {
           iter.remove();
         }
       }

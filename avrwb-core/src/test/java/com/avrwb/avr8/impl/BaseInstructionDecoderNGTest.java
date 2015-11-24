@@ -598,8 +598,9 @@ public class BaseInstructionDecoderNGTest
   {
     Instruction instruction;
     for (int rd = 0; rd < 32; ++rd) {
-      String context = "ld r" + rd + ", " + pointer.name() + " | ";
-      int opcode = Instruction_LdSt.composeOpcode(pointer,
+      String context = mnemonic + " r" + rd + ", " + pointer.name() + " | ";
+      int opcode = Instruction_LdSt.composeOpcode(baseOpcode,
+                                                  pointer,
                                                   rd,
                                                   Instruction_LdSt.Mode.UNMODIFIED,
                                                   0);
@@ -610,7 +611,7 @@ public class BaseInstructionDecoderNGTest
         assertNotNull(instruction,
                       context + "nulltest");
         assertTrue(clazz.isInstance(instruction),
-                   context + "class");
+                   context + "class" + " found:" + instruction.getClass().getName());
         Instruction_LdSt ld = clazz.cast(instruction);
         assertEquals(ld.getMnemonic(),
                      mnemonic,
@@ -635,7 +636,8 @@ public class BaseInstructionDecoderNGTest
     }
     for (int rd = 0; rd < 32; ++rd) {
       String context = "ld r" + rd + ", " + pointer.name() + "+ | ";
-      int opcode = Instruction_LdSt.composeOpcode(pointer,
+      int opcode = Instruction_LdSt.composeOpcode(baseOpcode,
+                                                  pointer,
                                                   rd,
                                                   Instruction_LdSt.Mode.POST_INCREMENT,
                                                   0);
@@ -669,7 +671,8 @@ public class BaseInstructionDecoderNGTest
     }
     for (int rd = 0; rd < 32; ++rd) {
       String context = "ld r" + rd + ", -" + pointer.name() + " | ";
-      int opcode = Instruction_LdSt.composeOpcode(pointer,
+      int opcode = Instruction_LdSt.composeOpcode(baseOpcode,
+                                                  pointer,
                                                   rd,
                                                   Instruction_LdSt.Mode.PRE_DECREMENT,
                                                   0);
@@ -703,7 +706,8 @@ public class BaseInstructionDecoderNGTest
       for (int rd = 0; rd < 32; ++rd) {
         for (int q = 0; q < 64; ++q) {
           String context = "ldd r" + rd + ", " + pointer.name() + "+" + q + " | ";
-          int opcode = Instruction_LdSt.composeOpcode(pointer,
+          int opcode = Instruction_LdSt.composeOpcode(baseOpcode,
+                                                      pointer,
                                                       rd,
                                                       Instruction_LdSt.Mode.DISPLACEMENT,
                                                       q);
@@ -734,8 +738,7 @@ public class BaseInstructionDecoderNGTest
                           context + "class");
             }
           } else // q==0
-          {
-            if (expectFind) {
+           if (expectFind) {
               assertNotNull(instruction,
                             context + "nulltest");
               assertTrue(clazz.isInstance(instruction),
@@ -761,7 +764,6 @@ public class BaseInstructionDecoderNGTest
                           context + "class");
 
             }
-          }
         }
       }
     }

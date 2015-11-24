@@ -40,7 +40,7 @@ import java.util.Objects;
  * @author wolfi
  */
 @NotThreadSave
-public abstract class AbstractInstruction<IC> implements Instruction
+public abstract class AbstractInstruction implements Instruction
 {
 
   private final int opcode;
@@ -138,11 +138,10 @@ public abstract class AbstractInstruction<IC> implements Instruction
                                     @NotNull Device device,
                                     @NotNull InstructionResultBuilder resultBuilder) throws SimulationException;
 
-  protected IC doPrepare(@NotNull ClockState clockState,
-                         @NotNull Device device,
-                         @NotNull InstructionResultBuilder resultBuilder) throws SimulationException
+  protected void doPrepare(@NotNull ClockState clockState,
+                           @NotNull Device device,
+                           @NotNull InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    return null;
   }
 
   @Override
@@ -155,22 +154,17 @@ public abstract class AbstractInstruction<IC> implements Instruction
     currentDeviceStateMessage = null;
     InstructionResultBuilder resultBuilder = InstanceFactories.getInstructionResultBuilder(device);
     switch (clockState.getPhase()) {
-      case HI: {
-        IC tmp = doPrepare(clockState,
-                           device,
-                           resultBuilder);
-        if (tmp != null) {
-          device.setInstructionContext(tmp);
-        }
-      }
-      break;
+      case HI:
+        doPrepare(clockState,
+                  device,
+                  resultBuilder);
+        break;
       case LO:
         doExecute(clockState,
                   device,
                   resultBuilder);
     }
     if (resultBuilder.isFinished()) {
-      device.setInstructionContext(null);
       finishCycle = -1;
     }
     return resultBuilder.build();

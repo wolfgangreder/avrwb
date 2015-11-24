@@ -433,7 +433,7 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
       {Ld.OPCODE_LD_Z, Ld.class, Pointer.Z, "ld", true, false, false, false},
       {Ld.OPCODE_LD_Z_M, Ld.class, Pointer.Z, "ld", false, false, false, false},
       {Ld.OPCODE_LD_Z_P, Ld.class, Pointer.Z, "ld", false, false, false, false},
-      {St.OPCODE_ST_X, St.class, Pointer.X, "ld", false, false, false, false},
+      {St.OPCODE_ST_X, St.class, Pointer.X, "st", false, false, false, false},
       {St.OPCODE_ST_X_M, St.class, Pointer.X, "st", false, false, false, false},
       {St.OPCODE_ST_X_P, St.class, Pointer.X, "st", false, false, false, false},
       {St.OPCODE_ST_Y, St.class, Pointer.Y, "st", false, false, false, false},
