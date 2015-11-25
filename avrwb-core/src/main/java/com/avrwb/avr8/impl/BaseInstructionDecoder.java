@@ -193,13 +193,6 @@ public class BaseInstructionDecoder implements InstructionDecoder
     final Logger logger = AVRWBDefaults.LOGGER;
     try {
       Class<?> clazz = Class.forName(line);
-      if (!Instruction.class.isAssignableFrom(clazz)) {
-        logger.log(Level.WARNING,
-                   "Class {0}is not assignable from {1}",
-                   new Object[]{line,
-                                Instruction.class.getName()});
-        return null;
-      }
       if (!Modifier.isFinal(clazz.getModifiers()) || !Modifier.isPublic(clazz.getModifiers())) {
         logger.log(Level.WARNING,
                    "class implementing a instruction must be final and public");
