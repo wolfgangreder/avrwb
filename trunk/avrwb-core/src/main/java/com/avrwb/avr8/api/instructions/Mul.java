@@ -85,7 +85,7 @@ public final class Mul extends Instruction_Rd_Rr
       int oldR0 = sram.getByteAt(0);
       int oldR1 = sram.getByteAt(1);
       int oldSREG = sreg.getValue();
-      int result = (rdVal * rrVal) & 0xff;
+      int result = (rdVal * rrVal) & 0xffff;
       sreg.setC((result & 0x8000) != 0);
       sreg.setZ(result == 0);
       if (oldSREG != sreg.getValue()) {
