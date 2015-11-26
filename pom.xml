@@ -87,6 +87,18 @@
         </executions>
         <inherited>true</inherited>
       </plugin>
+      <plugin>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-maven-plugin</artifactId>
+        <version>4.5.1-1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>antlr4</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -96,6 +108,7 @@
     <module>avrwb-core</module>
     <module>avrwb-vdbg</module>
     <module>avrawb-base</module>
+    <module>assembler</module>
   </modules>
 
   <properties>
