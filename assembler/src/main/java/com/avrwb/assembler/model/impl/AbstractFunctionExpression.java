@@ -19,31 +19,26 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.assembler.model.impl;
 
-import java.net.URL;
-import static org.testng.Assert.assertNotNull;
-import org.testng.annotations.Test;
+import com.avrwb.assembler.model.Expression;
 
 /**
  *
  * @author wolfi
  */
-public class AssemblerNGTest
+public abstract class AbstractFunctionExpression extends AbstractUnaryExpression
 {
 
-  public AssemblerNGTest()
+  public AbstractFunctionExpression(Expression subExpression,
+                                    String operator,
+                                    int level)
   {
-  }
-
-  @Test(enabled = false)
-  public void testCompile() throws Exception
-  {
-    URL u = Assembler.class.getResource("/asm/mov1.asm");
-    assertNotNull(u,
-                  "cannot find file");
-    Assembler.compile(u.openStream(),
-                      null);
+    super(subExpression,
+          operator,
+          level,
+          "(",
+          ")");
   }
 
 }

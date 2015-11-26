@@ -19,31 +19,33 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.assembler.model.impl;
 
-import java.net.URL;
-import static org.testng.Assert.assertNotNull;
-import org.testng.annotations.Test;
+import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.model.Expression;
 
 /**
  *
  * @author wolfi
  */
-public class AssemblerNGTest
+public final class GreaterThanOperation extends AbstractBinaryOperation
 {
 
-  public AssemblerNGTest()
+  public GreaterThanOperation(Expression left,
+                              Expression right)
   {
+    super(left,
+          right,
+          ">",
+          10);
   }
 
-  @Test(enabled = false)
-  public void testCompile() throws Exception
+  @Override
+  public int evaluate() throws AssemblerException
   {
-    URL u = Assembler.class.getResource("/asm/mov1.asm");
-    assertNotNull(u,
-                  "cannot find file");
-    Assembler.compile(u.openStream(),
-                      null);
+    int leftValue = getLeft().evaluate();
+    int rightValue = getRight().evaluate();
+    return leftValue > rightValue ? 1 : 0;
   }
 
 }
