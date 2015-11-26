@@ -10,7 +10,6 @@
     <packaging>nbm</packaging>
     <build>
         <plugins>
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
