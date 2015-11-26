@@ -19,31 +19,17 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.assembler.model;
 
-import java.net.URL;
-import static org.testng.Assert.assertNotNull;
-import org.testng.annotations.Test;
+import java.util.List;
 
 /**
  *
  * @author wolfi
  */
-public class AssemblerNGTest
+public interface Segment
 {
 
-  public AssemblerNGTest()
-  {
-  }
-
-  @Test(enabled = false)
-  public void testCompile() throws Exception
-  {
-    URL u = Assembler.class.getResource("/asm/mov1.asm");
-    assertNotNull(u,
-                  "cannot find file");
-    Assembler.compile(u.openStream(),
-                      null);
-  }
+  public List<SegmentElement> getElements();
 
 }

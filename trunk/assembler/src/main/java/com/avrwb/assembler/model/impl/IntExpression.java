@@ -19,31 +19,51 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.assembler.model.impl;
 
-import java.net.URL;
-import static org.testng.Assert.assertNotNull;
-import org.testng.annotations.Test;
+import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.model.Expression;
 
 /**
  *
  * @author wolfi
  */
-public class AssemblerNGTest
+public final class IntExpression implements Expression
 {
 
-  public AssemblerNGTest()
+  private final int i;
+  private final String text;
+
+  public IntExpression(String str)
   {
+    if (str.startsWith("$")) {
+      i = Integer.parseInt(str.substring(1),
+                           16);
+    } else if (str.startsWith("0b")) {
+      i = Integer.parseInt(str.substring(2),
+                           2);
+    } else {
+      i = Integer.decode(str);
+    }
+    text = str;
   }
 
-  @Test(enabled = false)
-  public void testCompile() throws Exception
+  public IntExpression(int i)
   {
-    URL u = Assembler.class.getResource("/asm/mov1.asm");
-    assertNotNull(u,
-                  "cannot find file");
-    Assembler.compile(u.openStream(),
-                      null);
+    this.i = i;
+    text = Integer.toString(i);
+  }
+
+  @Override
+  public int evaluate() throws AssemblerException
+  {
+    return i;
+  }
+
+  @Override
+  public String toString()
+  {
+    return text;
   }
 
 }

@@ -19,42 +19,44 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.assembler.model;
 
-import com.avrwb.assembler.model.ContextListener;
+import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.parser.AtmelAsmLexer;
 import com.avrwb.assembler.parser.AtmelAsmParser;
-import com.avrwb.io.IntelHexOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Function;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 /**
  *
  * @author wolfi
  */
-public final class Assembler
+public class TestContextListener extends ContextListener
 {
 
-  public static IntelHexOutputStream compile(InputStream asmStream,
-                                             Function<String, InputStream> fileResolver) throws IOException
+  public TestContextListener()
   {
-    try (InputStream is = asmStream) {
+    super(null);
+  }
+
+  void parse(String text) throws IOException, AssemblerException
+  {
+    try (StringInputStream is = new StringInputStream(text)) {
       ANTLRInputStream ais = new ANTLRInputStream(is);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
       AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
-      ContextListener ctxListener = new ContextListener(null);
-      parser.addParseListener(ctxListener);
-      ParseTree tree = parser.init();
-//      visit(tree,
-//            "");
-      System.out.println(tree.toStringTree(parser));
-      return null;
+      parser.addParseListener(this);
+      parser.init();
     }
+  }
+
+  @Override
+  public void exitEveryRule(ParserRuleContext ctx)
+  {
+    super.exitEveryRule(ctx);
   }
 
 }
