@@ -19,33 +19,22 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler.model.impl;
+package com.avrwb.assembler;
 
-import com.avrwb.assembler.AssemblerError;
-import com.avrwb.assembler.model.Expression;
+import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 
 /**
  *
  * @author wolfi
  */
-public final class GreaterEqualThanOperation extends AbstractBinaryOperation
+public interface AssemblerConfig
 {
 
-  public GreaterEqualThanOperation(Expression left,
-                                   Expression right)
-  {
-    super(left,
-          right,
-          ">=",
-          10);
-  }
+  public FileResolver getFileResolver();
 
-  @Override
-  public int evaluate() throws AssemblerError
-  {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
-    return leftValue >= rightValue ? 1 : 0;
-  }
+  public Charset getTargetCharset();
+
+  public ByteOrder getTargetByteOrder();
 
 }

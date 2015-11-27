@@ -21,7 +21,9 @@
  */
 package com.avrwb.assembler.model;
 
-import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.impl.SegmentElementImpl;
+import java.nio.ByteOrder;
 
 /**
  *
@@ -30,6 +32,33 @@ import com.avrwb.assembler.AssemblerException;
 public interface Expression
 {
 
-  public int evaluate() throws AssemblerException;
+  public default boolean isStringExpression()
+  {
+    return false;
+  }
+
+  public int evaluate() throws AssemblerError;
+
+  public default SegmentElement toSegmentElement(int offset,
+                                                 int numBytes,
+                                                 ByteOrder byteOrder) throws AssemblerError
+  {
+    int tmp = evaluate();
+    switch (numBytes) {
+      case 1:
+        return SegmentElementImpl.getByteInstance(offset,
+                                                  (byte) (tmp & 0xff));
+      case 2:
+        return SegmentElementImpl.getWordInstance(offset,
+                                                  (short) (tmp & 0xffff),
+                                                  byteOrder);
+      case 4:
+        return SegmentElementImpl.getDWordInstance(offset,
+                                                   tmp,
+                                                   byteOrder);
+      default:
+        throw new AssemblerError("illegal wordsize " + numBytes);
+    }
+  }
 
 }

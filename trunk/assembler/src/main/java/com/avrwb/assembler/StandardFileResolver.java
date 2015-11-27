@@ -19,33 +19,39 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler.model.impl;
+package com.avrwb.assembler;
 
-import com.avrwb.assembler.AssemblerError;
-import com.avrwb.assembler.model.Expression;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  *
  * @author wolfi
  */
-public final class GreaterEqualThanOperation extends AbstractBinaryOperation
+public class StandardFileResolver implements FileResolver
 {
 
-  public GreaterEqualThanOperation(Expression left,
-                                   Expression right)
+  private final Charset charset;
+
+  public StandardFileResolver()
   {
-    super(left,
-          right,
-          ">=",
-          10);
+    this(null);
+  }
+
+  public StandardFileResolver(Charset charset)
+  {
+    this.charset = charset != null ? charset : StandardCharsets.UTF_8;
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public Reader resolveFile(URL url) throws IOException
   {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
-    return leftValue >= rightValue ? 1 : 0;
+    return new InputStreamReader(url.openStream(),
+                                 charset);
   }
 
 }

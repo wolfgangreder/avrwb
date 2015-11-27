@@ -21,15 +21,14 @@
  */
 package com.avrwb.assembler.model;
 
-import java.util.List;
-
 /**
  *
  * @author wolfi
  */
-public interface Segment
+public enum Segment
 {
-
-  public List<SegmentElement> getElements();
+  CSEG,
+  DSEG,
+  ESEG;
 
 }

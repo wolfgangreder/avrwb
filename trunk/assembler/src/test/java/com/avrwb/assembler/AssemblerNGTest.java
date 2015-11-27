@@ -21,8 +21,12 @@
  */
 package com.avrwb.assembler;
 
+import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import org.openide.util.Lookup;
 import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /**
@@ -32,8 +36,18 @@ import org.testng.annotations.Test;
 public class AssemblerNGTest
 {
 
+  private static Assembler assembler;
+
   public AssemblerNGTest()
   {
+  }
+
+  @BeforeClass
+  public void initTestclass()
+  {
+    assembler = Lookup.getDefault().lookup(Assembler.class);
+    assertNotNull(assembler,
+                  "assembler==null");
   }
 
   @Test(enabled = false)
@@ -42,7 +56,8 @@ public class AssemblerNGTest
     URL u = Assembler.class.getResource("/asm/mov1.asm");
     assertNotNull(u,
                   "cannot find file");
-    Assembler.compile(u.openStream(),
+    assembler.compile(new InputStreamReader(u.openStream(),
+                                            StandardCharsets.UTF_8),
                       null);
   }
 

@@ -21,21 +21,51 @@
  */
 package com.avrwb.assembler.model;
 
-import com.avrwb.assembler.AssemblerError;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 
 /**
  *
  * @author wolfi
  */
-public interface Alias
+public class LowerCaseReader extends Reader
 {
 
-  public String getName();
+  private final Reader parent;
 
-  public boolean isConst();
+  public LowerCaseReader(InputStream is,
+                         Charset charset)
+  {
+    this.parent = new InputStreamReader(is,
+                                        charset);
+  }
 
-  public Expression getExpression();
+  public LowerCaseReader(Reader parent)
+  {
+    this.parent = parent;
+  }
 
-  public int getValue() throws AssemblerError;
+  @Override
+  public int read(char[] cbuf,
+                  int off,
+                  int len) throws IOException
+  {
+    int read = parent.read(cbuf,
+                           off,
+                           len);
+    for (int i = off; i < off + read; ++i) {
+      cbuf[i] = Character.toLowerCase(cbuf[i]);
+    }
+    return read;
+  }
+
+  @Override
+  public void close() throws IOException
+  {
+    parent.close();
+  }
 
 }

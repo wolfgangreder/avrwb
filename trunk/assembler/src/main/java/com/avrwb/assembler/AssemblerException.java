@@ -25,12 +25,24 @@ package com.avrwb.assembler;
  *
  * @author wolfi
  */
-public class AssemblerException extends Error
+public class AssemblerException extends Exception
 {
 
-  public AssemblerException(String message)
+  public AssemblerException(String msg)
   {
-    super(message);
+    super(msg);
+  }
+
+  public AssemblerException(Throwable th)
+  {
+    super(th);
+  }
+
+  public AssemblerException(String msg,
+                            Throwable th)
+  {
+    super(msg,
+          th);
   }
 
 }

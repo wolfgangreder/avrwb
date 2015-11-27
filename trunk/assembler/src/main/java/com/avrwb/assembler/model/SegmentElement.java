@@ -21,15 +21,19 @@
  */
 package com.avrwb.assembler.model;
 
+import java.nio.ByteBuffer;
+
 /**
  *
  * @author wolfi
  */
-public interface SegmentElement
+public interface SegmentElement extends Comparable<SegmentElement>
 {
 
   public int getOffset();
 
-  public byte[] getData();
+  public int getSize();
+
+  public ByteBuffer getData();
 
 }

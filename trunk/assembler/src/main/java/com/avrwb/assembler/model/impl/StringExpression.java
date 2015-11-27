@@ -23,47 +23,53 @@ package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.SegmentElement;
+import java.nio.ByteOrder;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
 
 /**
  *
  * @author wolfi
  */
-public final class IntExpression implements Expression
+public class StringExpression implements Expression
 {
 
-  private final int i;
-  private final String text;
+  private final String str;
+  private final Charset charset;
 
-  public IntExpression(String str)
+  public StringExpression(String str,
+                          Charset charset)
   {
-    if (str.startsWith("$")) {
-      i = Integer.parseInt(str.substring(1),
-                           16);
-    } else if (str.startsWith("0b")) {
-      i = Integer.parseInt(str.substring(2),
-                           2);
-    } else {
-      i = Integer.decode(str);
-    }
-    text = str;
+    this.str = str;
+    this.charset = charset;
   }
 
-  public IntExpression(int i)
+  @Override
+  public boolean isStringExpression()
   {
-    this.i = i;
-    text = Integer.toString(i);
+    return true;
   }
 
   @Override
   public int evaluate() throws AssemblerError
   {
-    return i;
+    throw new AssemblerError("cannot convert string to number");
   }
 
   @Override
-  public String toString()
+  public SegmentElement toSegmentElement(int offset,
+                                         int numBytes,
+                                         ByteOrder byteOrder) throws AssemblerError
   {
-    return text;
+    try {
+      return SegmentElementImpl.getStringInstance(offset,
+                                                  str,
+                                                  byteOrder,
+                                                  charset);
+    } catch (CharacterCodingException ex) {
+      throw new AssemblerError(ex);
+    }
   }
 
 }

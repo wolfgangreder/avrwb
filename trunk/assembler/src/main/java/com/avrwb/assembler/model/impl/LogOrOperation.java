@@ -21,7 +21,7 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.model.Expression;
 
 /**
@@ -41,7 +41,7 @@ public final class LogOrOperation extends AbstractBinaryOperation
   }
 
   @Override
-  public int evaluate() throws AssemblerException
+  public int evaluate() throws AssemblerError
   {
     int leftValue = getLeft().evaluate();
     int rightValue = getRight().evaluate();

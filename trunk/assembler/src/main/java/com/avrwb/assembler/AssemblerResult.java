@@ -19,33 +19,24 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler.model.impl;
+package com.avrwb.assembler;
 
-import com.avrwb.assembler.AssemblerError;
-import com.avrwb.assembler.model.Expression;
+import com.avrwb.io.MemoryChunkInputStream;
+import java.io.IOException;
+import java.io.Reader;
+import org.openide.util.Lookup;
 
 /**
  *
  * @author wolfi
  */
-public final class GreaterEqualThanOperation extends AbstractBinaryOperation
+public interface AssemblerResult extends Lookup.Provider
 {
 
-  public GreaterEqualThanOperation(Expression left,
-                                   Expression right)
-  {
-    super(left,
-          right,
-          ">=",
-          10);
-  }
+  public MemoryChunkInputStream getCSEG() throws IOException;
 
-  @Override
-  public int evaluate() throws AssemblerError
-  {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
-    return leftValue >= rightValue ? 1 : 0;
-  }
+  public MemoryChunkInputStream getESEG() throws IOException;
+
+  public Reader getList() throws IOException;
 
 }
