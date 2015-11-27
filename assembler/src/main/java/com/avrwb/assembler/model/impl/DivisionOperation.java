@@ -21,7 +21,7 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.model.Expression;
 
 /**
@@ -41,11 +41,11 @@ public final class DivisionOperation extends AbstractBinaryOperation
   }
 
   @Override
-  public int evaluate() throws AssemblerException
+  public int evaluate() throws AssemblerError
   {
     int rightValue = getRight().evaluate();
     if (rightValue == 0) {
-      throw new AssemblerException("division by zero");
+      throw new AssemblerError("division by zero");
     }
     int leftValue = getLeft().evaluate();
     return leftValue / rightValue;

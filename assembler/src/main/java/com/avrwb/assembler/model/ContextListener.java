@@ -21,7 +21,11 @@
  */
 package com.avrwb.assembler.model;
 
+import com.avrwb.annotations.NotNull;
+import com.avrwb.assembler.AssemblerConfig;
+import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.model.impl.AliasImpl;
 import com.avrwb.assembler.model.impl.BitAndOperation;
 import com.avrwb.assembler.model.impl.BitNotOperation;
 import com.avrwb.assembler.model.impl.BitOrOperation;
@@ -51,9 +55,14 @@ import com.avrwb.assembler.model.impl.PageOperation;
 import com.avrwb.assembler.model.impl.PlusOperation;
 import com.avrwb.assembler.model.impl.ProductOperation;
 import com.avrwb.assembler.model.impl.RightShiftOperation;
+import com.avrwb.assembler.model.impl.StringExpression;
 import com.avrwb.assembler.model.impl.UniMinusOperation;
 import com.avrwb.assembler.parser.AtmelAsmBaseListener;
 import com.avrwb.assembler.parser.AtmelAsmParser;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Objects;
+import org.antlr.v4.runtime.tree.ErrorNode;
 
 /**
  *
@@ -64,9 +73,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private final Context context;
 
-  public ContextListener(Context context)
+  public ContextListener(@NotNull Context context,
+                         int dummy)
   {
-    this.context = context != null ? context : new Context();
+    Objects.requireNonNull(context,
+                           "context==null");
+    this.context = context;
+  }
+
+  public ContextListener(@NotNull InternalAssembler assembler,
+                         AssemblerConfig config)
+  {
+    this.context = new Context(assembler,
+                               config);
   }
 
   public Context getContext()
@@ -75,9 +94,25 @@ public class ContextListener extends AtmelAsmBaseListener
   }
 
   @Override
+  public void visitErrorNode(ErrorNode node)
+  {
+    throw new AssemblerError(node.getText());
+  }
+
+  @Override
   public void exitInt(AtmelAsmParser.IntContext ctx)
   {
     context.pushExpression(new IntExpression(ctx.getText()));
+  }
+
+  @Override
+  public void exitName(AtmelAsmParser.NameContext ctx)
+  {
+    Alias alias = context.getAlias(ctx.getText());
+    if (alias == null) {
+      throw new AssemblerError("cannot find name " + ctx.getText());
+    }
+    context.pushExpression(alias.getExpression());
   }
 
   @Override
@@ -104,7 +139,7 @@ public class ContextListener extends AtmelAsmBaseListener
                                                       right));
         break;
       default:
-        throw new AssemblerException("unknown compare " + text);
+        throw new AssemblerError("unknown compare " + text);
 
     }
   }
@@ -134,7 +169,7 @@ public class ContextListener extends AtmelAsmBaseListener
                                                          right));
         break;
       default:
-        throw new AssemblerException("unkown equal " + text);
+        throw new AssemblerError("unkown equal " + text);
     }
   }
 
@@ -172,7 +207,7 @@ public class ContextListener extends AtmelAsmBaseListener
         context.pushExpression(new UniMinusOperation(right));
         break;
       default:
-        throw new AssemblerException("unkown unary " + text);
+        throw new AssemblerError("unkown unary " + text);
     }
   }
 
@@ -192,7 +227,7 @@ public class ContextListener extends AtmelAsmBaseListener
                                                   right));
         break;
       default:
-        throw new AssemblerException("unkown operation " + text);
+        throw new AssemblerError("unkown operation " + text);
     }
   }
 
@@ -212,7 +247,7 @@ public class ContextListener extends AtmelAsmBaseListener
                                                      right));
         break;
       default:
-        throw new AssemblerException("unkown operation " + text);
+        throw new AssemblerError("unkown operation " + text);
     }
   }
 
@@ -260,7 +295,7 @@ public class ContextListener extends AtmelAsmBaseListener
         context.pushExpression(new PageOperation(right));
         break;
       default:
-        throw new AssemblerException("unkown func " + text);
+        throw new AssemblerError("unkown func " + text);
     }
   }
 
@@ -289,8 +324,81 @@ public class ContextListener extends AtmelAsmBaseListener
                                                        right));
         break;
       default:
-        throw new AssemblerException("unkonw operation " + text);
+        throw new AssemblerError("unkonw operation " + text);
     }
+  }
+
+  private String removeQoutes(String strIn)
+  {
+    int beginIndex = strIn.startsWith("\"") ? 1 : 0;
+    int endIndex = strIn.lastIndexOf('"');
+    return strIn.substring(beginIndex,
+                           endIndex);
+  }
+
+  @Override
+  public void exitInclude_dir(AtmelAsmParser.Include_dirContext ctx)
+  {
+    String fileName = removeQoutes(ctx.getChild(1).getText());
+    try {
+      URL u = new URL(fileName);
+      context.getAssembler().compile(context.getConfig().getFileResolver().resolveFile(u),
+                                     this);
+    } catch (IOException | AssemblerException ex) {
+      throw new AssemblerError(ex.getMessage());
+    }
+  }
+
+  @Override
+  public void exitEqu_dir(AtmelAsmParser.Equ_dirContext ctx)
+  {
+    String name = ctx.getChild(1).getText();
+    Expression exp = context.popExpression();
+    context.addAlias(new AliasImpl(name,
+                                   true,
+                                   exp));
+  }
+
+  @Override
+  public void exitSet_dir(AtmelAsmParser.Set_dirContext ctx)
+  {
+    String name = ctx.getChild(1).getText();
+    Expression exp = context.popExpression();
+    context.addAlias(new AliasImpl(name,
+                                   false,
+                                   exp));
+  }
+
+  @Override
+  public void exitString(AtmelAsmParser.StringContext ctx)
+  {
+    String text = removeQoutes(ctx.getChild(0).getText());
+    context.pushExpression(new StringExpression(text,
+                                                context.getConfig().getTargetCharset()));
+  }
+
+  @Override
+  public void exitDw_dir(AtmelAsmParser.Dw_dirContext ctx)
+  {
+    context.forEachExpression((Expression ex) -> {
+      SegmentElement se = ex.toSegmentElement(context.getCurrentPosition(),
+                                              2,
+                                              context.getConfig().getTargetByteOrder());
+      context.addToSeg(se);
+    },
+                              true);
+  }
+
+  @Override
+  public void exitDb_dir(AtmelAsmParser.Db_dirContext ctx)
+  {
+    context.forEachExpression((Expression ex) -> {
+      SegmentElement se = ex.toSegmentElement(context.getCurrentPosition(),
+                                              1,
+                                              context.getConfig().getTargetByteOrder());
+      context.addToSeg(se);
+    },
+                              true);
   }
 
 }

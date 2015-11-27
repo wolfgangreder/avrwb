@@ -21,42 +21,46 @@
  */
 package com.avrwb.assembler.model;
 
+import com.avrwb.assembler.Assembler;
+import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerException;
-import com.avrwb.assembler.parser.AtmelAsmLexer;
-import com.avrwb.assembler.parser.AtmelAsmParser;
+import com.avrwb.assembler.AssemblerResult;
 import java.io.IOException;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
+import java.io.StringReader;
 
 /**
  *
  * @author wolfi
  */
-public class TestContextListener extends ContextListener
+public class TestContextListener
 {
 
-  public TestContextListener()
+  private final Assembler assembler;
+  private Context lastContext;
+
+  public TestContextListener(Assembler assembler)
   {
-    super(null);
+    this.assembler = assembler;
   }
 
-  void parse(String text) throws IOException, AssemblerException
+  public AssemblerResult parse(String toParse) throws IOException, AssemblerException
   {
-    try (StringInputStream is = new StringInputStream(text)) {
-      ANTLRInputStream ais = new ANTLRInputStream(is);
-      AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
-      CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-      AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
-      parser.addParseListener(this);
-      parser.init();
-    }
+    return parse(toParse,
+                 null);
   }
 
-  @Override
-  public void exitEveryRule(ParserRuleContext ctx)
+  public AssemblerResult parse(String parse,
+                               AssemblerConfig config) throws IOException, AssemblerException
   {
-    super.exitEveryRule(ctx);
+    AssemblerResult tmp = assembler.compile(new StringReader(parse),
+                                            config);
+    lastContext = tmp.getLookup().lookup(Context.class);
+    return tmp;
+  }
+
+  public Context getContext()
+  {
+    return lastContext;
   }
 
 }

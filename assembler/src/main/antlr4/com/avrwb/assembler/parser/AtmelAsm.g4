@@ -120,8 +120,8 @@ CHAR: '\'' . '\''
     ;
 
 INT: [0-9]+ 
-   | ('0x'|'$')[0-9a-f]+
-   | '0b'[01]+ 
+   | ('0x'|'$'|'0X')[0-9a-fA-F]+
+   | ('0b'|'0B')[01]+ 
    ;
 
 MNEMONIC:      'adc' |
@@ -129,7 +129,7 @@ MNEMONIC:      'adc' |
       'adiw' |
       'and' |
       'andi' |
-      'asr' |
+      'asr' | 
       'bclr' |
       'bld' |
       'brbc' |
@@ -237,14 +237,14 @@ MNEMONIC:      'adc' |
       'st' |
       'std' |
       'sts' |
-      'sub' |
+      'sub' | 
       'subi' |
       'swap' |
       'tst' |
       'wdr' |
       'xch' ;
 
-NAME: [a-z_][a-z0-9_]* ;
+NAME: [a-zA-Z_][a-zA-Z0-9_]* ;
 
 STRING: '"' .*? '"' ;
 

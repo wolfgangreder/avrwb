@@ -21,40 +21,17 @@
  */
 package com.avrwb.assembler;
 
-import com.avrwb.assembler.model.ContextListener;
-import com.avrwb.assembler.parser.AtmelAsmLexer;
-import com.avrwb.assembler.parser.AtmelAsmParser;
-import com.avrwb.io.IntelHexOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.function.Function;
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
+import java.io.Reader;
 
 /**
  *
  * @author wolfi
  */
-public final class Assembler
+public interface Assembler
 {
 
-  public static IntelHexOutputStream compile(InputStream asmStream,
-                                             Function<String, InputStream> fileResolver) throws IOException
-  {
-    try (InputStream is = asmStream) {
-      ANTLRInputStream ais = new ANTLRInputStream(is);
-      AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
-      CommonTokenStream tokenStream = new CommonTokenStream(lexer);
-      AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
-      ContextListener ctxListener = new ContextListener(null);
-      parser.addParseListener(ctxListener);
-      ParseTree tree = parser.init();
-//      visit(tree,
-//            "");
-      System.out.println(tree.toStringTree(parser));
-      return null;
-    }
-  }
+  public AssemblerResult compile(Reader asmReader,
+                                 AssemblerConfig config) throws IOException, AssemblerException;
 
 }

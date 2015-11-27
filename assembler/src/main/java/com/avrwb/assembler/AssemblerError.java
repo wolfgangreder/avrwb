@@ -19,33 +19,40 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler.model.impl;
-
-import com.avrwb.assembler.AssemblerError;
-import com.avrwb.assembler.model.Expression;
+package com.avrwb.assembler;
 
 /**
  *
  * @author wolfi
  */
-public final class GreaterEqualThanOperation extends AbstractBinaryOperation
+public class AssemblerError extends Error
 {
 
-  public GreaterEqualThanOperation(Expression left,
-                                   Expression right)
+  public AssemblerError(String message)
   {
-    super(left,
-          right,
-          ">=",
-          10);
+    super(message);
   }
 
-  @Override
-  public int evaluate() throws AssemblerError
+  public AssemblerError(Throwable th)
   {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
-    return leftValue >= rightValue ? 1 : 0;
+    super(th);
+  }
+
+  public AssemblerError(String message,
+                        Throwable th)
+  {
+    super(message,
+          th);
+  }
+
+  public AssemblerException toException()
+  {
+    if (this.getCause() instanceof AssemblerException) {
+      return (AssemblerException) this.getCause();
+    } else {
+      return new AssemblerException(getMessage(),
+                                    this.getCause());
+    }
   }
 
 }

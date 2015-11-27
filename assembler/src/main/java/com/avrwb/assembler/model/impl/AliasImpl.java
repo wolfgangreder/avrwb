@@ -22,30 +22,68 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.Alias;
 import com.avrwb.assembler.model.Expression;
 
 /**
  *
  * @author wolfi
  */
-public final class GreaterEqualThanOperation extends AbstractBinaryOperation
+public final class AliasImpl implements Alias
 {
 
-  public GreaterEqualThanOperation(Expression left,
-                                   Expression right)
+  private final String name;
+  private final boolean isConst;
+  private final Expression expression;
+  private final String text;
+
+  public AliasImpl(String name,
+                   boolean isConst,
+                   Expression expression)
   {
-    super(left,
-          right,
-          ">=",
-          10);
+    this.name = name;
+    this.isConst = isConst;
+    this.expression = expression;
+    StringBuilder tmp = new StringBuilder();
+    if (isConst) {
+      tmp.append(".equ ");
+    } else {
+      tmp.append(".set ");
+    }
+    tmp.append(name);
+    tmp.append("=");
+    tmp.append(expression.toString());
+    text = tmp.toString();
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public String getName()
   {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
-    return leftValue >= rightValue ? 1 : 0;
+    return name;
+  }
+
+  @Override
+  public boolean isConst()
+  {
+    return isConst;
+  }
+
+  @Override
+  public Expression getExpression()
+  {
+    return expression;
+  }
+
+  @Override
+  public int getValue() throws AssemblerError
+  {
+    return expression.evaluate();
+  }
+
+  @Override
+  public String toString()
+  {
+    return text;
   }
 
 }

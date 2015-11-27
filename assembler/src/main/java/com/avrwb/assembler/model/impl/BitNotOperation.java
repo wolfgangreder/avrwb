@@ -21,7 +21,7 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.model.Expression;
 
 /**
@@ -39,7 +39,7 @@ public final class BitNotOperation extends AbstractUnaryExpression
   }
 
   @Override
-  public int evaluate() throws AssemblerException
+  public int evaluate() throws AssemblerError
   {
     return ~getSubExpression().evaluate();
   }
