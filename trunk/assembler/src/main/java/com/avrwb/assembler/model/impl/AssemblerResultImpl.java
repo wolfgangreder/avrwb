@@ -141,12 +141,10 @@ public class AssemblerResultImpl implements AssemblerResult
   }
 
   private void writeURLStarter(AssemblerSource src,
-                               String newLine,
                                Writer writer) throws IOException
   {
     writer.append("URL: ");
     writer.append(src.getSourceURL().toString());
-    writer.append(newLine);
   }
 
   private String getLineNumberString(int line)
@@ -175,8 +173,8 @@ public class AssemblerResultImpl implements AssemblerResult
                          Writer writer) throws IOException
   {
     writeURLStarter(src,
-                    newLine,
                     writer);
+    writer.append(newLine);
     try (LineNumberReader reader = new LineNumberReader(src.getReader())) {
       String line;
       while ((line = reader.readLine()) != null) {
@@ -206,7 +204,6 @@ public class AssemblerResultImpl implements AssemblerResult
                       newLine,
                       writer);
             writeURLStarter(src,
-                            newLine,
                             writer);
           }
         }
