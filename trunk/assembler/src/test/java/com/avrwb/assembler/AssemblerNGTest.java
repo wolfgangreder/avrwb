@@ -21,9 +21,7 @@
  */
 package com.avrwb.assembler;
 
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import org.openide.util.Lookup;
 import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.BeforeClass;
@@ -56,8 +54,7 @@ public class AssemblerNGTest
     URL u = Assembler.class.getResource("/asm/mov1.asm");
     assertNotNull(u,
                   "cannot find file");
-    assembler.compile(new InputStreamReader(u.openStream(),
-                                            StandardCharsets.UTF_8),
+    assembler.compile(new StandardAssemblerSource(u),
                       null);
   }
 

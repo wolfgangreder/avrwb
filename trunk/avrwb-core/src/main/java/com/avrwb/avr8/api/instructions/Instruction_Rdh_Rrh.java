@@ -35,22 +35,6 @@ public abstract class Instruction_Rdh_Rrh extends AbstractInstruction
 
   public static final int OPCODE_MASK = 0xff00;
 
-  public static int composeOpcode(int baseOpcode,
-                                  int rdh,
-                                  int rrh)
-  {
-    if ((baseOpcode & ~OPCODE_MASK) != 0) {
-      throw new IllegalArgumentException("invalid base opcode");
-    }
-    if (rdh < 16 || rdh > 32) {
-      throw new IllegalArgumentException("invalid rdh");
-    }
-    if (rrh < 16 || rrh > 32) {
-      throw new IllegalArgumentException("invalid rrh");
-    }
-    return baseOpcode | ((rdh & 0xf) << 4) | (rrh & 0xf);
-  }
-
   private final int rdhAddress;
   private final int rrhAddress;
   private final String toStringValue;

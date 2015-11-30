@@ -30,18 +30,6 @@ import java.text.MessageFormat;
 public abstract class Instruction_k12 extends AbstractInstruction
 {
 
-  public static int composeOpcode(int baseOpcode,
-                                  int k12)
-  {
-    if ((baseOpcode & ~0xf000) != 0) {
-      throw new IllegalArgumentException("illegal baseopcode");
-    }
-    if (k12 < -2048 || k12 >= 2048) {
-      throw new IllegalArgumentException("illegal k12");
-    }
-    return baseOpcode | (k12 & 0x0fff);
-  }
-
   protected final int k12;
   private final String toStringValue;
 

@@ -22,7 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -31,17 +33,19 @@ import com.avrwb.assembler.model.Expression;
 public final class Exp2Operation extends AbstractFunctionExpression
 {
 
-  public Exp2Operation(Expression subExpression)
+  public Exp2Operation(Expression subExpression,
+                       FileContext fileContext)
   {
     super(subExpression,
           "exp2",
-          15);
+          15,
+          fileContext);
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public int evaluate(Context ctx) throws AssemblerError
   {
-    return 1 << getSubExpression().evaluate();
+    return 1 << getSubExpression().evaluate(ctx);
   }
 
 }

@@ -90,11 +90,21 @@ public final class Converter
       return null;
     }
     return printHexString(i,
-                          1);
+                          1,
+                          true);
   }
 
   public static String printHexString(int i,
                                       int minDigits)
+  {
+    return printHexString(i,
+                          minDigits,
+                          true);
+  }
+
+  public static String printHexString(int i,
+                                      int minDigits,
+                                      boolean withPrefix)
   {
     String tmp = Integer.toHexString(i);
     if (tmp.length() < minDigits) {
@@ -104,7 +114,11 @@ public final class Converter
       }
       tmp = b.append(tmp).toString();
     }
-    return "0x" + tmp;
+    if (withPrefix) {
+      return "0x" + tmp;
+    } else {
+      return tmp;
+    }
 
   }
 

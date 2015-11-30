@@ -21,19 +21,17 @@
  */
 package com.avrwb.assembler.model;
 
-import java.nio.ByteBuffer;
+import com.avrwb.io.MemoryChunk;
 
 /**
  *
  * @author wolfi
  */
-public interface SegmentElement extends Comparable<SegmentElement>
+public interface SegmentElement extends Comparable<SegmentElement>, MemoryChunk
 {
 
-  public int getOffset();
+  public Segment getSegment();
 
-  public int getSize();
-
-  public ByteBuffer getData();
+  public FileContext getFileContext();
 
 }

@@ -24,6 +24,7 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.api.Instruction;
+import com.avrwb.avr8.api.InstructionComposer;
 import com.avrwb.avr8.api.InstructionDecoder;
 import com.avrwb.avr8.api.instructions.Bclr_Bset;
 import com.avrwb.avr8.api.instructions.Brbs_Brbc;
@@ -119,9 +120,9 @@ public class BaseInstructionDecoderNGTest
     String context = clazz.getName() + "@" + deviceKey.toString() + " ";
     for (int rd = 0; rd < 32; ++rd) {
       for (int rr = 0; rr < 32; ++rr) {
-        int opcode = Instruction_Rd_Rr.composeOpcode(baseOpcode,
-                                                     rd,
-                                                     rr);
+        int opcode = InstructionComposer.composeOpcode_Rd_Rr(baseOpcode,
+                                                             rd,
+                                                             rr);
         Instruction instruction = decoder.decodeInstruction(deviceKey,
                                                             opcode,
                                                             0);
@@ -153,8 +154,8 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rd = 0; rd < 32; ++rd) {
       String context = mnemonic + " r" + rd + " | ";
-      int opcode = Instruction_Rd.composeOpcode(baseOpcode,
-                                                rd);
+      int opcode = InstructionComposer.composeOpcode_Rd(baseOpcode,
+                                                        rd);
       Instruction inst = decoder.decodeInstruction(deviceKey,
                                                    opcode,
                                                    0);
@@ -186,9 +187,9 @@ public class BaseInstructionDecoderNGTest
                                                     rd,
                                                     k8,
                                                     mnemonic);
-        int opcode = Instruction_Rd_K8.composeOpcode(baseOpcode,
-                                                     rd,
-                                                     k8);
+        int opcode = InstructionComposer.composeOpcode_Rd_K8(baseOpcode,
+                                                             rd,
+                                                             k8);
         Instruction instruction = decoder.decodeInstruction(deviceKey,
                                                             opcode,
                                                             -1);
@@ -223,9 +224,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int b = 0; b < 7; ++b) {
       for (int dist = -64; dist < 64; ++dist) {
-        int opcode = Brbs_Brbc.composeOpcode(baseOpcode,
-                                             b,
-                                             dist);
+        int opcode = InstructionComposer.composeOpcode_b_k7(baseOpcode,
+                                                            b,
+                                                            dist);
         String context = mnemonic + " b=" + b + ", dist=" + dist + " | ";
         Instruction instruction = decoder.decodeInstruction(deviceKey,
                                                             opcode,
@@ -255,8 +256,8 @@ public class BaseInstructionDecoderNGTest
                                      boolean expectToFind)
   {
     for (int k = -2048; k < 2048; ++k) {
-      int opcode = Instruction_k12.composeOpcode(baseOpcode,
-                                                 k);
+      int opcode = InstructionComposer.composeOpcode_k12(baseOpcode,
+                                                         k);
       String context = mnemonic + " k=" + k + " | ";
       Instruction i = decoder.decodeInstruction(deviceKey,
                                                 opcode,
@@ -284,9 +285,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rd = 0; rd < 32; ++rd) {
       for (int p = 0; p < 64; ++p) {
-        int opcode = InOut.composeOpcode(baseOpcode,
-                                         rd,
-                                         p);
+        int opcode = InstructionComposer.composeOpcode_Rd_P(baseOpcode,
+                                                            rd,
+                                                            p);
         String context = mnemonic + " r" + rd + ", 0x" + Integer.toHexString(p) + " | ";
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
@@ -316,9 +317,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rdl = 24; rdl < 32; rdl += 2) {
       for (int k6 = 0; k6 < 64; ++k6) {
-        int opcode = Instruction_Rdl_K6.composeOpcode(baseOpcode,
-                                                      rdl,
-                                                      k6);
+        int opcode = InstructionComposer.composeOpcode_Rdl_K6(baseOpcode,
+                                                              rdl,
+                                                              k6);
         String context = mnemonic + " r" + rdl + ":r" + (rdl + 1) + ", " + k6 + " | ";
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
@@ -395,9 +396,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rd = 0; rd < 32; ++rd) {
       for (int b = 0; b < 8; ++b) {
-        int opcode = Instruction_Rd_b.composeOpcode(baseOpcode,
-                                                    rd,
-                                                    b);
+        int opcode = InstructionComposer.composeOpcode_Rd_b(baseOpcode,
+                                                            rd,
+                                                            b);
         String context = mnemonic + " r" + rd + ", " + b + " | ";
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
@@ -453,8 +454,8 @@ public class BaseInstructionDecoderNGTest
   {
     for (int k = 0; k < 0x40; ++k) {
       int k22 = k << 16;
-      int opcode = Instruction_K22.composeOpcode(baseOpcode,
-                                                 k22);
+      int opcode = InstructionComposer.composeOpcode_K22(baseOpcode,
+                                                         k22);
       Instruction i = decoder.decodeInstruction(deviceKey,
                                                 (opcode >> 16) & 0xffff,
                                                 opcode & 0xffff);
@@ -477,8 +478,8 @@ public class BaseInstructionDecoderNGTest
     }
     for (int k = 0; k < 0x40; ++k) {
       int k22 = (k << 16) | 0xffff;
-      int opcode = Instruction_K22.composeOpcode(baseOpcode,
-                                                 k22);
+      int opcode = InstructionComposer.composeOpcode_K22(baseOpcode,
+                                                         k22);
       Instruction i = decoder.decodeInstruction(deviceKey,
                                                 (opcode >> 16) & 0xffff,
                                                 opcode & 0xffff);
@@ -509,8 +510,8 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rd = 0; rd < 32; ++rd) {
       String context = mnemonic + " r" + rd + " | ";
-      int opcode = Instruction_Rd.composeOpcode(baseOpcode,
-                                                rd);
+      int opcode = InstructionComposer.composeOpcode_Rd(baseOpcode,
+                                                        rd);
       Instruction inst = decoder.decodeInstruction(deviceKey,
                                                    opcode,
                                                    0);
@@ -537,9 +538,9 @@ public class BaseInstructionDecoderNGTest
                            boolean expectToFind)
   {
     for (int rd = 0; rd < 32; ++rd) {
-      int opcode = Instruction_Rd_K16.composeOpcode(baseOpcode,
-                                                    rd,
-                                                    0);
+      int opcode = InstructionComposer.composeOpcode_Rd_K16(baseOpcode,
+                                                            rd,
+                                                            0);
       Instruction i = decoder.decodeInstruction(deviceKey,
                                                 (opcode >> 16) & 0xffff,
                                                 opcode & 0xffff);
@@ -562,9 +563,9 @@ public class BaseInstructionDecoderNGTest
       }
     }
     for (int rd = 0; rd < 32; ++rd) {
-      int opcode = Instruction_Rd_K16.composeOpcode(baseOpcode,
-                                                    rd,
-                                                    0xffff);
+      int opcode = InstructionComposer.composeOpcode_Rd_K16(baseOpcode,
+                                                            rd,
+                                                            0xffff);
       Instruction i = decoder.decodeInstruction(deviceKey,
                                                 (opcode >> 16) & 0xffff,
                                                 opcode & 0xffff);
@@ -772,9 +773,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int p = 0; p < 32; ++p) {
       for (int b = 0; b < 8; ++b) {
-        int opcode = Instruction_P_b.composeOpcode(baseOpcode,
-                                                   p,
-                                                   b);
+        int opcode = InstructionComposer.composeOpcode_P_b(baseOpcode,
+                                                           p,
+                                                           b);
         String context = mnemonic + " 0x" + Integer.toHexString(p) + ", " + b + " | ";
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
@@ -808,8 +809,8 @@ public class BaseInstructionDecoderNGTest
                          boolean expectToFind)
   {
     for (int i = 0; i < 16; ++i) {
-      int opcode = Instruction_K4.composeOpcode(baseOpcode,
-                                                i);
+      int opcode = InstructionComposer.composeOpcode_K4(baseOpcode,
+                                                        i);
       String context = mnemonic + " " + i + " | ";
       Instruction inst = decoder.decodeInstruction(deviceKey,
                                                    opcode,
@@ -840,9 +841,9 @@ public class BaseInstructionDecoderNGTest
     for (int rd = 16; rd < 24; ++rd) {
       for (int rr = 16; rr < 24; ++rr) {
         final String context = mnemonic + " r" + rd + ",r" + rr + " | ";
-        final int opcode = Instruction_Rdh23_Rrh23.composeOpcode(baseOpcode,
-                                                                 rd,
-                                                                 rr);
+        final int opcode = InstructionComposer.composeOpcode_Rdh23_Rrh23(baseOpcode,
+                                                                         rd,
+                                                                         rr);
         final Instruction i = decoder.decodeInstruction(deviceKey,
                                                         opcode,
                                                         0);
@@ -913,9 +914,9 @@ public class BaseInstructionDecoderNGTest
   {
     for (int rd = 16; rd < 33; ++rd) {
       for (int rr = 16; rr < 33; ++rr) {
-        int opcode = Instruction_Rdh_Rrh.composeOpcode(baseOpcode,
-                                                       rd,
-                                                       rr);
+        int opcode = InstructionComposer.composeOpcode_Rdh_Rrh(baseOpcode,
+                                                               rd,
+                                                               rr);
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
                                                   -1);

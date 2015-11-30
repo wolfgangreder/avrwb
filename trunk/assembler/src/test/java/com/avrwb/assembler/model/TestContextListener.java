@@ -25,8 +25,13 @@ import com.avrwb.assembler.Assembler;
 import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.StandardAssemblerSource;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 
 /**
  *
@@ -52,10 +57,22 @@ public class TestContextListener
   public AssemblerResult parse(String parse,
                                AssemblerConfig config) throws IOException, AssemblerException
   {
-    AssemblerResult tmp = assembler.compile(new StringReader(parse),
+    AssemblerResult tmp = assembler.compile(constructFile(parse),
                                             config);
     lastContext = tmp.getLookup().lookup(Context.class);
     return tmp;
+  }
+
+  private AssemblerSource constructFile(String toParse) throws IOException
+  {
+    File result = File.createTempFile("TestContextListener",
+                                      ".asm");
+    result.deleteOnExit();
+    try (Writer fw = new OutputStreamWriter(new FileOutputStream(result),
+                                            StandardCharsets.UTF_8)) {
+      fw.write(toParse);
+    }
+    return new StandardAssemblerSource(result.toURI().toURL());
   }
 
   public Context getContext()

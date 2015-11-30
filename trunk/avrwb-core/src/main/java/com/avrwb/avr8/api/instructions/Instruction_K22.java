@@ -28,18 +28,6 @@ package com.avrwb.avr8.api.instructions;
 public abstract class Instruction_K22 extends AbstractInstruction
 {
 
-  public static int composeOpcode(int baseOpcode,
-                                  int k22)
-  {
-    if ((baseOpcode & ~0xfe0e) != 0) {
-      throw new IllegalArgumentException("invalid baseopcode");
-    }
-    if (k22 < 0 || k22 > 0x3fffff) {
-      throw new IllegalArgumentException("invalid k22");
-    }
-    return (baseOpcode << 16) | (k22 & 0x1ffff) | ((k22 & 0x3e0000) << 3);
-  }
-
   private final int k22;
   private final String toStringValue;
 

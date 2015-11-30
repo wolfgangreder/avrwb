@@ -35,22 +35,6 @@ import java.text.MessageFormat;
 public abstract class Instruction_P_b extends AbstractInstruction
 {
 
-  public static final int composeOpcode(int baseOpcode,
-                                        int io,
-                                        int b)
-  {
-    if ((baseOpcode & ~0xff00) != 0) {
-      throw new IllegalArgumentException("invalid opcode");
-    }
-    if (io < 0 || io > 31) {
-      throw new IllegalArgumentException("invalid io");
-    }
-    if (b < 0 || b > 7) {
-      throw new IllegalArgumentException("invalid bit");
-    }
-    return baseOpcode | b | (io << 3);
-  }
-
   public static final int OPCODE_MASK = 0xff00;
   private final int portAddress;
   private final int bitOffset;

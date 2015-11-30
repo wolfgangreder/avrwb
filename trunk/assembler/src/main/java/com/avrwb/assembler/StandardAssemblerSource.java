@@ -23,34 +23,78 @@ package com.avrwb.assembler;
 
 import com.avrwb.assembler.model.AssemblerSource;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 /**
  *
  * @author wolfi
  */
-public class StandardFileResolver implements FileResolver
+public final class StandardAssemblerSource implements AssemblerSource
 {
 
+  private final URL url;
   private final Charset charset;
 
-  public StandardFileResolver()
+  public StandardAssemblerSource(URL url)
   {
-    this(null);
+    this(url,
+         StandardCharsets.UTF_8);
   }
 
-  public StandardFileResolver(Charset charset)
+  public StandardAssemblerSource(URL url,
+                                 Charset charset)
   {
+    this.url = url;
     this.charset = charset != null ? charset : StandardCharsets.UTF_8;
   }
 
   @Override
-  public AssemblerSource resolveFile(URL url) throws IOException
+  public Reader getReader() throws IOException
   {
-    return new StandardAssemblerSource(url,
-                                       charset);
+    return new InputStreamReader(url.openStream(),
+                                 charset);
+  }
+
+  @Override
+  public URL getSourceURL()
+  {
+    return url;
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 3;
+    hash = 67 * hash + Objects.hashCode(this.url);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final StandardAssemblerSource other = (StandardAssemblerSource) obj;
+    return Objects.equals(this.url,
+                          other.url);
+  }
+
+  @Override
+  public String toString()
+  {
+    return "StandardAssemblerSource{" + "url=" + url + '}';
   }
 
 }

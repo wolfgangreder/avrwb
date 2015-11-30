@@ -21,19 +21,31 @@
  */
 package com.avrwb.assembler.model;
 
-import com.avrwb.assembler.Assembler;
-import com.avrwb.assembler.AssemblerException;
-import com.avrwb.assembler.AssemblerResult;
-import java.io.IOException;
-
 /**
  *
  * @author wolfi
  */
-public interface InternalAssembler extends Assembler
+public final class Inline
 {
 
-  public AssemblerResult compile(AssemblerSource source,
-                                 ContextListener contextListener) throws IOException, AssemblerException;
+  private final FileContext fileContext;
+  private final AssemblerSource src;
+
+  public Inline(FileContext fileContext,
+                AssemblerSource src)
+  {
+    this.fileContext = fileContext;
+    this.src = src;
+  }
+
+  public FileContext getFileContext()
+  {
+    return fileContext;
+  }
+
+  public AssemblerSource getSrc()
+  {
+    return src;
+  }
 
 }

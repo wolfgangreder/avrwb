@@ -21,6 +21,8 @@
  */
 package com.avrwb.assembler.model.impl;
 
+import com.avrwb.assembler.model.FileContext;
+import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -33,76 +35,93 @@ import java.nio.charset.CharsetEncoder;
  *
  * @author wolfi
  */
-public class SegmentElementImpl implements SegmentElement
+public class SegmentElementImpl extends AbstractSegmentElement
 {
 
-  private final int offset;
   private final ByteBuffer data;
 
-  public static SegmentElement getByteInstance(int offset,
-                                               byte b)
+  public static SegmentElement getByteInstance(Segment segment,
+                                               int offset,
+                                               byte b,
+                                               FileContext fctx)
   {
-    return new SegmentElementImpl(offset,
-                                  ByteBuffer.wrap(new byte[]{b}));
+    return new SegmentElementImpl(segment,
+                                  offset,
+                                  ByteBuffer.wrap(new byte[]{b}),
+                                  fctx);
   }
 
-  public static SegmentElement getWordInstance(int offset,
+  public static SegmentElement getWordInstance(Segment segment,
+                                               int offset,
                                                int word,
-                                               ByteOrder byteOrder)
+                                               ByteOrder byteOrder,
+                                               FileContext fctx)
   {
-    return new SegmentElementImpl(offset,
+    return new SegmentElementImpl(segment,
+                                  offset,
                                   ByteBuffer.allocate(2).
                                   order(byteOrder).
-                                  putShort((short) (word & 0xffff)));
+                                  putShort((short) (word & 0xffff)),
+                                  fctx);
   }
 
-  public static SegmentElement getDWordInstance(int offset,
+  public static SegmentElement getDWordInstance(Segment segment,
+                                                int offset,
                                                 int dword,
-                                                ByteOrder byteOrder)
+                                                ByteOrder byteOrder,
+                                                FileContext fctx)
   {
-    return new SegmentElementImpl(offset,
+    return new SegmentElementImpl(segment,
+                                  offset,
                                   ByteBuffer.allocate(4).
                                   order(byteOrder).
-                                  putInt(dword));
+                                  putInt(dword),
+                                  fctx);
 
   }
 
-  public static SegmentElement getStringInstance(int offset,
+  public static SegmentElement getStringInstance(Segment segment,
+                                                 int offset,
                                                  String string,
                                                  ByteOrder byteOrder,
-                                                 Charset charset) throws CharacterCodingException
+                                                 Charset charset,
+                                                 FileContext fctx) throws CharacterCodingException
   {
     CharsetEncoder encoder = charset.newEncoder();
     CharBuffer charBuffer = CharBuffer.allocate(string.length() + 1);
     charBuffer.append(string);
     charBuffer.append((char) 0);
     charBuffer.rewind();
-    return new SegmentElementImpl(offset,
-                                  encoder.encode(charBuffer).order(byteOrder));
+    return new SegmentElementImpl(segment,
+                                  offset,
+                                  encoder.encode(charBuffer).order(byteOrder),
+                                  fctx);
 
   }
 
-  public static SegmentElement getArrayInstance(int offset,
+  public static SegmentElement getArrayInstance(Segment segment,
+                                                int offset,
                                                 byte[] data,
-                                                ByteOrder byteOrder)
+                                                ByteOrder byteOrder,
+                                                FileContext fctx)
   {
-    return new SegmentElementImpl(offset,
+    return new SegmentElementImpl(segment,
+                                  offset,
                                   ByteBuffer.allocate(data.length).
                                   order(byteOrder).
-                                  put(data));
+                                  put(data),
+                                  fctx);
   }
 
-  private SegmentElementImpl(int offset,
-                             ByteBuffer data)
+  private SegmentElementImpl(Segment segment,
+                             int offset,
+                             ByteBuffer data,
+                             FileContext fctx)
   {
-    this.offset = offset;
+    super(segment,
+          offset,
+          fctx);
     this.data = data;
-  }
-
-  @Override
-  public int getOffset()
-  {
-    return offset;
   }
 
   @Override
@@ -115,37 +134,6 @@ public class SegmentElementImpl implements SegmentElement
   public ByteBuffer getData()
   {
     return data.asReadOnlyBuffer();
-  }
-
-  @Override
-  public int compareTo(SegmentElement o)
-  {
-    return Integer.compare(offset,
-                           o.getOffset());
-  }
-
-  @Override
-  public int hashCode()
-  {
-    int hash = 7;
-    hash = 47 * hash + this.offset;
-    return hash;
-  }
-
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    final SegmentElementImpl other = (SegmentElementImpl) obj;
-    return this.offset == other.offset;
   }
 
 }

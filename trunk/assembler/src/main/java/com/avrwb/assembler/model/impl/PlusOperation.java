@@ -22,7 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -32,19 +34,21 @@ public final class PlusOperation extends AbstractBinaryOperation
 {
 
   public PlusOperation(Expression left,
-                       Expression right)
+                       Expression right,
+                       FileContext fileContext)
   {
     super(left,
           right,
           "+",
-          12);
+          12,
+          fileContext);
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public int evaluate(Context ctx) throws AssemblerError
   {
-    int leftValue = getLeft().evaluate();
-    int rightValue = getRight().evaluate();
+    int leftValue = getLeft().evaluate(ctx);
+    int rightValue = getRight().evaluate(ctx);
     return leftValue + rightValue;
   }
 

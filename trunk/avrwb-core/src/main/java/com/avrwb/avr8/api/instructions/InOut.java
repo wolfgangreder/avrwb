@@ -40,22 +40,6 @@ import java.util.logging.Logger;
 public final class InOut extends AbstractInstruction
 {
 
-  public static int composeOpcode(int baseOpcode,
-                                  int rd,
-                                  int io)
-  {
-    if ((baseOpcode & ~0xf800) != 0) {
-      throw new IllegalArgumentException("invalid opcode");
-    }
-    if (rd < 0 || rd > 31) {
-      throw new IllegalArgumentException("invalid rd");
-    }
-    if (io < 0 || io > 63) {
-      throw new IllegalArgumentException("invalid io");
-    }
-    return baseOpcode | (rd << 4) | (io & 0xf) | ((io & 0x30) << 5);
-  }
-
   public static final int OPCODE_IN = 0xb000;
   public static final int OPCODE_OUT = 0xb800;
   private final boolean in;

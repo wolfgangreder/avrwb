@@ -23,6 +23,7 @@ package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.model.Alias;
+import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
 
 /**
@@ -75,9 +76,9 @@ public final class AliasImpl implements Alias
   }
 
   @Override
-  public int getValue() throws AssemblerError
+  public int getValue(Context ctx) throws AssemblerError
   {
-    return expression.evaluate();
+    return expression.evaluate(ctx);
   }
 
   @Override
