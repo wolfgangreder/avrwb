@@ -21,7 +21,8 @@
  */
 package com.avrwb.assembler;
 
-import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.openide.util.Lookup;
 import static org.testng.Assert.assertNotNull;
 import org.testng.annotations.BeforeClass;
@@ -51,7 +52,7 @@ public class AssemblerNGTest
   @Test(enabled = false)
   public void testCompile() throws Exception
   {
-    URL u = Assembler.class.getResource("/asm/mov1.asm");
+    Path u = Paths.get(Assembler.class.getResource("/asm/mov1.asm").getPath());
     assertNotNull(u,
                   "cannot find file");
     assembler.compile(new StandardAssemblerSource(u),

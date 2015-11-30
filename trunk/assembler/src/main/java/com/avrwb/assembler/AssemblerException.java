@@ -28,21 +28,34 @@ package com.avrwb.assembler;
 public class AssemblerException extends Exception
 {
 
-  public AssemblerException(String msg)
+  private final SourceContext sourceContext;
+
+  public AssemblerException(String msg,
+                            SourceContext sourceContext)
   {
     super(msg);
+    this.sourceContext = sourceContext;
   }
 
-  public AssemblerException(Throwable th)
+  public AssemblerException(Throwable th,
+                            SourceContext sourceContext)
   {
     super(th);
+    this.sourceContext = sourceContext;
   }
 
   public AssemblerException(String msg,
-                            Throwable th)
+                            Throwable th,
+                            SourceContext sourceContext)
   {
     super(msg,
           th);
+    this.sourceContext = sourceContext;
+  }
+
+  public SourceContext getSourceContext()
+  {
+    return sourceContext;
   }
 
 }

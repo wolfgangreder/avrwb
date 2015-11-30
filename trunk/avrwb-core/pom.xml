@@ -34,27 +34,25 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.15</version>
             </plugin>
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>exec-maven-plugin</artifactId>
-              <version>1.4.0</version>
-              <executions>
-                <execution>
-                  <goals>
-                    <goal>exec</goal>
-                  </goals>
-                </execution>
-              </executions>
-              <configuration>
-                <skip>false</skip>
-                <executable>${basedir}/src/test/app/avrasm</executable>
-                <basedir>${basedir}/src/test/app</basedir>
-                <arguments>
-                  <argument>${basedir}/target/test-classes</argument>
-                </arguments>
-              </configuration>
-            </plugin>
-        </plugins>
+              <plugin>
+        <groupId>com.avrwb</groupId>
+        <artifactId>avrasm-maven-plugin</artifactId>
+        <version>1.0-SNAPSHOT</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>avrasm</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includePaths>
+            <includePath>${basedir}/src/test/resources/avrasm</includePath>
+          </includePaths>
+        </configuration>
+      </plugin>
+</plugins>
+        
     </build>
     <dependencies>
         <dependency>
@@ -80,12 +78,6 @@
             <artifactId>base</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>assembler</artifactId>
-            <version>${project.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
     <properties>

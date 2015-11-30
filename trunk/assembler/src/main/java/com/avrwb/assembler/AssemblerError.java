@@ -28,31 +28,34 @@ package com.avrwb.assembler;
 public class AssemblerError extends Error
 {
 
-  public AssemblerError(String message)
+  private final SourceContext sourceContext;
+
+  public AssemblerError(String message,
+                        SourceContext sourceContext)
   {
     super(message);
+    this.sourceContext = sourceContext;
   }
 
-  public AssemblerError(Throwable th)
+  public AssemblerError(Throwable th,
+                        SourceContext sourceContext)
   {
     super(th);
+    this.sourceContext = sourceContext;
   }
 
   public AssemblerError(String message,
-                        Throwable th)
+                        Throwable th,
+                        SourceContext sourceContext)
   {
     super(message,
           th);
+    this.sourceContext = sourceContext;
   }
 
-  public AssemblerException toException()
+  public SourceContext getSourceContext()
   {
-    if (this.getCause() instanceof AssemblerException) {
-      return (AssemblerException) this.getCause();
-    } else {
-      return new AssemblerException(getMessage(),
-                                    this.getCause());
-    }
+    return sourceContext;
   }
 
 }

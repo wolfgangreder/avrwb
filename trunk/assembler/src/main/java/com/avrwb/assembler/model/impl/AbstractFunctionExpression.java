@@ -21,8 +21,8 @@
  */
 package com.avrwb.assembler.model.impl;
 
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -34,7 +34,7 @@ public abstract class AbstractFunctionExpression extends AbstractUnaryExpression
   public AbstractFunctionExpression(Expression subExpression,
                                     String operator,
                                     int level,
-                                    FileContext fileContext)
+                                    SourceContext fileContext)
   {
     super(subExpression,
           operator,

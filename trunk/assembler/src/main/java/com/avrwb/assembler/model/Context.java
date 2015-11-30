@@ -24,6 +24,7 @@ package com.avrwb.assembler.model;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.StandardAssemblerConfig;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import java.text.MessageFormat;
@@ -71,7 +72,8 @@ public final class Context
     this.assembler = assembler;
     this.config = config != null ? config : StandardAssemblerConfig.getDefaultInstance();
     for (Alias a : this.config.getDefaultAliases()) {
-      addAlias(a);
+      addAlias(a,
+               null);
     }
   }
 
@@ -113,7 +115,7 @@ public final class Context
     return sourceStack.pop();
   }
 
-  public AssemblerSource currentSource()
+  public AssemblerSource getCurrentSource()
   {
     return sourceStack.getFirst();
   }
@@ -159,7 +161,7 @@ public final class Context
     }
   }
 
-  public Expression popExpression() throws AssemblerError
+  public Expression popExpression(SourceContext sourceContext) throws AssemblerError
   {
     try {
       Expression result = expStack.pop();
@@ -167,7 +169,8 @@ public final class Context
                                           result));
       return result;
     } catch (NoSuchElementException ex) {
-      throw new AssemblerError(ex.getMessage());
+      throw new AssemblerError(ex.getMessage(),
+                               sourceContext);
     }
   }
 
@@ -182,13 +185,15 @@ public final class Context
     return result;
   }
 
-  public Alias addAlias(@NotNull Alias alias) throws AssemblerError
+  public Alias addAlias(@NotNull Alias alias,
+                        SourceContext sourceContext) throws AssemblerError
   {
     Objects.requireNonNull(alias,
                            "alias==null");
     Alias current = getAlias(alias.getName());
     if (current != null && current.isConst()) {
-      throw new AssemblerError("alias already defined:" + alias.getName());
+      throw new AssemblerError("alias already defined:" + alias.getName(),
+                               sourceContext);
     }
     if (alias.isConst()) {
       Alias tmp = constMap.putIfAbsent(alias.getName(),
@@ -228,7 +233,8 @@ public final class Context
   }
 
   private int addToSegment(@NotNull SegmentElement element,
-                           Segment segment)
+                           Segment segment,
+                           SourceContext sourceContext)
   {
     Objects.requireNonNull(element,
                            "element==null");
@@ -244,7 +250,8 @@ public final class Context
         SegmentElement prev = seg.get(index - 1);
         if ((prev.getStartAddress() + prev.getSize()) > element.getStartAddress()) {
           throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.
-                  toHexString(element.getStartAddress()));
+                  toHexString(element.getStartAddress()),
+                                   sourceContext);
         }
         seg.add(index,
                 element);
@@ -252,13 +259,15 @@ public final class Context
         SegmentElement next = seg.get(index);
         if (next.getStartAddress() < maxAddress) {
           throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.toHexString(element.
-                  getStartAddress()));
+                  getStartAddress()),
+                                   sourceContext);
         }
         if (index != 0) {
           SegmentElement prev = seg.get(index - 1);
           if ((prev.getStartAddress() + prev.getSize()) > element.getStartAddress()) {
             throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.
-                    toHexString(element.getStartAddress()));
+                    toHexString(element.getStartAddress()),
+                                     sourceContext);
           }
         }
       }
@@ -266,16 +275,19 @@ public final class Context
     return element.getSize();
   }
 
-  public void addToSeg(@NotNull SegmentElement element)
+  public void addToSeg(@NotNull SegmentElement element,
+                       SourceContext sourceContext)
   {
     Objects.requireNonNull(element,
                            "element==null");
     addToSeg(currentSegment,
-             element);
+             element,
+             sourceContext);
   }
 
   public void addToSeg(@NotNull Segment seg,
-                       @NotNull SegmentElement element)
+                       @NotNull SegmentElement element,
+                       SourceContext sourceContext)
   {
     Objects.requireNonNull(seg,
                            "seg==null");
@@ -284,7 +296,8 @@ public final class Context
     LongAdder adder = segmentPositions.computeIfAbsent(seg,
                                                        (Segment s) -> new LongAdder());
     adder.add(addToSegment(element,
-                           seg));
+                           seg,
+                           sourceContext));
 
   }
 

@@ -23,8 +23,8 @@ package com.avrwb.assembler;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.model.AssemblerSource;
+import com.avrwb.assembler.model.Context;
 import java.io.IOException;
-import java.net.URL;
 
 /**
  *
@@ -35,6 +35,7 @@ public interface FileResolver
 {
 
   @NotNull
-  public AssemblerSource resolveFile(@NotNull URL url) throws IOException;
+  public AssemblerSource resolveFile(@NotNull Context currentContext,
+                                     @NotNull String path) throws IOException;
 
 }

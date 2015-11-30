@@ -23,9 +23,9 @@ package com.avrwb.assembler.model.impl;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.AssemblerSource;
 import com.avrwb.assembler.model.Context;
-import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.Inline;
 import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
@@ -80,19 +80,19 @@ public class AssemblerResultImpl implements AssemblerResult
   private void writeList(Context ctx,
                          Writer writer) throws IOException
   {
-    final Map<FileContext, SegmentElement> segments = new HashMap<>();
-    final Map<FileContext, Inline> inlines = new HashMap<>();
+    final Map<SourceContext, SegmentElement> segments = new HashMap<>();
+    final Map<SourceContext, Inline> inlines = new HashMap<>();
     final String newLine = System.getProperty("line.separator");
     for (SegmentElement se : ctx.getSegment(Segment.CSEG)) {
-      segments.put(se.getFileContext(),
+      segments.put(se.getSourceContext(),
                    se);
     }
     for (SegmentElement se : ctx.getSegment(Segment.ESEG)) {
-      segments.put(se.getFileContext(),
+      segments.put(se.getSourceContext(),
                    se);
     }
     for (Inline i : ctx.getInlines()) {
-      inlines.put(i.getFileContext(),
+      inlines.put(i.getSourceContext(),
                   i);
     }
     writeFile(ctx.getMasterSource(),
@@ -144,7 +144,7 @@ public class AssemblerResultImpl implements AssemblerResult
                                Writer writer) throws IOException
   {
     writer.append("URL: ");
-    writer.append(src.getSourceURL().toString());
+    writer.append(src.getSourcePath().toString());
   }
 
   private String getLineNumberString(int line)
@@ -167,8 +167,8 @@ public class AssemblerResultImpl implements AssemblerResult
   }
 
   private void writeFile(AssemblerSource src,
-                         Map<FileContext, SegmentElement> segments,
-                         Map<FileContext, Inline> inlines,
+                         Map<SourceContext, SegmentElement> segments,
+                         Map<SourceContext, Inline> inlines,
                          String newLine,
                          Writer writer) throws IOException
   {
@@ -178,8 +178,9 @@ public class AssemblerResultImpl implements AssemblerResult
     try (LineNumberReader reader = new LineNumberReader(src.getReader())) {
       String line;
       while ((line = reader.readLine()) != null) {
-        FileContext fctx = new FileContext(src,
-                                           reader.getLineNumber());
+        SourceContext fctx = new SourceContext(src.getSourcePath().toString(),
+                                               reader.getLineNumber(),
+                                               0);
         writer.append(getLineNumberString(reader.getLineNumber()));
         SegmentElement seg = segments.get(fctx);
         if (seg != null) {
@@ -220,10 +221,22 @@ public class AssemblerResultImpl implements AssemblerResult
   }
 
   @Override
+  public boolean isCSEGAvailable()
+  {
+    return !context.getSegment(Segment.CSEG).isEmpty();
+  }
+
+  @Override
   public void getESEG(MemoryChunkOutputStream os) throws IOException
   {
     writeIntelHex(context.getSegment(Segment.ESEG),
                   os);
+  }
+
+  @Override
+  public boolean isESEGAvailable()
+  {
+    return !context.getSegment(Segment.ESEG).isEmpty();
   }
 
   @Override

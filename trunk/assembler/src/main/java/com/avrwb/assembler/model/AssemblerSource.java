@@ -23,7 +23,7 @@ package com.avrwb.assembler.model;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
+import java.nio.file.Path;
 
 /**
  *
@@ -34,6 +34,6 @@ public interface AssemblerSource
 
   public Reader getReader() throws IOException;
 
-  public URL getSourceURL();
+  public Path getSourcePath();
 
 }

@@ -22,9 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -35,10 +35,10 @@ public final class IntExpression implements Expression
 
   private final int i;
   private final String text;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
 
   public IntExpression(String str,
-                       FileContext fileContext)
+                       SourceContext fileContext)
   {
     if (str.startsWith("$")) {
       i = Integer.parseInt(str.substring(1),
@@ -54,7 +54,7 @@ public final class IntExpression implements Expression
   }
 
   public IntExpression(int i,
-                       FileContext fileContext)
+                       SourceContext fileContext)
   {
     this.i = i;
     text = Integer.toString(i);
@@ -62,7 +62,7 @@ public final class IntExpression implements Expression
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

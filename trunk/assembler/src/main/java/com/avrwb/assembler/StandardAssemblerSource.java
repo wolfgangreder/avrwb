@@ -25,9 +25,11 @@ import com.avrwb.assembler.model.AssemblerSource;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Objects;
 
 /**
@@ -37,40 +39,41 @@ import java.util.Objects;
 public final class StandardAssemblerSource implements AssemblerSource
 {
 
-  private final URL url;
+  private final Path path;
   private final Charset charset;
 
-  public StandardAssemblerSource(URL url)
+  public StandardAssemblerSource(Path path)
   {
-    this(url,
+    this(path,
          StandardCharsets.UTF_8);
   }
 
-  public StandardAssemblerSource(URL url,
+  public StandardAssemblerSource(Path path,
                                  Charset charset)
   {
-    this.url = url;
+    this.path = path;
     this.charset = charset != null ? charset : StandardCharsets.UTF_8;
   }
 
   @Override
   public Reader getReader() throws IOException
   {
-    return new InputStreamReader(url.openStream(),
+    return new InputStreamReader(Files.newInputStream(path,
+                                                      StandardOpenOption.READ),
                                  charset);
   }
 
   @Override
-  public URL getSourceURL()
+  public Path getSourcePath()
   {
-    return url;
+    return path;
   }
 
   @Override
   public int hashCode()
   {
     int hash = 3;
-    hash = 67 * hash + Objects.hashCode(this.url);
+    hash = 67 * hash + Objects.hashCode(this.path);
     return hash;
   }
 
@@ -87,14 +90,14 @@ public final class StandardAssemblerSource implements AssemblerSource
       return false;
     }
     final StandardAssemblerSource other = (StandardAssemblerSource) obj;
-    return Objects.equals(this.url,
-                          other.url);
+    return Objects.equals(this.path,
+                          other.path);
   }
 
   @Override
   public String toString()
   {
-    return "StandardAssemblerSource{" + "url=" + url + '}';
+    return "StandardAssemblerSource{" + "path=" + path + '}';
   }
 
 }

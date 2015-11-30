@@ -50,7 +50,7 @@ public class AssemblerImpl implements InternalAssembler
   {
     try {
       ANTLRInputStream ais = new ANTLRInputStream(source.getReader());
-      ais.name = source.getSourceURL().toString();
+      ais.name = source.getSourcePath().toString();
       contextListener.getContext().pushSource(source);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
@@ -60,7 +60,8 @@ public class AssemblerImpl implements InternalAssembler
       contextListener.getContext().popSource();
       return new AssemblerResultImpl(contextListener.getContext());
     } catch (AssemblerError ae) {
-      throw new AssemblerException(ae);
+      throw new AssemblerException(ae,
+                                   ae.getSourceContext());
     }
   }
 

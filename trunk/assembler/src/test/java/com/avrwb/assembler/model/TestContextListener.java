@@ -72,7 +72,7 @@ public class TestContextListener
                                             StandardCharsets.UTF_8)) {
       fw.write(toParse);
     }
-    return new StandardAssemblerSource(result.toURI().toURL());
+    return new StandardAssemblerSource(result.toPath());
   }
 
   public Context getContext()

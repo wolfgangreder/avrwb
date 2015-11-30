@@ -24,6 +24,7 @@ package com.avrwb.assembler.model;
 import com.avrwb.assembler.Assembler;
 import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.StandardAssemblerSource;
 import com.avrwb.assembler.model.impl.AssemblerImpl;
 import com.avrwb.io.IntelHexOutputStream;
 import com.avrwb.io.MemoryChunkOutputStream;
@@ -32,7 +33,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -44,7 +48,7 @@ import org.testng.annotations.Test;
 public class ContextNGTest
 {
 
-  private static URL includeFile;
+  private static Path includeFile;
   private static Assembler assembler;
 
   @BeforeClass
@@ -63,7 +67,7 @@ public class ContextNGTest
       writer.write(".set val1 = 0x40\n\n");
     }
     iFile.deleteOnExit();
-    includeFile = iFile.toURI().toURL();
+    includeFile = iFile.toPath();
     assembler = new AssemblerImpl();
   }
 
@@ -130,7 +134,7 @@ public class ContextNGTest
   {
     TestContextListener tcl = new TestContextListener(assembler);
     AssemblerResult asr = tcl.parse(getIncludeLine()
-                                    + "\nrjmp pushseq\nrjmp init\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
+                                            + "\nrjmp pushseq\nrjmp init\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
     assertNotNull(asr);
     try (Writer writer = new PrintWriter(System.out)) {
       asr.getList(writer);
@@ -138,6 +142,22 @@ public class ContextNGTest
     try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
       asr.getCSEG(os);
     }
+  }
+
+  @Test
+  public void testBranch() throws IOException, AssemblerException, URISyntaxException
+  {
+    URL u = getClass().getResource("/asm/br1.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+
   }
 
 }

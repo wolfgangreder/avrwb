@@ -22,6 +22,7 @@
 package com.avrwb.assembler.model;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.impl.SegmentElementImpl;
 import java.nio.ByteOrder;
 
@@ -32,7 +33,7 @@ import java.nio.ByteOrder;
 public interface Expression
 {
 
-  public FileContext getFileContext();
+  public SourceContext getSourceContext();
 
   public default boolean isStringExpression()
   {
@@ -57,21 +58,22 @@ public interface Expression
         return SegmentElementImpl.getByteInstance(ctx.getCurrentSegment(),
                                                   offset,
                                                   (byte) (tmp & 0xff),
-                                                  getFileContext());
+                                                  getSourceContext());
       case 2:
         return SegmentElementImpl.getWordInstance(ctx.getCurrentSegment(),
                                                   offset,
                                                   (short) (tmp & 0xffff),
                                                   byteOrder,
-                                                  getFileContext());
+                                                  getSourceContext());
       case 4:
         return SegmentElementImpl.getDWordInstance(ctx.getCurrentSegment(),
                                                    offset,
                                                    tmp,
                                                    byteOrder,
-                                                   getFileContext());
+                                                   getSourceContext());
       default:
-        throw new AssemblerError("illegal wordsize " + numBytes);
+        throw new AssemblerError("illegal wordsize " + numBytes,
+                                 getSourceContext());
     }
   }
 

@@ -22,8 +22,8 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.annotations.NotNull;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.OperatorExpression;
 import com.avrwb.assembler.model.UnaryExpression;
 import java.util.Objects;
@@ -39,12 +39,12 @@ public abstract class AbstractUnaryExpression implements OperatorExpression, Una
   private final String operator;
   private final int level;
   private final String text;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
 
   public AbstractUnaryExpression(@NotNull Expression subExpression,
                                  @NotNull String operator,
                                  int level,
-                                 FileContext fileContext)
+                                 SourceContext fileContext)
   {
     this(subExpression,
          operator,
@@ -59,7 +59,7 @@ public abstract class AbstractUnaryExpression implements OperatorExpression, Una
                                  int level,
                                  String preExpression,
                                  String postExpression,
-                                 FileContext fileContext)
+                                 SourceContext fileContext)
   {
     Objects.requireNonNull(subExpression,
                            "subExpression==null");
@@ -81,7 +81,7 @@ public abstract class AbstractUnaryExpression implements OperatorExpression, Una
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

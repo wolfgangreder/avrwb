@@ -22,9 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -35,7 +35,7 @@ public final class DivisionOperation extends AbstractBinaryOperation
 
   public DivisionOperation(Expression left,
                            Expression right,
-                           FileContext fileContext)
+                           SourceContext fileContext)
   {
     super(left,
           right,
@@ -49,7 +49,8 @@ public final class DivisionOperation extends AbstractBinaryOperation
   {
     int rightValue = getRight().evaluate(ctx);
     if (rightValue == 0) {
-      throw new AssemblerError("division by zero");
+      throw new AssemblerError("division by zero",
+                               getSourceContext());
     }
     int leftValue = getLeft().evaluate(ctx);
     return leftValue / rightValue;
