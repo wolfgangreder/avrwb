@@ -23,7 +23,7 @@ package com.avrwb.assembler.model.impl;
 
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
-import com.avrwb.assembler.model.FileContext;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteBuffer;
@@ -47,7 +47,7 @@ public class InstructionSegmentElement extends AbstractSegmentElement
                                                int offset,
                                                @NotNull Supplier<Integer> opcodeGenerator,
                                                @NotNull ByteOrder byteOrder,
-                                               FileContext fileContext)
+                                               SourceContext fileContext)
   {
     return new InstructionSegmentElement(segment,
                                          offset,
@@ -61,7 +61,7 @@ public class InstructionSegmentElement extends AbstractSegmentElement
                                                 int offset,
                                                 @NotNull Supplier<Integer> opcodeGenerator,
                                                 @NotNull ByteOrder byteOrder,
-                                                FileContext fileContext)
+                                                SourceContext fileContext)
   {
     return new InstructionSegmentElement(segment,
                                          offset,
@@ -76,7 +76,7 @@ public class InstructionSegmentElement extends AbstractSegmentElement
                                    @Invariants(allowedValues = {"2", "4"}) int size,
                                    @NotNull Supplier<Integer> opcodeGenerator,
                                    @NotNull ByteOrder byteOrder,
-                                   FileContext fileContext)
+                                   SourceContext fileContext)
   {
     super(segment,
           offset,

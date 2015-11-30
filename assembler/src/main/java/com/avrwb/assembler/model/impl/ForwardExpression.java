@@ -10,26 +10,26 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Alias;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 
 public class ForwardExpression implements Expression
 {
 
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
   private final String name;
 
-  public ForwardExpression(FileContext fileContext,
-                           String name)
+  public ForwardExpression(String name,
+                           SourceContext sourceContext)
   {
-    this.fileContext = fileContext;
+    this.fileContext = sourceContext;
     this.name = name;
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }
@@ -39,7 +39,8 @@ public class ForwardExpression implements Expression
   {
     Alias exp = ctx.getAlias(name);
     if (exp == null) {
-      throw new AssemblerError("cannot find " + name);
+      throw new AssemblerError("cannot find " + name,
+                               fileContext);
     }
     return exp.getValue(ctx);
   }

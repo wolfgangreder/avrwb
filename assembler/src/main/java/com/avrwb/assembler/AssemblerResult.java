@@ -35,7 +35,11 @@ public interface AssemblerResult extends Lookup.Provider
 
   public void getCSEG(MemoryChunkOutputStream os) throws IOException;
 
+  public boolean isCSEGAvailable();
+
   public void getESEG(MemoryChunkOutputStream os) throws IOException;
+
+  public boolean isESEGAvailable();
 
   public void getList(Writer writer) throws IOException;
 

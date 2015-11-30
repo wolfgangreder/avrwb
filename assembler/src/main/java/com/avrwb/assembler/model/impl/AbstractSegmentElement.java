@@ -21,7 +21,7 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.model.FileContext;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
 
@@ -33,12 +33,12 @@ public abstract class AbstractSegmentElement implements SegmentElement
 {
 
   private final int offset;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
   private final Segment segment;
 
   protected AbstractSegmentElement(Segment segment,
                                    int offset,
-                                   FileContext fileContext)
+                                   SourceContext fileContext)
   {
     this.segment = segment;
     this.offset = offset;
@@ -52,7 +52,7 @@ public abstract class AbstractSegmentElement implements SegmentElement
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

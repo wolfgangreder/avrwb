@@ -10,9 +10,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.Segment;
 
 public class DistanceExpression implements Expression
@@ -20,12 +20,12 @@ public class DistanceExpression implements Expression
 
   private final int position;
   private final Expression labelExpression;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
   private final Segment segment;
 
   public DistanceExpression(int position,
                             Expression labelExpression,
-                            FileContext fileContext,
+                            SourceContext fileContext,
                             Segment segment)
   {
     this.position = position;
@@ -35,7 +35,7 @@ public class DistanceExpression implements Expression
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

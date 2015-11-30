@@ -22,9 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -34,7 +34,7 @@ public final class HwrdOperation extends AbstractFunctionExpression
 {
 
   public HwrdOperation(Expression subExpression,
-                       FileContext fileContext)
+                       SourceContext fileContext)
   {
     super(subExpression,
           "hwrd",

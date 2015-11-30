@@ -25,6 +25,7 @@ import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.impl.AliasImpl;
 import com.avrwb.assembler.model.impl.BitAndOperation;
 import com.avrwb.assembler.model.impl.BitNotOperation;
@@ -64,7 +65,6 @@ import com.avrwb.assembler.parser.AtmelAsmBaseListener;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import com.avrwb.avr8.api.InstructionComposer;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -79,6 +79,7 @@ public class ContextListener extends AtmelAsmBaseListener
 {
 
   private final Context context;
+  private SourceContext sourceContext;
 
   public ContextListener(@NotNull Context context,
                          int dummy)
@@ -103,14 +104,31 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void visitErrorNode(ErrorNode node)
   {
-    throw new AssemblerError(node.toString());
+    Token token = node.getSymbol();
+    int line = token.getLine();
+    int col = token.getCharPositionInLine();
+    String file = context.getCurrentSource().getSourcePath().toString();
+    throw new AssemblerError(node.toString(),
+                             new SourceContext(file,
+                                               line,
+                                               col));
+  }
+
+  private void createSourceContext(ParserRuleContext ctx)
+  {
+    Token startToken = ctx.getStart();
+    int line = startToken.getLine();
+    int col = startToken.getCharPositionInLine();
+    sourceContext = new SourceContext(context.getCurrentSource().getSourcePath().toString(),
+                                      line,
+                                      col);
   }
 
   @Override
   public void exitInt(AtmelAsmParser.IntContext ctx)
   {
     context.pushExpression(new IntExpression(ctx.getText(),
-                                             createFileContext(ctx)));
+                                             sourceContext));
   }
 
   @Override
@@ -119,11 +137,12 @@ public class ContextListener extends AtmelAsmBaseListener
     Alias alias = context.getAlias(ctx.getText());
     if (alias == null) {
       if (ctx.getParent().getStart().getType() == AtmelAsmParser.MNEMONIC) {
-        context.pushExpression(new ForwardExpression(createFileContext(ctx),
-                                                     ctx.getText()));
+        context.pushExpression(new ForwardExpression(ctx.getText(),
+                                                     sourceContext));
         return;
       } else {
-        throw new AssemblerError("cannot find name " + ctx.getText());
+        throw new AssemblerError("cannot find name " + ctx.getText(),
+                                 sourceContext);
       }
     }
     context.pushExpression(alias.getExpression());
@@ -132,32 +151,33 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void exitCompare(AtmelAsmParser.CompareContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     String text = ctx.getChild(1).getText();
     switch (text) {
       case ">":
         context.pushExpression(new GreaterThanOperation(left,
                                                         right,
-                                                        createFileContext(ctx)));
+                                                        sourceContext));
         break;
       case ">=":
         context.pushExpression(new GreaterEqualThanOperation(left,
                                                              right,
-                                                             createFileContext(ctx)));
+                                                             sourceContext));
         break;
       case "<":
         context.pushExpression(new LessThanOperation(left,
                                                      right,
-                                                     createFileContext(ctx)));
+                                                     sourceContext));
         break;
       case "<=":
         context.pushExpression(new LessEqualOperation(left,
                                                       right,
-                                                      createFileContext(ctx)));
+                                                      sourceContext));
         break;
       default:
-        throw new AssemblerError("unknown compare " + text);
+        throw new AssemblerError("unknown compare " + text,
+                                 sourceContext);
 
     }
   }
@@ -165,209 +185,215 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void exitBitAnd(AtmelAsmParser.BitAndContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     context.pushExpression(new BitAndOperation(left,
                                                right,
-                                               createFileContext(ctx)));
+                                               sourceContext));
   }
 
   @Override
   public void exitEqual(AtmelAsmParser.EqualContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     String text = ctx.getChild(1).getText();
     switch (text) {
       case "==":
         context.pushExpression(new EqualThanOperation(left,
                                                       right,
-                                                      createFileContext(ctx)));
+                                                      sourceContext));
         break;
       case "!=":
         context.pushExpression(new NotEqualThanOperation(left,
                                                          right,
-                                                         createFileContext(ctx)));
+                                                         sourceContext));
         break;
       default:
-        throw new AssemblerError("unkown equal " + text);
+        throw new AssemblerError("unkown equal " + text,
+                                 sourceContext);
     }
   }
 
   @Override
   public void exitBitXor(AtmelAsmParser.BitXorContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     context.pushExpression(new BitXorOperation(left,
                                                right,
-                                               createFileContext(ctx)));
+                                               sourceContext));
   }
 
   @Override
   public void exitLogAnd(AtmelAsmParser.LogAndContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     context.pushExpression(new LogAndOperation(left,
                                                right,
-                                               createFileContext(ctx)));
+                                               sourceContext));
   }
 
   @Override
   public void exitUnary(AtmelAsmParser.UnaryContext ctx)
   {
-    Expression right = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
     String text = ctx.getChild(0).getText();
     switch (text) {
       case "!":
         context.pushExpression(new LogNotOperation(right,
-                                                   createFileContext(ctx)));
+                                                   sourceContext));
         break;
       case "~":
         context.pushExpression(new BitNotOperation(right,
-                                                   createFileContext(ctx)));
+                                                   sourceContext));
         break;
       case "-":
         context.pushExpression(new UniMinusOperation(right,
-                                                     createFileContext(ctx)));
+                                                     sourceContext));
         break;
       default:
-        throw new AssemblerError("unkown unary " + text);
+        throw new AssemblerError("unkown unary " + text,
+                                 sourceContext);
     }
   }
 
   @Override
   public void exitSum(AtmelAsmParser.SumContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     String text = ctx.getChild(1).getText();
     switch (text) {
       case "+":
         context.pushExpression(new PlusOperation(left,
                                                  right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "-":
         context.pushExpression(new MinusOperation(left,
                                                   right,
-                                                  createFileContext(ctx)));
+                                                  sourceContext));
         break;
       default:
-        throw new AssemblerError("unkown operation " + text);
+        throw new AssemblerError("unkown operation " + text,
+                                 sourceContext);
     }
   }
 
   @Override
   public void exitProduct(AtmelAsmParser.ProductContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     String text = ctx.getChild(1).getText();
     switch (text) {
       case "*":
         context.pushExpression(new ProductOperation(left,
                                                     right,
-                                                    createFileContext(ctx)));
+                                                    sourceContext));
         break;
       case "/":
         context.pushExpression(new DivisionOperation(left,
                                                      right,
-                                                     createFileContext(ctx)));
+                                                     sourceContext));
         break;
       default:
-        throw new AssemblerError("unkown operation " + text);
+        throw new AssemblerError("unkown operation " + text,
+                                 sourceContext);
     }
   }
 
   @Override
   public void exitLogOr(AtmelAsmParser.LogOrContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     context.pushExpression(new LogOrOperation(left,
                                               right,
-                                              createFileContext(ctx)));
+                                              sourceContext));
   }
 
   @Override
   public void exitFunc(AtmelAsmParser.FuncContext ctx)
   {
-    Expression right = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
     String text = ctx.getChild(0).getText();
     switch (text) {
       case "byte3":
         context.pushExpression(new Byte3Operation(right,
-                                                  createFileContext(ctx)));
+                                                  sourceContext));
         break;
       case "byte4":
         context.pushExpression(new Byte4Operation(right,
-                                                  createFileContext(ctx)));
+                                                  sourceContext));
         break;
       case "exp2":
         context.pushExpression(new Exp2Operation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "high":
       case "byte2":
         context.pushExpression(new HighOperation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "hwrd":
         context.pushExpression(new HwrdOperation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "log2":
         context.pushExpression(new Log2Operation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "low":
         context.pushExpression(new LowOperation(right,
-                                                createFileContext(ctx)));
+                                                sourceContext));
         break;
       case "lwrd":
         context.pushExpression(new LwrdOperation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       case "page":
         context.pushExpression(new PageOperation(right,
-                                                 createFileContext(ctx)));
+                                                 sourceContext));
         break;
       default:
-        throw new AssemblerError("unkown func " + text);
+        throw new AssemblerError("unkown func " + text,
+                                 sourceContext);
     }
   }
 
   @Override
   public void exitBitOr(AtmelAsmParser.BitOrContext ctx)
   {
-    Expression left = context.popExpression();
-    Expression right = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sourceContext);
     context.pushExpression(new BitOrOperation(left,
                                               right,
-                                              createFileContext(ctx)));
+                                              sourceContext));
   }
 
   @Override
   public void exitShift(AtmelAsmParser.ShiftContext ctx)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     String text = ctx.getChild(1).getText();
     switch (text) {
       case "<<":
         context.pushExpression(new LeftShiftOperation(left,
                                                       right,
-                                                      createFileContext(ctx)));
+                                                      sourceContext));
         break;
       case ">>":
         context.pushExpression(new RightShiftOperation(left,
                                                        right,
-                                                       createFileContext(ctx)));
+                                                       sourceContext));
         break;
       default:
-        throw new AssemblerError("unkonw operation " + text);
+        throw new AssemblerError("unkonw operation " + text,
+                                 sourceContext);
     }
   }
 
@@ -384,14 +410,15 @@ public class ContextListener extends AtmelAsmBaseListener
   {
     String fileName = removeQoutes(ctx.getChild(1).getText());
     try {
-      URL u = new URL(fileName);
-      AssemblerSource source = context.getConfig().getFileResolver().resolveFile(u);
-      context.addInline(new Inline(createFileContext(ctx),
+      AssemblerSource source = context.getConfig().getFileResolver().resolveFile(context,
+                                                                                 fileName);
+      context.addInline(new Inline(sourceContext,
                                    source));
       context.getAssembler().compile(source,
                                      this);
     } catch (IOException | AssemblerException ex) {
-      throw new AssemblerError(ex.getMessage());
+      throw new AssemblerError(ex.getMessage(),
+                               sourceContext);
     }
   }
 
@@ -399,20 +426,22 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitEqu_dir(AtmelAsmParser.Equ_dirContext ctx)
   {
     String name = ctx.getChild(1).getText();
-    Expression exp = context.popExpression();
+    Expression exp = context.popExpression(sourceContext);
     context.addAlias(new AliasImpl(name,
                                    true,
-                                   exp));
+                                   exp),
+                     sourceContext);
   }
 
   @Override
   public void exitSet_dir(AtmelAsmParser.Set_dirContext ctx)
   {
     String name = ctx.getChild(1).getText();
-    Expression exp = context.popExpression();
+    Expression exp = context.popExpression(sourceContext);
     context.addAlias(new AliasImpl(name,
                                    false,
-                                   exp));
+                                   exp),
+                     sourceContext);
   }
 
   @Override
@@ -421,7 +450,7 @@ public class ContextListener extends AtmelAsmBaseListener
     String text = removeQoutes(ctx.getChild(0).getText());
     context.pushExpression(new StringExpression(text,
                                                 context.getConfig().getTargetCharset(),
-                                                createFileContext(ctx)));
+                                                sourceContext));
   }
 
   @Override
@@ -432,7 +461,8 @@ public class ContextListener extends AtmelAsmBaseListener
                                               context.getCurrentPosition(),
                                               2,
                                               context.getConfig().getTargetByteOrder());
-      context.addToSeg(se);
+      context.addToSeg(se,
+                       sourceContext);
     },
                               true);
   }
@@ -445,7 +475,8 @@ public class ContextListener extends AtmelAsmBaseListener
                                               context.getCurrentPosition(),
                                               1,
                                               context.getConfig().getTargetByteOrder());
-      context.addToSeg(se);
+      context.addToSeg(se,
+                       sourceContext);
     },
                               true);
   }
@@ -492,8 +523,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_Rr(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_Rr(baseOpcode,
                               left,
                               right);
@@ -501,7 +532,7 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_Rd(int baseOpcode)
   {
-    Expression left = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_Rr(baseOpcode,
                               left,
                               left);
@@ -531,8 +562,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rdl_K6(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rdl_K6(baseOpcode,
                                left,
                                right);
@@ -562,8 +593,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_K8(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_K8(baseOpcode,
                               left,
                               right);
@@ -605,7 +636,7 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd(int baseOpcode)
   {
-    Expression left = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
     return new Compose_Rd(baseOpcode,
                           left);
   }
@@ -636,19 +667,18 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Bclr_Bset(int baseOpcode,
                                                     boolean bset,
-                                                    int bit,
-                                                    ParserRuleContext ctx)
+                                                    int bit)
   {
     return new Compose_Bclr_Bset(baseOpcode,
                                  new IntExpression(bit,
-                                                   createFileContext(ctx)),
+                                                   sourceContext),
                                  bset);
   }
 
   private Supplier<Integer> composeOpcode_Bclr_Bset(int baseOpcode,
                                                     boolean bset)
   {
-    Expression left = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
     return new Compose_Bclr_Bset(baseOpcode,
                                  left,
                                  bset);
@@ -678,8 +708,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_b(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_b(baseOpcode,
                              left,
                              right);
@@ -709,22 +739,20 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_b_k7(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = getDistanceExpression(context.popExpression(sourceContext));
+    Expression left = context.popExpression(sourceContext);
     return new Composer_b_k7(baseOpcode,
                              left,
                              right);
   }
 
   private Supplier<Integer> composeOpcode_b_k7(int baseOpcode,
-                                               int bit,
-                                               FileContext ctx)
+                                               int bit)
   {
-    Expression left = getDistanceExpression(context.popExpression(),
-                                            ctx);
+    Expression left = getDistanceExpression(context.popExpression(sourceContext));
     return new Composer_b_k7(baseOpcode,
                              new IntExpression(bit,
-                                               ctx),
+                                               sourceContext),
                              left);
   }
 
@@ -750,7 +778,7 @@ public class ContextListener extends AtmelAsmBaseListener
   private Supplier<Integer> composeOpcode_K22(int baseOpcode)
 
   {
-    Expression left = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
     return new Composer_K22(baseOpcode,
                             left);
   }
@@ -779,8 +807,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_P_b(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_P_b(baseOpcode,
                             left,
                             right);
@@ -807,12 +835,12 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_K4(int baseOpcode)
   {
-    Expression left = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
     return new Composer_K4(baseOpcode,
                            left);
   }
 
-  private Supplier<Integer> composeElpm(AtmelAsmParser.InstructionContext ctx)
+  private Supplier<Integer> composeElpm()
   {
     throw new UnsupportedOperationException();
   }
@@ -841,8 +869,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rdh23_Rrh23(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rdh23_Rrh23(baseOpcode,
                                     left,
                                     right);
@@ -872,8 +900,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_P(int baseOpocde)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_P(baseOpocde,
                              left,
                              right);
@@ -881,29 +909,29 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_P_Rd(int baseOpocde)
   {
-    Expression left = context.popExpression();
-    Expression right = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sourceContext);
     return new Composer_Rd_P(baseOpocde,
                              left,
                              right);
   }
 
-  private Supplier<Integer> composeOpcode_Ld(AtmelAsmParser.InstructionContext ctx)
+  private Supplier<Integer> composeOpcode_Ld()
   {
     throw new UnsupportedOperationException();
   }
 
-  private Supplier<Integer> composeOpcode_Lpm(AtmelAsmParser.InstructionContext ctx)
+  private Supplier<Integer> composeOpcode_Lpm()
   {
     throw new UnsupportedOperationException();
   }
 
-  private Supplier<Integer> composeOpcode_St(AtmelAsmParser.InstructionContext ctx)
+  private Supplier<Integer> composeOpcode_St()
   {
     throw new UnsupportedOperationException();
   }
 
-  private Supplier<Integer> composeOpcode_Spm(AtmelAsmParser.InstructionContext ctx)
+  private Supplier<Integer> composeOpcode_Spm()
   {
     throw new UnsupportedOperationException();
   }
@@ -932,8 +960,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rd_K16(int baseOpocde)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rd_K16(baseOpocde,
                                left,
                                right);
@@ -941,8 +969,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_K16_Rd(int baseOpocde)
   {
-    Expression left = context.popExpression();
-    Expression right = context.popExpression();
+    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sourceContext);
     return new Composer_Rd_K16(baseOpocde,
                                left,
                                right);
@@ -972,8 +1000,8 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Rdh_Rrh(int baseOpcode)
   {
-    Expression right = context.popExpression();
-    Expression left = context.popExpression();
+    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sourceContext);
     return new Composer_Rdh_Rrh(baseOpcode,
                                 left,
                                 right);
@@ -998,20 +1026,17 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Expression getDistanceExpression(Expression label,
-                                           FileContext fileContext)
+  private Expression getDistanceExpression(Expression label)
   {
     return new DistanceExpression(context.getCurrentPosition(),
                                   label,
-                                  fileContext,
+                                  sourceContext,
                                   Segment.CSEG);
   }
 
-  private Supplier<Integer> composeOpcode_k12(int baseOpcode,
-                                              FileContext fileContext)
+  private Supplier<Integer> composeOpcode_k12(int baseOpcode)
   {
-    Expression left = getDistanceExpression(context.popExpression(),
-                                            fileContext);
+    Expression left = getDistanceExpression(context.popExpression(sourceContext));
     return new Composer_k12(baseOpcode,
                             left);
   }
@@ -1022,7 +1047,6 @@ public class ContextListener extends AtmelAsmBaseListener
     String mnemonic = ctx.getChild(0).getText();
     Supplier<Integer> opcode = null;
     boolean bigInstruciton = false;
-    final FileContext fileContext = createFileContext(ctx);
 
     switch (mnemonic) {
       case "adc":
@@ -1058,96 +1082,78 @@ public class ContextListener extends AtmelAsmBaseListener
         break;
       case "brcc":
         opcode = composeOpcode_b_k7(0xf400,
-                                    0,
-                                    fileContext);
+                                    0);
         break;
       case "brcs":
         opcode = composeOpcode_b_k7(0xf000,
-                                    0,
-                                    fileContext);
+                                    0);
         break;
       case "break":
         opcode = () -> 0x9598;
         break;
       case "breq":
         opcode = composeOpcode_b_k7(0xf000,
-                                    1,
-                                    fileContext);
+                                    1);
         break;
       case "brge":
         opcode = composeOpcode_b_k7(0xf400,
-                                    4,
-                                    fileContext);
+                                    4);
         break;
       case "brhc":
         opcode = composeOpcode_b_k7(0xf000,
-                                    5,
-                                    fileContext);
+                                    5);
         break;
       case "brhs":
         opcode = composeOpcode_b_k7(0xf400,
-                                    5,
-                                    fileContext);
+                                    5);
         break;
       case "brid":
         opcode = composeOpcode_b_k7(0xf400,
-                                    7,
-                                    fileContext);
+                                    7);
         break;
       case "brie":
         opcode = composeOpcode_b_k7(0xf000,
-                                    7,
-                                    fileContext);
+                                    7);
         break;
       case "brlo":
         opcode = composeOpcode_b_k7(0xf000,
-                                    0,
-                                    fileContext);
+                                    0);
         break;
       case "brlt":
         opcode = composeOpcode_b_k7(0xf000,
-                                    7,
-                                    fileContext);
+                                    7);
         break;
       case "brmi":
         opcode = composeOpcode_b_k7(0xf000,
-                                    2,
-                                    fileContext);
+                                    2);
         break;
       case "brne":
         opcode = composeOpcode_b_k7(0xf400,
-                                    1,
-                                    fileContext);
+                                    1);
         break;
       case "brpl":
         opcode = composeOpcode_b_k7(0xf400,
-                                    2,
-                                    fileContext);
+                                    2);
         break;
       case "brsh":
         opcode = composeOpcode_b_k7(0xf400,
-                                    0,
-                                    fileContext);
+                                    0);
         break;
       case "brtc":
         opcode = composeOpcode_b_k7(0xf400,
-                                    6,
-                                    fileContext);
+                                    6);
         break;
       case "brts":
         opcode = composeOpcode_b_k7(0xf000,
-                                    6,
-                                    fileContext);
+                                    6);
         break;
       case "brvc":
         opcode = composeOpcode_b_k7(0xf400,
-                                    3,
-                                    fileContext);
+                                    3);
         break;
       case "brvs":
         opcode = composeOpcode_b_k7(0xf000,
-                                    3,
-                                    fileContext);
+                                    3);
         break;
       case "bset":
         opcode = composeOpcode_Bclr_Bset(0x9408,
@@ -1169,26 +1175,22 @@ public class ContextListener extends AtmelAsmBaseListener
       case "clc":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         0,
-                                         ctx);
+                                         0);
         break;
       case "clh":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         5,
-                                         ctx);
+                                         5);
         break;
       case "cli":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         7,
-                                         ctx);
+                                         7);
         break;
       case "cln":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         2,
-                                         ctx);
+                                         2);
         break;
       case "clr":
         opcode = composeOpcode_Rd_Rd(0x2400);
@@ -1196,26 +1198,22 @@ public class ContextListener extends AtmelAsmBaseListener
       case "cls":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         4,
-                                         ctx);
+                                         4);
         break;
       case "clt":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         6,
-                                         ctx);
+                                         6);
         break;
       case "clv":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         3,
-                                         ctx);
+                                         3);
         break;
       case "clz":
         opcode = composeOpcode_Bclr_Bset(0x9488,
                                          false,
-                                         1,
-                                         ctx);
+                                         1);
         break;
       case "com":
         opcode = composeOpcode_Rd(0x9400);
@@ -1245,7 +1243,7 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = () -> 0x9419;
         break;
       case "elpm":
-        opcode = composeElpm(ctx);
+        opcode = composeElpm();
         break;
       case "eor":
         opcode = composeOpcode_Rd_Rr(0x2400);
@@ -1285,10 +1283,10 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = composeOpcode_Rd(0x9207);
         break;
       case "ld":
-        opcode = composeOpcode_Ld(ctx);
+        opcode = composeOpcode_Ld();
         break;
       case "ldd":
-        opcode = composeOpcode_Ld(ctx);
+        opcode = composeOpcode_Ld();
         break;
       case "ldi":
         opcode = composeOpcode_Rd_K8(0xe000);
@@ -1298,7 +1296,7 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = composeOpcode_Rd_K16(0x9000);
         break;
       case "lpm":
-        opcode = composeOpcode_Lpm(ctx);
+        opcode = composeOpcode_Lpm();
         break;
       case "lsl":
         opcode = composeOpcode_Rd_Rd(0x0c00);
@@ -1343,8 +1341,7 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = composeOpcode_Rd(0x920f);
         break;
       case "rcall":
-        opcode = composeOpcode_k12(0xd000,
-                                   fileContext);
+        opcode = composeOpcode_k12(0xd000);
         break;
       case "ret":
         opcode = () -> 0x9508;
@@ -1353,8 +1350,7 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = () -> 0x9518;
         break;
       case "rjmp":
-        opcode = composeOpcode_k12(0xc000,
-                                   fileContext);
+        opcode = composeOpcode_k12(0xc000);
         break;
       case "rol":
         opcode = composeOpcode_Rd_Rd(0x1c00);
@@ -1392,63 +1388,55 @@ public class ContextListener extends AtmelAsmBaseListener
       case "sec":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         0,
-                                         ctx);
+                                         0);
         break;
       case "seh":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         5,
-                                         ctx);
+                                         5);
         break;
       case "sei":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         7,
-                                         ctx);
+                                         7);
         break;
       case "sen":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         2,
-                                         ctx);
+                                         2);
         break;
       case "ser":
       case "ses":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         4,
-                                         ctx);
+                                         4);
         break;
       case "set":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         6,
-                                         ctx);
+                                         6);
         break;
       case "sev":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         3,
-                                         ctx);
+                                         3);
         break;
       case "sez":
         opcode = composeOpcode_Bclr_Bset(0x9408,
                                          true,
-                                         1,
-                                         ctx);
+                                         1);
         break;
       case "sleep":
         opcode = () -> 0x9588;
         break;
       case "spm":
-        opcode = composeOpcode_Spm(ctx);
+        opcode = composeOpcode_Spm();
         break;
       case "st":
-        opcode = composeOpcode_St(ctx);
+        opcode = composeOpcode_St();
         break;
       case "std":
-        opcode = composeOpcode_St(ctx);
+        opcode = composeOpcode_St();
         break;
       case "sts":
         bigInstruciton = true;
@@ -1474,35 +1462,30 @@ public class ContextListener extends AtmelAsmBaseListener
         break;
     }
     if (opcode == null) {
-      throw new AssemblerError("unknown mnemonic " + mnemonic);
+      throw new AssemblerError("unknown mnemonic " + mnemonic,
+                               sourceContext);
     }
     if (bigInstruciton) {
       context.addToSeg(InstructionSegmentElement.getDWordInstance(context.getCurrentSegment(),
                                                                   context.getCurrentPosition(),
                                                                   opcode,
                                                                   context.getConfig().getTargetByteOrder(),
-                                                                  fileContext));
+                                                                  sourceContext),
+                       sourceContext);
     } else {
       context.addToSeg(InstructionSegmentElement.getWordInstance(context.getCurrentSegment(),
                                                                  context.getCurrentPosition(),
                                                                  opcode,
                                                                  context.getConfig().getTargetByteOrder(),
-                                                                 fileContext));
+                                                                 sourceContext),
+                       sourceContext);
     }
-  }
-
-  private FileContext createFileContext(ParserRuleContext ctx)
-  {
-    Token startToken = ctx.getStart();
-    int lineNumber = startToken.getLine();
-    return new FileContext(context.currentSource(),
-                           lineNumber);
   }
 
   @Override
   public void exitOrg_dir(AtmelAsmParser.Org_dirContext ctx)
   {
-    Expression ex = context.popExpression();
+    Expression ex = context.popExpression(sourceContext);
     context.setCurrentPosition(context.getCurrentSegment(),
                                ex.evaluate(context) * 2);
   }
@@ -1514,7 +1497,8 @@ public class ContextListener extends AtmelAsmBaseListener
     context.addAlias(new AliasImpl(name,
                                    true,
                                    new IntExpression(context.getCurrentPosition(),
-                                                     createFileContext(ctx))));
+                                                     sourceContext)),
+                     sourceContext);
   }
 
   @Override

@@ -21,6 +21,7 @@
  */
 package com.avrwb.assembler.model;
 
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.io.MemoryChunk;
 
 /**
@@ -32,6 +33,6 @@ public interface SegmentElement extends Comparable<SegmentElement>, MemoryChunk
 
   public Segment getSegment();
 
-  public FileContext getFileContext();
+  public SourceContext getSourceContext();
 
 }

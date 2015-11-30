@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler.model;
+package com.avrwb.assembler;
 
 import java.util.Objects;
 
@@ -27,35 +27,43 @@ import java.util.Objects;
  *
  * @author wolfi
  */
-public class FileContext
+public final class SourceContext
 {
 
-  private final AssemblerSource src;
-  private final int lineNumber;
+  private final String sourceFile;
+  private final int line;
+  private final int col;
 
-  public FileContext(AssemblerSource src,
-                     int lineNumber)
+  public SourceContext(String sourceFile,
+                       int line,
+                       int col)
   {
-    this.src = src;
-    this.lineNumber = lineNumber;
+    this.sourceFile = sourceFile;
+    this.line = line;
+    this.col = col;
   }
 
-  public AssemblerSource getSource()
+  public String getSourceFile()
   {
-    return src;
+    return sourceFile;
   }
 
-  public int getLineNumber()
+  public int getLine()
   {
-    return lineNumber;
+    return line;
+  }
+
+  public int getCol()
+  {
+    return col;
   }
 
   @Override
   public int hashCode()
   {
     int hash = 7;
-    hash = 53 * hash + Objects.hashCode(this.src);
-    hash = 53 * hash + this.lineNumber;
+    hash = 13 * hash + Objects.hashCode(this.sourceFile);
+    hash = 13 * hash + this.line;
     return hash;
   }
 
@@ -71,18 +79,12 @@ public class FileContext
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final FileContext other = (FileContext) obj;
-    if (this.lineNumber != other.lineNumber) {
+    final SourceContext other = (SourceContext) obj;
+    if (this.line != other.line) {
       return false;
     }
-    return Objects.equals(this.src,
-                          other.src);
-  }
-
-  @Override
-  public String toString()
-  {
-    return "FileContext{" + "src=" + src + ", lineNumber=" + lineNumber + '}';
+    return Objects.equals(this.sourceFile,
+                          other.sourceFile);
   }
 
 }

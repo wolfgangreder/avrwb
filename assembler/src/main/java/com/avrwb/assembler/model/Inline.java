@@ -21,6 +21,8 @@
  */
 package com.avrwb.assembler.model;
 
+import com.avrwb.assembler.SourceContext;
+
 /**
  *
  * @author wolfi
@@ -28,17 +30,17 @@ package com.avrwb.assembler.model;
 public final class Inline
 {
 
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
   private final AssemblerSource src;
 
-  public Inline(FileContext fileContext,
+  public Inline(SourceContext fileContext,
                 AssemblerSource src)
   {
     this.fileContext = fileContext;
     this.src = src;
   }
 
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

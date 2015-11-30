@@ -28,6 +28,7 @@ import com.avrwb.assembler.model.impl.IntExpression;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -49,6 +50,15 @@ public class StandardAssemblerConfig implements AssemblerConfig
     private Charset charset;
     private ByteOrder bo;
     private final List<Alias> defaultAliases = new LinkedList<>();
+    private final List<Path> includePaths = new LinkedList<>();
+
+    public AssemblerConfigBuilder includePath(Path path)
+    {
+      Objects.requireNonNull(path,
+                             "path==null");
+      includePaths.add(path);
+      return this;
+    }
 
     public AssemblerConfigBuilder fileResolver(FileResolver fr)
     {
@@ -89,7 +99,8 @@ public class StandardAssemblerConfig implements AssemblerConfig
       return new StandardAssemblerConfig(resolver,
                                          charset,
                                          bo,
-                                         defaultAliases);
+                                         defaultAliases,
+                                         includePaths);
     }
 
   }
@@ -109,11 +120,13 @@ public class StandardAssemblerConfig implements AssemblerConfig
   private static final AssemblerConfig DEFAULT_INSTANCE = new StandardAssemblerConfig(new StandardFileResolver(),
                                                                                       StandardCharsets.ISO_8859_1,
                                                                                       ByteOrder.LITTLE_ENDIAN,
-                                                                                      getRegisterAliases());
+                                                                                      Collections.EMPTY_LIST,
+                                                                                      Collections.EMPTY_LIST);
   private final FileResolver fileResolver;
   private final Charset targetCharset;
   private final ByteOrder byteOrder;
   private final List<Alias> defaultAliases;
+  private final List<Path> includePaths;
 
   public static AssemblerConfig getDefaultInstance()
   {
@@ -123,16 +136,29 @@ public class StandardAssemblerConfig implements AssemblerConfig
   public StandardAssemblerConfig(FileResolver fileResolver,
                                  Charset targetCharset,
                                  ByteOrder byteOrder,
-                                 Collection<? extends Alias> defAliases)
+                                 Collection<? extends Alias> defAliases,
+                                 Collection<? extends Path> includePaths)
   {
     this.fileResolver = fileResolver;
     this.targetCharset = targetCharset;
     this.byteOrder = byteOrder;
-    if (defAliases == null || defAliases.isEmpty()) {
-      defaultAliases = Collections.emptyList();
-    } else {
-      defaultAliases = Collections.unmodifiableList(new ArrayList<>(defAliases));
+    List<Alias> tmpAliases = new ArrayList<>();
+    if (defAliases != null && !defAliases.isEmpty()) {
+      tmpAliases.addAll(defAliases);
     }
+    tmpAliases.addAll(getRegisterAliases());
+    this.defaultAliases = Collections.unmodifiableList(tmpAliases);
+    if (includePaths == null || includePaths.isEmpty()) {
+      this.includePaths = Collections.emptyList();
+    } else {
+      this.includePaths = Collections.unmodifiableList(new ArrayList<>(includePaths));
+    }
+  }
+
+  @Override
+  public List<Path> getIncludePaths()
+  {
+    return includePaths;
   }
 
   @Override

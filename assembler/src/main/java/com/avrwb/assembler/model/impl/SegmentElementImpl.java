@@ -21,7 +21,7 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.model.FileContext;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteBuffer;
@@ -43,7 +43,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
   public static SegmentElement getByteInstance(Segment segment,
                                                int offset,
                                                byte b,
-                                               FileContext fctx)
+                                               SourceContext fctx)
   {
     return new SegmentElementImpl(segment,
                                   offset,
@@ -55,7 +55,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
                                                int offset,
                                                int word,
                                                ByteOrder byteOrder,
-                                               FileContext fctx)
+                                               SourceContext fctx)
   {
     return new SegmentElementImpl(segment,
                                   offset,
@@ -69,7 +69,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
                                                 int offset,
                                                 int dword,
                                                 ByteOrder byteOrder,
-                                                FileContext fctx)
+                                                SourceContext fctx)
   {
     return new SegmentElementImpl(segment,
                                   offset,
@@ -85,7 +85,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
                                                  String string,
                                                  ByteOrder byteOrder,
                                                  Charset charset,
-                                                 FileContext fctx) throws CharacterCodingException
+                                                 SourceContext fctx) throws CharacterCodingException
   {
     CharsetEncoder encoder = charset.newEncoder();
     CharBuffer charBuffer = CharBuffer.allocate(string.length() + 1);
@@ -103,7 +103,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
                                                 int offset,
                                                 byte[] data,
                                                 ByteOrder byteOrder,
-                                                FileContext fctx)
+                                                SourceContext fctx)
   {
     return new SegmentElementImpl(segment,
                                   offset,
@@ -116,7 +116,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
   private SegmentElementImpl(Segment segment,
                              int offset,
                              ByteBuffer data,
-                             FileContext fctx)
+                             SourceContext fctx)
   {
     super(segment,
           offset,

@@ -22,9 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.annotations.NotNull;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.BinaryExpression;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.OperatorExpression;
 
 /**
@@ -39,13 +39,13 @@ public abstract class AbstractBinaryOperation implements OperatorExpression, Bin
   private final String operator;
   private final String text;
   private final int level;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
 
   public AbstractBinaryOperation(@NotNull Expression left,
                                  @NotNull Expression right,
                                  @NotNull String operator,
                                  int level,
-                                 FileContext fileContext)
+                                 SourceContext fileContext)
   {
     this.left = left;
     this.right = right;
@@ -59,7 +59,7 @@ public abstract class AbstractBinaryOperation implements OperatorExpression, Bin
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }

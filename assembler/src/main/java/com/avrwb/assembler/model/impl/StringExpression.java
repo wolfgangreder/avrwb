@@ -22,9 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
-import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteOrder;
 import java.nio.charset.CharacterCodingException;
@@ -39,11 +39,11 @@ public class StringExpression implements Expression
 
   private final String str;
   private final Charset charset;
-  private final FileContext fileContext;
+  private final SourceContext fileContext;
 
   public StringExpression(String str,
                           Charset charset,
-                          FileContext fileContext)
+                          SourceContext fileContext)
   {
     this.str = str;
     this.charset = charset;
@@ -51,7 +51,7 @@ public class StringExpression implements Expression
   }
 
   @Override
-  public FileContext getFileContext()
+  public SourceContext getSourceContext()
   {
     return fileContext;
   }
@@ -65,7 +65,8 @@ public class StringExpression implements Expression
   @Override
   public int evaluate(Context ctx) throws AssemblerError
   {
-    throw new AssemblerError("cannot convert string to number");
+    throw new AssemblerError("cannot convert string to number",
+                             getSourceContext());
   }
 
   @Override
@@ -82,7 +83,8 @@ public class StringExpression implements Expression
                                                   charset,
                                                   fileContext);
     } catch (CharacterCodingException ex) {
-      throw new AssemblerError(ex);
+      throw new AssemblerError(ex,
+                               getSourceContext());
     }
   }
 

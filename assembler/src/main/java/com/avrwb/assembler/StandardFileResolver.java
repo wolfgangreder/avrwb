@@ -22,10 +22,14 @@
 package com.avrwb.assembler;
 
 import com.avrwb.assembler.model.AssemblerSource;
+import com.avrwb.assembler.model.Context;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 
 /**
  *
@@ -46,10 +50,37 @@ public class StandardFileResolver implements FileResolver
     this.charset = charset != null ? charset : StandardCharsets.UTF_8;
   }
 
-  @Override
-  public AssemblerSource resolveFile(URL url) throws IOException
+  private Path resolveWithPaths(Path path,
+                                Collection<Path> paths)
   {
-    return new StandardAssemblerSource(url,
+    for (Path currentPath : paths) {
+      Path result = Paths.get(currentPath.toString(),
+                              path.toString());
+      if (Files.isReadable(result)) {
+        return result;
+      }
+    }
+    return null;
+  }
+
+  @Override
+  public AssemblerSource resolveFile(Context context,
+                                     String path) throws IOException
+  {
+    Path result;
+    Path tmp = Paths.get(path);
+    if (tmp.isAbsolute()) {
+      result = tmp;
+    } else {
+      Path parent = context.getCurrentSource().getSourcePath().getParent();
+      result = Paths.get(parent.toString(),
+                         path);
+      if (!Files.isReadable(result)) {
+        result = resolveWithPaths(tmp,
+                                  context.getConfig().getIncludePaths());
+      }
+    }
+    return new StandardAssemblerSource(result,
                                        charset);
   }
 
