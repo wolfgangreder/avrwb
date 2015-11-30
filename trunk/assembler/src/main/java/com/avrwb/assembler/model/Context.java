@@ -25,6 +25,7 @@ import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.StandardAssemblerConfig;
+import com.avrwb.avr8.helper.AVRWBDefaults;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,8 +49,8 @@ import java.util.logging.Logger;
 public final class Context
 {
 
-  private final Level DEBUGLEVEL = Level.INFO;
-  private static final Logger LOGGER = Logger.getLogger("com.avrwb.assembler.context");
+  private final Level DEBUGLEVEL = Level.FINEST;
+  private static final Logger LOGGER = AVRWBDefaults.LOGGER;
   private final Map<String, Alias> constMap = new HashMap<>();
   private final Map<String, Alias> varMap = new HashMap<>();
   private final LinkedList<Expression> expStack = new LinkedList<>();
@@ -187,7 +188,7 @@ public final class Context
                            "alias==null");
     Alias current = getAlias(alias.getName());
     if (current != null && current.isConst()) {
-      throw new AssemblerError("alias already defined");
+      throw new AssemblerError("alias already defined:" + alias.getName());
     }
     if (alias.isConst()) {
       Alias tmp = constMap.putIfAbsent(alias.getName(),

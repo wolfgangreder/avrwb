@@ -108,7 +108,7 @@ public class StandardAssemblerConfig implements AssemblerConfig
 
   private static final AssemblerConfig DEFAULT_INSTANCE = new StandardAssemblerConfig(new StandardFileResolver(),
                                                                                       StandardCharsets.ISO_8859_1,
-                                                                                      ByteOrder.BIG_ENDIAN,
+                                                                                      ByteOrder.LITTLE_ENDIAN,
                                                                                       getRegisterAliases());
   private final FileResolver fileResolver;
   private final Charset targetCharset;

@@ -32,9 +32,11 @@ import com.avrwb.assembler.model.impl.BitOrOperation;
 import com.avrwb.assembler.model.impl.BitXorOperation;
 import com.avrwb.assembler.model.impl.Byte3Operation;
 import com.avrwb.assembler.model.impl.Byte4Operation;
+import com.avrwb.assembler.model.impl.DistanceExpression;
 import com.avrwb.assembler.model.impl.DivisionOperation;
 import com.avrwb.assembler.model.impl.EqualThanOperation;
 import com.avrwb.assembler.model.impl.Exp2Operation;
+import com.avrwb.assembler.model.impl.ForwardExpression;
 import com.avrwb.assembler.model.impl.GreaterEqualThanOperation;
 import com.avrwb.assembler.model.impl.GreaterThanOperation;
 import com.avrwb.assembler.model.impl.HighOperation;
@@ -101,7 +103,7 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void visitErrorNode(ErrorNode node)
   {
-    throw new AssemblerError(node.getText());
+    throw new AssemblerError(node.toString());
   }
 
   @Override
@@ -116,7 +118,13 @@ public class ContextListener extends AtmelAsmBaseListener
   {
     Alias alias = context.getAlias(ctx.getText());
     if (alias == null) {
-      throw new AssemblerError("cannot find name " + ctx.getText());
+      if (ctx.getParent().getStart().getType() == AtmelAsmParser.MNEMONIC) {
+        context.pushExpression(new ForwardExpression(createFileContext(ctx),
+                                                     ctx.getText()));
+        return;
+      } else {
+        throw new AssemblerError("cannot find name " + ctx.getText());
+      }
     }
     context.pushExpression(alias.getExpression());
   }
@@ -710,12 +718,13 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_b_k7(int baseOpcode,
                                                int bit,
-                                               ParserRuleContext ctx)
+                                               FileContext ctx)
   {
-    Expression left = context.popExpression();
+    Expression left = getDistanceExpression(context.popExpression(),
+                                            ctx);
     return new Composer_b_k7(baseOpcode,
                              new IntExpression(bit,
-                                               createFileContext(ctx)),
+                                               ctx),
                              left);
   }
 
@@ -989,9 +998,20 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_k12(int baseOpcode)
+  private Expression getDistanceExpression(Expression label,
+                                           FileContext fileContext)
   {
-    Expression left = context.popExpression();
+    return new DistanceExpression(context.getCurrentPosition(),
+                                  label,
+                                  fileContext,
+                                  Segment.CSEG);
+  }
+
+  private Supplier<Integer> composeOpcode_k12(int baseOpcode,
+                                              FileContext fileContext)
+  {
+    Expression left = getDistanceExpression(context.popExpression(),
+                                            fileContext);
     return new Composer_k12(baseOpcode,
                             left);
   }
@@ -1002,6 +1022,7 @@ public class ContextListener extends AtmelAsmBaseListener
     String mnemonic = ctx.getChild(0).getText();
     Supplier<Integer> opcode = null;
     boolean bigInstruciton = false;
+    final FileContext fileContext = createFileContext(ctx);
 
     switch (mnemonic) {
       case "adc":
@@ -1038,12 +1059,12 @@ public class ContextListener extends AtmelAsmBaseListener
       case "brcc":
         opcode = composeOpcode_b_k7(0xf400,
                                     0,
-                                    ctx);
+                                    fileContext);
         break;
       case "brcs":
         opcode = composeOpcode_b_k7(0xf000,
                                     0,
-                                    ctx);
+                                    fileContext);
         break;
       case "break":
         opcode = () -> 0x9598;
@@ -1051,82 +1072,82 @@ public class ContextListener extends AtmelAsmBaseListener
       case "breq":
         opcode = composeOpcode_b_k7(0xf000,
                                     1,
-                                    ctx);
+                                    fileContext);
         break;
       case "brge":
         opcode = composeOpcode_b_k7(0xf400,
                                     4,
-                                    ctx);
+                                    fileContext);
         break;
       case "brhc":
         opcode = composeOpcode_b_k7(0xf000,
                                     5,
-                                    ctx);
+                                    fileContext);
         break;
       case "brhs":
         opcode = composeOpcode_b_k7(0xf400,
                                     5,
-                                    ctx);
+                                    fileContext);
         break;
       case "brid":
         opcode = composeOpcode_b_k7(0xf400,
                                     7,
-                                    ctx);
+                                    fileContext);
         break;
       case "brie":
         opcode = composeOpcode_b_k7(0xf000,
                                     7,
-                                    ctx);
+                                    fileContext);
         break;
       case "brlo":
         opcode = composeOpcode_b_k7(0xf000,
                                     0,
-                                    ctx);
+                                    fileContext);
         break;
       case "brlt":
         opcode = composeOpcode_b_k7(0xf000,
                                     7,
-                                    ctx);
+                                    fileContext);
         break;
       case "brmi":
         opcode = composeOpcode_b_k7(0xf000,
                                     2,
-                                    ctx);
+                                    fileContext);
         break;
       case "brne":
         opcode = composeOpcode_b_k7(0xf400,
                                     1,
-                                    ctx);
+                                    fileContext);
         break;
       case "brpl":
         opcode = composeOpcode_b_k7(0xf400,
                                     2,
-                                    ctx);
+                                    fileContext);
         break;
       case "brsh":
         opcode = composeOpcode_b_k7(0xf400,
                                     0,
-                                    ctx);
+                                    fileContext);
         break;
       case "brtc":
         opcode = composeOpcode_b_k7(0xf400,
                                     6,
-                                    ctx);
+                                    fileContext);
         break;
       case "brts":
         opcode = composeOpcode_b_k7(0xf000,
                                     6,
-                                    ctx);
+                                    fileContext);
         break;
       case "brvc":
         opcode = composeOpcode_b_k7(0xf400,
                                     3,
-                                    ctx);
+                                    fileContext);
         break;
       case "brvs":
         opcode = composeOpcode_b_k7(0xf000,
                                     3,
-                                    ctx);
+                                    fileContext);
         break;
       case "bset":
         opcode = composeOpcode_Bclr_Bset(0x9408,
@@ -1322,7 +1343,8 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = composeOpcode_Rd(0x920f);
         break;
       case "rcall":
-        opcode = composeOpcode_k12(0xd000);
+        opcode = composeOpcode_k12(0xd000,
+                                   fileContext);
         break;
       case "ret":
         opcode = () -> 0x9508;
@@ -1331,7 +1353,8 @@ public class ContextListener extends AtmelAsmBaseListener
         opcode = () -> 0x9518;
         break;
       case "rjmp":
-        opcode = composeOpcode_k12(0xc000);
+        opcode = composeOpcode_k12(0xc000,
+                                   fileContext);
         break;
       case "rol":
         opcode = composeOpcode_Rd_Rd(0x1c00);
@@ -1458,13 +1481,13 @@ public class ContextListener extends AtmelAsmBaseListener
                                                                   context.getCurrentPosition(),
                                                                   opcode,
                                                                   context.getConfig().getTargetByteOrder(),
-                                                                  createFileContext(ctx)));
+                                                                  fileContext));
     } else {
       context.addToSeg(InstructionSegmentElement.getWordInstance(context.getCurrentSegment(),
                                                                  context.getCurrentPosition(),
                                                                  opcode,
                                                                  context.getConfig().getTargetByteOrder(),
-                                                                 createFileContext(ctx)));
+                                                                 fileContext));
     }
   }
 
@@ -1479,13 +1502,37 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void exitOrg_dir(AtmelAsmParser.Org_dirContext ctx)
   {
-    throw new UnsupportedOperationException("org not implemented");
+    Expression ex = context.popExpression();
+    context.setCurrentPosition(context.getCurrentSegment(),
+                               ex.evaluate(context) * 2);
   }
 
   @Override
   public void exitLabel(AtmelAsmParser.LabelContext ctx)
   {
-    throw new UnsupportedOperationException("label not implemented");
+    String name = ctx.getChild(0).getText();
+    context.addAlias(new AliasImpl(name,
+                                   true,
+                                   new IntExpression(context.getCurrentPosition(),
+                                                     createFileContext(ctx))));
+  }
+
+  @Override
+  public void exitEseg_dir(AtmelAsmParser.Eseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.ESEG);
+  }
+
+  @Override
+  public void exitDseg_dir(AtmelAsmParser.Dseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.DSEG);
+  }
+
+  @Override
+  public void exitCseg_dir(AtmelAsmParser.Cseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.CSEG);
   }
 
 }
