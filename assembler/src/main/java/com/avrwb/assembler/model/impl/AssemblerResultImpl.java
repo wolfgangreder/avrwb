@@ -122,7 +122,7 @@ public class AssemblerResultImpl implements AssemblerResult
                                        4,
                                        false);
       }
-      writer.append(Bundle.List_SEG(Converter.printHexString(seg.getStartAddress(),
+      writer.append(Bundle.List_SEG(Converter.printHexString(seg.getStartAddress() >> 1,
                                                              6,
                                                              false),
                                     op1,
