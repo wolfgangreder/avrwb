@@ -130,7 +130,7 @@ public class ContextNGTest
   {
     TestContextListener tcl = new TestContextListener(assembler);
     AssemblerResult asr = tcl.parse(getIncludeLine()
-                                    + "\nrjmp init\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x20\ninit:\nmov r22,r23\npop r22\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\n");
+                                    + "\nrjmp pushseq\nrjmp init\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
     assertNotNull(asr);
     try (Writer writer = new PrintWriter(System.out)) {
       asr.getList(writer);
