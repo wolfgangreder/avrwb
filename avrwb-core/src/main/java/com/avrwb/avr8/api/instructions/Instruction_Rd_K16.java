@@ -36,22 +36,6 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
 
   public static final int OPCODE_MASK = 0xfe0f;
 
-  public static int composeOpcode(int baseOpcode,
-                                  int rdAddress,
-                                  int k16)
-  {
-    if ((baseOpcode & ~OPCODE_MASK) != 0) {
-      throw new IllegalArgumentException("illegal base opcode");
-    }
-    if (rdAddress < 0 || rdAddress > 31) {
-      throw new IllegalArgumentException("illegal rd");
-    }
-    if (k16 < 0 || k16 > 0xffff) {
-      throw new IllegalArgumentException("illegal k16");
-    }
-    return (baseOpcode << 16) | ((rdAddress) << 20) | k16;
-  }
-
   private final int rdAddress;
   private final int k16;
   private final String toStringValue;

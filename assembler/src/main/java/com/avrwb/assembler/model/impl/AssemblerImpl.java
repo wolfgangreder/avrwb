@@ -26,12 +26,12 @@ import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.model.AssemblerSource;
 import com.avrwb.assembler.model.ContextListener;
 import com.avrwb.assembler.model.InternalAssembler;
 import com.avrwb.assembler.parser.AtmelAsmLexer;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import java.io.IOException;
-import java.io.Reader;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.openide.util.lookup.ServiceProvider;
@@ -45,16 +45,19 @@ public class AssemblerImpl implements InternalAssembler
 {
 
   @Override
-  public AssemblerResult compile(Reader asmReader,
+  public AssemblerResult compile(AssemblerSource source,
                                  ContextListener contextListener) throws IOException, AssemblerException
   {
     try {
-      ANTLRInputStream ais = new ANTLRInputStream(asmReader);
+      ANTLRInputStream ais = new ANTLRInputStream(source.getReader());
+      ais.name = source.getSourceURL().toString();
+      contextListener.getContext().pushSource(source);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
       AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
       parser.addParseListener(contextListener);
       parser.init();
+      contextListener.getContext().popSource();
       return new AssemblerResultImpl(contextListener.getContext());
     } catch (AssemblerError ae) {
       throw new AssemblerException(ae);
@@ -62,10 +65,10 @@ public class AssemblerImpl implements InternalAssembler
   }
 
   @Override
-  public AssemblerResult compile(Reader asmReader,
+  public AssemblerResult compile(AssemblerSource source,
                                  AssemblerConfig config) throws IOException, AssemblerException
   {
-    return compile(asmReader,
+    return compile(source,
                    new ContextListener(this,
                                        config));
   }

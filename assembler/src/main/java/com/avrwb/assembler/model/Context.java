@@ -58,6 +58,9 @@ public final class Context
   private Segment currentSegment = Segment.CSEG;
   private final AssemblerConfig config;
   private final InternalAssembler assembler;
+  public final LinkedList<AssemblerSource> sourceStack = new LinkedList<>();
+  public AssemblerSource masterSource;
+  private final List<Inline> inlines = new LinkedList<>();
 
   public Context(@NotNull InternalAssembler assembler,
                  AssemblerConfig config)
@@ -66,12 +69,52 @@ public final class Context
                            "assembler==null");
     this.assembler = assembler;
     this.config = config != null ? config : StandardAssemblerConfig.getDefaultInstance();
+    for (Alias a : this.config.getDefaultAliases()) {
+      addAlias(a);
+    }
   }
 
   private void debugLog(Supplier<String> msg)
   {
     LOGGER.log(DEBUGLEVEL,
                msg);
+  }
+
+  public void addInline(Inline inline)
+  {
+    Objects.requireNonNull(inline,
+                           "inline==null");
+    inlines.add(inline);
+  }
+
+  public List<Inline> getInlines()
+  {
+    return Collections.unmodifiableList(inlines);
+  }
+
+  public void pushSource(AssemblerSource src)
+  {
+    Objects.requireNonNull(src,
+                           "src==null");
+    sourceStack.push(src);
+    if (masterSource == null) {
+      masterSource = src;
+    }
+  }
+
+  public AssemblerSource getMasterSource()
+  {
+    return masterSource;
+  }
+
+  public AssemblerSource popSource()
+  {
+    return sourceStack.pop();
+  }
+
+  public AssemblerSource currentSource()
+  {
+    return sourceStack.getFirst();
   }
 
   public AssemblerConfig getConfig()
@@ -190,7 +233,7 @@ public final class Context
                            "element==null");
     List<SegmentElement> seg = segments.computeIfAbsent(segment,
                                                         (Segment s) -> new ArrayList<>());
-    int maxAddress = element.getOffset() + element.getSize();
+    int maxAddress = element.getStartAddress() + element.getSize();
     if (seg.isEmpty()) {
       seg.add(element);
     } else {
@@ -198,22 +241,23 @@ public final class Context
                                              element) + 1);
       if (index == seg.size()) {
         SegmentElement prev = seg.get(index - 1);
-        if ((prev.getOffset() + prev.getSize()) > element.getOffset()) {
+        if ((prev.getStartAddress() + prev.getSize()) > element.getStartAddress()) {
           throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.
-                  toHexString(element.getOffset()));
+                  toHexString(element.getStartAddress()));
         }
         seg.add(index,
                 element);
       } else {
         SegmentElement next = seg.get(index);
-        if (next.getOffset() < maxAddress) {
-          throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.toHexString(element.getOffset()));
+        if (next.getStartAddress() < maxAddress) {
+          throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.toHexString(element.
+                  getStartAddress()));
         }
         if (index != 0) {
           SegmentElement prev = seg.get(index - 1);
-          if ((prev.getOffset() + prev.getSize()) > element.getOffset()) {
+          if ((prev.getStartAddress() + prev.getSize()) > element.getStartAddress()) {
             throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.
-                    toHexString(element.getOffset()));
+                    toHexString(element.getStartAddress()));
           }
         }
       }

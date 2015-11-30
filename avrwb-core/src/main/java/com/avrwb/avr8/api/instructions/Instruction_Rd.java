@@ -39,18 +39,6 @@ public abstract class Instruction_Rd extends AbstractInstruction
 
   public static final int OPCODE_MASK = 0xfe0f;
 
-  public static int composeOpcode(int baseOpcode,
-                                  int rd)
-  {
-    if ((baseOpcode & ~OPCODE_MASK) != 0) {
-      throw new IllegalArgumentException("invalid base opcode");
-    }
-    if (rd < 0 || rd > 31) {
-      throw new IllegalArgumentException("invalid rd");
-    }
-    return baseOpcode | (rd << 4);
-  }
-
   protected int rdVal;
   private final String toStringVal;
 

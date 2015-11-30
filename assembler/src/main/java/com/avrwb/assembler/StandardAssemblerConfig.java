@@ -21,9 +21,19 @@
  */
 package com.avrwb.assembler;
 
+import com.avrwb.annotations.NotNull;
+import com.avrwb.assembler.model.Alias;
+import com.avrwb.assembler.model.impl.AliasImpl;
+import com.avrwb.assembler.model.impl.IntExpression;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -38,6 +48,7 @@ public class StandardAssemblerConfig implements AssemblerConfig
     private FileResolver resolver;
     private Charset charset;
     private ByteOrder bo;
+    private final List<Alias> defaultAliases = new LinkedList<>();
 
     public AssemblerConfigBuilder fileResolver(FileResolver fr)
     {
@@ -57,6 +68,13 @@ public class StandardAssemblerConfig implements AssemblerConfig
       return this;
     }
 
+    public AssemblerConfigBuilder defaultAlias(@NotNull Alias alias)
+    {
+      Objects.requireNonNull(alias);
+      defaultAliases.add(alias);
+      return this;
+    }
+
     public AssemblerConfig build()
     {
       if (resolver == null) {
@@ -70,16 +88,32 @@ public class StandardAssemblerConfig implements AssemblerConfig
       }
       return new StandardAssemblerConfig(resolver,
                                          charset,
-                                         bo);
+                                         bo,
+                                         defaultAliases);
     }
 
   }
+
+  private static List<Alias> getRegisterAliases()
+  {
+    List<Alias> result = new ArrayList<>(32);
+    for (int i = 0; i < 32; ++i) {
+      result.add(new AliasImpl("r" + i,
+                               true,
+                               new IntExpression(i,
+                                                 null)));
+    }
+    return result;
+  }
+
   private static final AssemblerConfig DEFAULT_INSTANCE = new StandardAssemblerConfig(new StandardFileResolver(),
                                                                                       StandardCharsets.ISO_8859_1,
-                                                                                      ByteOrder.LITTLE_ENDIAN);
+                                                                                      ByteOrder.BIG_ENDIAN,
+                                                                                      getRegisterAliases());
   private final FileResolver fileResolver;
   private final Charset targetCharset;
   private final ByteOrder byteOrder;
+  private final List<Alias> defaultAliases;
 
   public static AssemblerConfig getDefaultInstance()
   {
@@ -88,11 +122,17 @@ public class StandardAssemblerConfig implements AssemblerConfig
 
   public StandardAssemblerConfig(FileResolver fileResolver,
                                  Charset targetCharset,
-                                 ByteOrder byteOrder)
+                                 ByteOrder byteOrder,
+                                 Collection<? extends Alias> defAliases)
   {
     this.fileResolver = fileResolver;
     this.targetCharset = targetCharset;
     this.byteOrder = byteOrder;
+    if (defAliases == null || defAliases.isEmpty()) {
+      defaultAliases = Collections.emptyList();
+    } else {
+      defaultAliases = Collections.unmodifiableList(new ArrayList<>(defAliases));
+    }
   }
 
   @Override
@@ -111,6 +151,12 @@ public class StandardAssemblerConfig implements AssemblerConfig
   public ByteOrder getTargetByteOrder()
   {
     return byteOrder;
+  }
+
+  @Override
+  public List<Alias> getDefaultAliases()
+  {
+    return defaultAliases;
   }
 
 }

@@ -21,19 +21,19 @@
  */
 package com.avrwb.assembler.model;
 
-import com.avrwb.assembler.Assembler;
-import com.avrwb.assembler.AssemblerException;
-import com.avrwb.assembler.AssemblerResult;
 import java.io.IOException;
+import java.io.Reader;
+import java.net.URL;
 
 /**
  *
  * @author wolfi
  */
-public interface InternalAssembler extends Assembler
+public interface AssemblerSource
 {
 
-  public AssemblerResult compile(AssemblerSource source,
-                                 ContextListener contextListener) throws IOException, AssemblerException;
+  public Reader getReader() throws IOException;
+
+  public URL getSourceURL();
 
 }

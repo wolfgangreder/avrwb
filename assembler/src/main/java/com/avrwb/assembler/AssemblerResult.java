@@ -21,9 +21,9 @@
  */
 package com.avrwb.assembler;
 
-import com.avrwb.io.MemoryChunkInputStream;
+import com.avrwb.io.MemoryChunkOutputStream;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.Writer;
 import org.openide.util.Lookup;
 
 /**
@@ -33,10 +33,10 @@ import org.openide.util.Lookup;
 public interface AssemblerResult extends Lookup.Provider
 {
 
-  public MemoryChunkInputStream getCSEG() throws IOException;
+  public void getCSEG(MemoryChunkOutputStream os) throws IOException;
 
-  public MemoryChunkInputStream getESEG() throws IOException;
+  public void getESEG(MemoryChunkOutputStream os) throws IOException;
 
-  public Reader getList() throws IOException;
+  public void getList(Writer writer) throws IOException;
 
 }

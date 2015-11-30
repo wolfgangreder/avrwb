@@ -21,44 +21,34 @@
  */
 package com.avrwb.assembler.model.impl;
 
-import com.avrwb.assembler.AssemblerError;
-import com.avrwb.assembler.model.Context;
-import com.avrwb.assembler.model.Expression;
 import com.avrwb.assembler.model.FileContext;
+import com.avrwb.assembler.model.Segment;
+import com.avrwb.assembler.model.SegmentElement;
 
 /**
  *
  * @author wolfi
  */
-public final class IntExpression implements Expression
+public abstract class AbstractSegmentElement implements SegmentElement
 {
 
-  private final int i;
-  private final String text;
+  private final int offset;
   private final FileContext fileContext;
+  private final Segment segment;
 
-  public IntExpression(String str,
-                       FileContext fileContext)
+  protected AbstractSegmentElement(Segment segment,
+                                   int offset,
+                                   FileContext fileContext)
   {
-    if (str.startsWith("$")) {
-      i = Integer.parseInt(str.substring(1),
-                           16);
-    } else if (str.startsWith("0b")) {
-      i = Integer.parseInt(str.substring(2),
-                           2);
-    } else {
-      i = Integer.decode(str);
-    }
-    text = str;
+    this.segment = segment;
+    this.offset = offset;
     this.fileContext = fileContext;
   }
 
-  public IntExpression(int i,
-                       FileContext fileContext)
+  @Override
+  public Segment getSegment()
   {
-    this.i = i;
-    text = Integer.toString(i);
-    this.fileContext = fileContext;
+    return segment;
   }
 
   @Override
@@ -68,15 +58,43 @@ public final class IntExpression implements Expression
   }
 
   @Override
-  public int evaluate(Context ctx) throws AssemblerError
+  public int getStartAddress()
   {
-    return i;
+    return offset;
   }
 
   @Override
-  public String toString()
+  public int getSize()
   {
-    return text;
+    return getData().capacity();
+  }
+
+  @Override
+  public int compareTo(SegmentElement o)
+  {
+    return Integer.compareUnsigned(offset,
+                                   o.getStartAddress());
+  }
+
+  @Override
+  public int hashCode()
+  {
+    int hash = 5;
+    hash = 79 * hash + this.offset;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj)
+  {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof SegmentElement)) {
+      return false;
+    }
+    final SegmentElement other = (SegmentElement) obj;
+    return this.offset == other.getStartAddress();
   }
 
 }

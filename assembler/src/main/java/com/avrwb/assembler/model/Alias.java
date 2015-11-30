@@ -36,6 +36,6 @@ public interface Alias
 
   public Expression getExpression();
 
-  public int getValue() throws AssemblerError;
+  public int getValue(Context context) throws AssemblerError;
 
 }

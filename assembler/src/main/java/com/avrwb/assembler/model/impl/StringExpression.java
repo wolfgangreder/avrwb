@@ -22,7 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.FileContext;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteOrder;
 import java.nio.charset.CharacterCodingException;
@@ -37,12 +39,21 @@ public class StringExpression implements Expression
 
   private final String str;
   private final Charset charset;
+  private final FileContext fileContext;
 
   public StringExpression(String str,
-                          Charset charset)
+                          Charset charset,
+                          FileContext fileContext)
   {
     this.str = str;
     this.charset = charset;
+    this.fileContext = fileContext;
+  }
+
+  @Override
+  public FileContext getFileContext()
+  {
+    return fileContext;
   }
 
   @Override
@@ -52,21 +63,24 @@ public class StringExpression implements Expression
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public int evaluate(Context ctx) throws AssemblerError
   {
     throw new AssemblerError("cannot convert string to number");
   }
 
   @Override
-  public SegmentElement toSegmentElement(int offset,
+  public SegmentElement toSegmentElement(Context ctx,
+                                         int offset,
                                          int numBytes,
                                          ByteOrder byteOrder) throws AssemblerError
   {
     try {
-      return SegmentElementImpl.getStringInstance(offset,
+      return SegmentElementImpl.getStringInstance(ctx.getCurrentSegment(),
+                                                  offset,
                                                   str,
                                                   byteOrder,
-                                                  charset);
+                                                  charset,
+                                                  fileContext);
     } catch (CharacterCodingException ex) {
       throw new AssemblerError(ex);
     }

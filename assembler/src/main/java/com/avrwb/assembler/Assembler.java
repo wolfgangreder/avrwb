@@ -21,8 +21,8 @@
  */
 package com.avrwb.assembler;
 
+import com.avrwb.assembler.model.AssemblerSource;
 import java.io.IOException;
-import java.io.Reader;
 
 /**
  *
@@ -31,7 +31,7 @@ import java.io.Reader;
 public interface Assembler
 {
 
-  public AssemblerResult compile(Reader asmReader,
+  public AssemblerResult compile(AssemblerSource source,
                                  AssemblerConfig config) throws IOException, AssemblerException;
 
 }

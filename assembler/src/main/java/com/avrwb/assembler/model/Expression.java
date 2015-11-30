@@ -32,30 +32,44 @@ import java.nio.ByteOrder;
 public interface Expression
 {
 
+  public FileContext getFileContext();
+
   public default boolean isStringExpression()
   {
     return false;
   }
 
-  public int evaluate() throws AssemblerError;
+  public default Expression preEvaluate(Context ctx) throws AssemblerError
+  {
+    return this;
+  }
 
-  public default SegmentElement toSegmentElement(int offset,
+  public int evaluate(Context ctx) throws AssemblerError;
+
+  public default SegmentElement toSegmentElement(Context ctx,
+                                                 int offset,
                                                  int numBytes,
                                                  ByteOrder byteOrder) throws AssemblerError
   {
-    int tmp = evaluate();
+    int tmp = evaluate(ctx);
     switch (numBytes) {
       case 1:
-        return SegmentElementImpl.getByteInstance(offset,
-                                                  (byte) (tmp & 0xff));
+        return SegmentElementImpl.getByteInstance(ctx.getCurrentSegment(),
+                                                  offset,
+                                                  (byte) (tmp & 0xff),
+                                                  getFileContext());
       case 2:
-        return SegmentElementImpl.getWordInstance(offset,
+        return SegmentElementImpl.getWordInstance(ctx.getCurrentSegment(),
+                                                  offset,
                                                   (short) (tmp & 0xffff),
-                                                  byteOrder);
+                                                  byteOrder,
+                                                  getFileContext());
       case 4:
-        return SegmentElementImpl.getDWordInstance(offset,
+        return SegmentElementImpl.getDWordInstance(ctx.getCurrentSegment(),
+                                                   offset,
                                                    tmp,
-                                                   byteOrder);
+                                                   byteOrder,
+                                                   getFileContext());
       default:
         throw new AssemblerError("illegal wordsize " + numBytes);
     }

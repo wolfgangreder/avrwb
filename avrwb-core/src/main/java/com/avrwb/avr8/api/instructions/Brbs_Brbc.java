@@ -47,22 +47,6 @@ public final class Brbs_Brbc extends AbstractInstruction
   public static final int OPCODE_SET = 0xf000;
   public static final int OPCODE_CLR = 0xf400;
 
-  public static int composeOpcode(int baseOpcode,
-                                  int bit,
-                                  int offset)
-  {
-    if ((baseOpcode & ~0xfc00) != 0) {
-      throw new IllegalArgumentException("invalid opcode");
-    }
-    if (bit < 0 || bit > 7) {
-      throw new IllegalArgumentException("invalid bit");
-    }
-    if (offset < -64 || offset > 63) {
-      throw new IllegalArgumentException("invalid offset");
-    }
-    return baseOpcode | bit | ((offset & 0x7f) << 3);
-  }
-
   public static Brbs_Brbc getInstance(AvrDeviceKey deviceKey,
                                       int opcode,
                                       int nextOpcode)

@@ -40,22 +40,6 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rd_Rr extends AbstractInstruction
 {
 
-  public static int composeOpcode(int opcode,
-                                  int rd,
-                                  int rr)
-  {
-    if ((opcode & ~0xfc00) != 0) {
-      throw new IllegalArgumentException("invalid rd,rr opcode" + Integer.toHexString(opcode));
-    }
-    if (rd > 31 || rd < 0) {
-      throw new IllegalArgumentException("invalid register r" + rd);
-    }
-    if (rr > 31 || rr < 0) {
-      throw new IllegalArgumentException("invalid register r" + rr);
-    }
-    return opcode | (rd << 4) | ((rr & 0x10) << 5) | (rr & 0xf);
-  }
-
   protected int rdVal;
   protected int rrVal;
   private final String toStringVal;

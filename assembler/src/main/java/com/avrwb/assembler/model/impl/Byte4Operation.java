@@ -22,7 +22,9 @@
 package com.avrwb.assembler.model.impl;
 
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.FileContext;
 
 /**
  *
@@ -31,17 +33,19 @@ import com.avrwb.assembler.model.Expression;
 public final class Byte4Operation extends AbstractFunctionExpression
 {
 
-  public Byte4Operation(Expression subExpression)
+  public Byte4Operation(Expression subExpression,
+                        FileContext fileContext)
   {
     super(subExpression,
           "byte4",
-          15);
+          15,
+          fileContext);
   }
 
   @Override
-  public int evaluate() throws AssemblerError
+  public int evaluate(Context ctx) throws AssemblerError
   {
-    return (getSubExpression().evaluate() & 0xff000000) >> 24;
+    return (getSubExpression().evaluate(ctx) & 0xff000000) >> 24;
   }
 
 }

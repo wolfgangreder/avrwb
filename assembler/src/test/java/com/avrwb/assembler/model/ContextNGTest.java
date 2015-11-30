@@ -23,10 +23,15 @@ package com.avrwb.assembler.model;
 
 import com.avrwb.assembler.Assembler;
 import com.avrwb.assembler.AssemblerException;
+import com.avrwb.assembler.AssemblerResult;
 import com.avrwb.assembler.model.impl.AssemblerImpl;
+import com.avrwb.io.IntelHexOutputStream;
+import com.avrwb.io.MemoryChunkOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URL;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
@@ -55,127 +60,16 @@ public class ContextNGTest
       writer.write(".equ	sph	= 0x3e\n");
       writer.write(".set val1 = 0x20\n");
       writer.write(".set val2 = 0x30\n");
-      writer.write(".set val1 = 0x40\n");
+      writer.write(".set val1 = 0x40\n\n");
     }
     iFile.deleteOnExit();
     includeFile = iFile.toURI().toURL();
     assembler = new AssemblerImpl();
   }
 
-  @Test
-  public void testPlus() throws IOException, AssemblerException
+  private String getIncludeLine()
   {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db 1+1\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 2);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void testMinus() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db 1-1\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 0);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void test4() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db -5+10-1\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 4);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void test5() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db -5+7*2+1\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 10);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void test6() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db (-5+7)*2+1\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 5);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void test7() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db (-5+(7<<2))*2+(10/3)\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 49);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void testLogNotFalse() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db !(1+1)\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 0);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-
-  }
-
-  @Test
-  public void testLogNotTrue() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db !(1-1)\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 1);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-
-  }
-
-  @Test
-  public void testBinaryNot() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".db ~0x55\n");
-    Expression exp = tcl.getContext().popExpression();
-    assertEquals(exp.evaluate(),
-                 0xffffffaa);
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-  }
-
-  @Test
-  public void testEqu() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".equ	sreg	= 0x3f\n");
-    assertTrue(tcl.getContext().isExpressionStackEmpty());
-    Alias alias = tcl.getContext().getAlias("sreg");
-    assertNotNull(alias,
-                  "alias==null");
-    assertEquals(alias.getName(),
-                 "sreg");
-    assertEquals(alias.getValue(),
-                 0x3f);
+    return ".include \"" + includeFile.toString() + "\"\n";
   }
 
   @Test(expectedExceptions = AssemblerException.class)
@@ -190,7 +84,7 @@ public class ContextNGTest
   public void testInclude() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".include \"" + includeFile.toString() + "\"\n");
+    tcl.parse(getIncludeLine());
     Context context = tcl.getContext();
     assertTrue(context.isExpressionStackEmpty());
     Alias alias = context.getAlias("sreg");
@@ -198,69 +92,52 @@ public class ContextNGTest
                   "alias==null");
     assertEquals(alias.getName(),
                  "sreg");
-    assertEquals(alias.getValue(),
+    assertEquals(alias.getValue(context),
                  0x3f);
     alias = context.getAlias("sph");
     assertNotNull(alias,
                   "alias==null");
     assertEquals(alias.getName(),
                  "sph");
-    assertEquals(alias.getValue(),
+    assertEquals(alias.getValue(context),
                  0x3e);
     alias = context.getAlias("spl");
     assertNotNull(alias,
                   "alias==null");
     assertEquals(alias.getName(),
                  "spl");
-    assertEquals(alias.getValue(),
+    assertEquals(alias.getValue(context),
                  0x3d);
     alias = context.getAlias("val1");
     assertNotNull(alias,
                   "alias==null");
     assertEquals(alias.getName(),
                  "val1");
-    assertEquals(alias.getValue(),
+    assertEquals(alias.getValue(context),
                  0x40);
     alias = context.getAlias("val2");
     assertNotNull(alias,
                   "alias==null");
     assertEquals(alias.getName(),
                  "val2");
-    assertEquals(alias.getValue(),
+    assertEquals(alias.getValue(context),
                  0x30);
 
   }
 
   @Test
-  public void testResolveName() throws IOException, AssemblerException
+  public void testAdc() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".set VAL1 = 0xf0\n" + ".db VAL1 & 0x88\n");
-    Context ctx = tcl.getContext();
-    Alias alias = ctx.getAlias("VAL1");
-    assertNotNull(alias);
-    assertEquals(alias.getValue(),
-                 0xf0);
-    Expression exp = ctx.popExpression();
-    assertTrue(ctx.isExpressionStackEmpty());
-    assertEquals(exp.evaluate(),
-                 0x80);
-  }
-
-  @Test
-  public void testResolveName2() throws IOException, AssemblerException
-  {
-    TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".set VAL1 = 0xf0\n" + ".db VAL1 & 0x88, \"Wolfgang Reder\"\n");
-    Context ctx = tcl.getContext();
-    Alias alias = ctx.getAlias("VAL1");
-    assertNotNull(alias);
-    assertEquals(alias.getValue(),
-                 0xf0);
-    Expression exp = ctx.popExpression();
-    assertTrue(ctx.isExpressionStackEmpty());
-    assertEquals(exp.evaluate(),
-                 0x80);
+    AssemblerResult asr = tcl.parse(getIncludeLine()
+                                            + "\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x20\nmov r22,r23\npop r22\npush r0\npush r1\npush r2\n");
+    assertNotNull(asr);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
   }
 
 }

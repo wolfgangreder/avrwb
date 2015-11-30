@@ -21,8 +21,10 @@
  */
 package com.avrwb.assembler;
 
+import com.avrwb.assembler.model.Alias;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  *
@@ -36,5 +38,7 @@ public interface AssemblerConfig
   public Charset getTargetCharset();
 
   public ByteOrder getTargetByteOrder();
+
+  public List<Alias> getDefaultAliases();
 
 }

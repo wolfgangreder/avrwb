@@ -37,22 +37,6 @@ import java.util.logging.Logger;
 public abstract class Instruction_Rdl_K6 extends AbstractInstruction
 {
 
-  public static int composeOpcode(int baseOpcode,
-                                  int rdl,
-                                  int k6)
-  {
-    if ((baseOpcode & ~0xff00) != 0) {
-      throw new IllegalArgumentException("invalid base opcode");
-    }
-    if (rdl < 24 || rdl > 30 || ((rdl % 2) != 0)) {
-      throw new IllegalArgumentException("invalid rdl");
-    }
-    if (k6 < 0 || k6 > 63) {
-      throw new IllegalArgumentException("invalid k6");
-    }
-    return baseOpcode | ((rdl - 24) << 3) | ((k6 & 0x30) << 2) | (k6 & 0xf);
-  }
-
   private final int rdlAddress;
   private final int k6;
   private final String toStringValue;
