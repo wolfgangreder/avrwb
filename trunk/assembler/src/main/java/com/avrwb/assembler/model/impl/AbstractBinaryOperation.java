@@ -25,6 +25,7 @@ import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.BinaryExpression;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.ExpressionType;
 import com.avrwb.assembler.model.OperatorExpression;
 
 /**
@@ -56,6 +57,12 @@ public abstract class AbstractBinaryOperation implements OperatorExpression, Bin
     text = tmp.toString();
     this.level = level;
     this.fileContext = fileContext;
+  }
+
+  @Override
+  public ExpressionType getType()
+  {
+    return ExpressionType.INTEGER;
   }
 
   @Override

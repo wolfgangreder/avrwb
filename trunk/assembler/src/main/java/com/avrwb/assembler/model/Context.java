@@ -191,7 +191,7 @@ public final class Context
     Objects.requireNonNull(alias,
                            "alias==null");
     Alias current = getAlias(alias.getName());
-    if (current != null && current.isConst()) {
+    if (current != null && (current.isConst() || alias.isConst())) {
       throw new AssemblerError("alias already defined:" + alias.getName(),
                                sourceContext);
     }

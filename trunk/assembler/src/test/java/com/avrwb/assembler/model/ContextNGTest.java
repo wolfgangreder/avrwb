@@ -76,7 +76,7 @@ public class ContextNGTest
     return ".include \"" + includeFile.toString() + "\"\n";
   }
 
-  @Test(expectedExceptions = AssemblerException.class)
+  @Test(enabled = false, expectedExceptions = AssemblerException.class)
   public void testEquCollision() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
@@ -84,7 +84,7 @@ public class ContextNGTest
     fail();
   }
 
-  @Test
+  @Test(enabled = false)
   public void testInclude() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
@@ -134,7 +134,7 @@ public class ContextNGTest
   {
     TestContextListener tcl = new TestContextListener(assembler);
     AssemblerResult asr = tcl.parse(getIncludeLine()
-                                            + "\nrjmp pushseq\nrjmp init\nadc r23,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
+                                    + "\nrjmp pushseq\nrjmp init\nadc r32,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
     assertNotNull(asr);
     try (Writer writer = new PrintWriter(System.out)) {
       asr.getList(writer);
@@ -148,6 +148,22 @@ public class ContextNGTest
   public void testBranch() throws IOException, AssemblerException, URISyntaxException
   {
     URL u = getClass().getResource("/asm/br1.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+
+  }
+
+  @Test
+  public void testMov1() throws IOException, AssemblerException, URISyntaxException
+  {
+    URL u = getClass().getResource("/asm/mov1.asm");
     AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
     AssemblerResult asr = assembler.compile(source,
                                             null);

@@ -65,21 +65,18 @@ import com.avrwb.assembler.parser.AtmelAsmBaseListener;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import com.avrwb.avr8.api.InstructionComposer;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
 
-/**
- *
- * @author wolfi
- */
 public class ContextListener extends AtmelAsmBaseListener
 {
 
   private final Context context;
-  private SourceContext sourceContext;
+  private final LinkedList<SourceContext> sourceContext = new LinkedList<>();
 
   public ContextListener(@NotNull Context context,
                          int dummy)
@@ -114,287 +111,31 @@ public class ContextListener extends AtmelAsmBaseListener
                                                col));
   }
 
-  private void createSourceContext(ParserRuleContext ctx)
+  private SourceContext getSourceContext(ParserRuleContext ctx)
+  {
+    return sourceContext.getFirst();
+  }
+
+  @Override
+  public void enterEveryRule(ParserRuleContext ctx)
+  {
+    sourceContext.push(createSourceContext(ctx));
+  }
+
+  @Override
+  public void exitEveryRule(ParserRuleContext ctx)
+  {
+    sourceContext.pop();
+  }
+
+  private SourceContext createSourceContext(ParserRuleContext ctx)
   {
     Token startToken = ctx.getStart();
     int line = startToken.getLine();
     int col = startToken.getCharPositionInLine();
-    sourceContext = new SourceContext(context.getCurrentSource().getSourcePath().toString(),
-                                      line,
-                                      col);
-  }
-
-  @Override
-  public void exitInt(AtmelAsmParser.IntContext ctx)
-  {
-    context.pushExpression(new IntExpression(ctx.getText(),
-                                             sourceContext));
-  }
-
-  @Override
-  public void exitName(AtmelAsmParser.NameContext ctx)
-  {
-    Alias alias = context.getAlias(ctx.getText());
-    if (alias == null) {
-      if (ctx.getParent().getStart().getType() == AtmelAsmParser.MNEMONIC) {
-        context.pushExpression(new ForwardExpression(ctx.getText(),
-                                                     sourceContext));
-        return;
-      } else {
-        throw new AssemblerError("cannot find name " + ctx.getText(),
-                                 sourceContext);
-      }
-    }
-    context.pushExpression(alias.getExpression());
-  }
-
-  @Override
-  public void exitCompare(AtmelAsmParser.CompareContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    String text = ctx.getChild(1).getText();
-    switch (text) {
-      case ">":
-        context.pushExpression(new GreaterThanOperation(left,
-                                                        right,
-                                                        sourceContext));
-        break;
-      case ">=":
-        context.pushExpression(new GreaterEqualThanOperation(left,
-                                                             right,
-                                                             sourceContext));
-        break;
-      case "<":
-        context.pushExpression(new LessThanOperation(left,
-                                                     right,
-                                                     sourceContext));
-        break;
-      case "<=":
-        context.pushExpression(new LessEqualOperation(left,
-                                                      right,
-                                                      sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unknown compare " + text,
-                                 sourceContext);
-
-    }
-  }
-
-  @Override
-  public void exitBitAnd(AtmelAsmParser.BitAndContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    context.pushExpression(new BitAndOperation(left,
-                                               right,
-                                               sourceContext));
-  }
-
-  @Override
-  public void exitEqual(AtmelAsmParser.EqualContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    String text = ctx.getChild(1).getText();
-    switch (text) {
-      case "==":
-        context.pushExpression(new EqualThanOperation(left,
-                                                      right,
-                                                      sourceContext));
-        break;
-      case "!=":
-        context.pushExpression(new NotEqualThanOperation(left,
-                                                         right,
-                                                         sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkown equal " + text,
-                                 sourceContext);
-    }
-  }
-
-  @Override
-  public void exitBitXor(AtmelAsmParser.BitXorContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    context.pushExpression(new BitXorOperation(left,
-                                               right,
-                                               sourceContext));
-  }
-
-  @Override
-  public void exitLogAnd(AtmelAsmParser.LogAndContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    context.pushExpression(new LogAndOperation(left,
-                                               right,
-                                               sourceContext));
-  }
-
-  @Override
-  public void exitUnary(AtmelAsmParser.UnaryContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    String text = ctx.getChild(0).getText();
-    switch (text) {
-      case "!":
-        context.pushExpression(new LogNotOperation(right,
-                                                   sourceContext));
-        break;
-      case "~":
-        context.pushExpression(new BitNotOperation(right,
-                                                   sourceContext));
-        break;
-      case "-":
-        context.pushExpression(new UniMinusOperation(right,
-                                                     sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkown unary " + text,
-                                 sourceContext);
-    }
-  }
-
-  @Override
-  public void exitSum(AtmelAsmParser.SumContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    String text = ctx.getChild(1).getText();
-    switch (text) {
-      case "+":
-        context.pushExpression(new PlusOperation(left,
-                                                 right,
-                                                 sourceContext));
-        break;
-      case "-":
-        context.pushExpression(new MinusOperation(left,
-                                                  right,
-                                                  sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkown operation " + text,
-                                 sourceContext);
-    }
-  }
-
-  @Override
-  public void exitProduct(AtmelAsmParser.ProductContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    String text = ctx.getChild(1).getText();
-    switch (text) {
-      case "*":
-        context.pushExpression(new ProductOperation(left,
-                                                    right,
-                                                    sourceContext));
-        break;
-      case "/":
-        context.pushExpression(new DivisionOperation(left,
-                                                     right,
-                                                     sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkown operation " + text,
-                                 sourceContext);
-    }
-  }
-
-  @Override
-  public void exitLogOr(AtmelAsmParser.LogOrContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    context.pushExpression(new LogOrOperation(left,
-                                              right,
-                                              sourceContext));
-  }
-
-  @Override
-  public void exitFunc(AtmelAsmParser.FuncContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    String text = ctx.getChild(0).getText();
-    switch (text) {
-      case "byte3":
-        context.pushExpression(new Byte3Operation(right,
-                                                  sourceContext));
-        break;
-      case "byte4":
-        context.pushExpression(new Byte4Operation(right,
-                                                  sourceContext));
-        break;
-      case "exp2":
-        context.pushExpression(new Exp2Operation(right,
-                                                 sourceContext));
-        break;
-      case "high":
-      case "byte2":
-        context.pushExpression(new HighOperation(right,
-                                                 sourceContext));
-        break;
-      case "hwrd":
-        context.pushExpression(new HwrdOperation(right,
-                                                 sourceContext));
-        break;
-      case "log2":
-        context.pushExpression(new Log2Operation(right,
-                                                 sourceContext));
-        break;
-      case "low":
-        context.pushExpression(new LowOperation(right,
-                                                sourceContext));
-        break;
-      case "lwrd":
-        context.pushExpression(new LwrdOperation(right,
-                                                 sourceContext));
-        break;
-      case "page":
-        context.pushExpression(new PageOperation(right,
-                                                 sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkown func " + text,
-                                 sourceContext);
-    }
-  }
-
-  @Override
-  public void exitBitOr(AtmelAsmParser.BitOrContext ctx)
-  {
-    Expression left = context.popExpression(sourceContext);
-    Expression right = context.popExpression(sourceContext);
-    context.pushExpression(new BitOrOperation(left,
-                                              right,
-                                              sourceContext));
-  }
-
-  @Override
-  public void exitShift(AtmelAsmParser.ShiftContext ctx)
-  {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
-    String text = ctx.getChild(1).getText();
-    switch (text) {
-      case "<<":
-        context.pushExpression(new LeftShiftOperation(left,
-                                                      right,
-                                                      sourceContext));
-        break;
-      case ">>":
-        context.pushExpression(new RightShiftOperation(left,
-                                                       right,
-                                                       sourceContext));
-        break;
-      default:
-        throw new AssemblerError("unkonw operation " + text,
-                                 sourceContext);
-    }
+    return new SourceContext(context.getCurrentSource().getSourcePath().toString(),
+                             line,
+                             col);
   }
 
   private String removeQoutes(String strIn)
@@ -405,52 +146,45 @@ public class ContextListener extends AtmelAsmBaseListener
                            endIndex);
   }
 
+  //*********************************************************************************************************
+  //*
+  //* Directives
+  //*
+  //*********************************************************************************************************
   @Override
   public void exitInclude_dir(AtmelAsmParser.Include_dirContext ctx)
   {
-    String fileName = removeQoutes(ctx.getChild(1).getText());
+    String fileName = removeQoutes(ctx.STRING().getText());
     try {
       AssemblerSource source = context.getConfig().getFileResolver().resolveFile(context,
                                                                                  fileName);
-      context.addInline(new Inline(sourceContext,
+      context.addInline(new Inline(getSourceContext(ctx),
                                    source));
       context.getAssembler().compile(source,
                                      this);
     } catch (IOException | AssemblerException ex) {
       throw new AssemblerError(ex.getMessage(),
-                               sourceContext);
+                               getSourceContext(ctx));
     }
-  }
-
-  @Override
-  public void exitEqu_dir(AtmelAsmParser.Equ_dirContext ctx)
-  {
-    String name = ctx.getChild(1).getText();
-    Expression exp = context.popExpression(sourceContext);
-    context.addAlias(new AliasImpl(name,
-                                   true,
-                                   exp),
-                     sourceContext);
   }
 
   @Override
   public void exitSet_dir(AtmelAsmParser.Set_dirContext ctx)
   {
-    String name = ctx.getChild(1).getText();
-    Expression exp = context.popExpression(sourceContext);
+    String name = ctx.NAME().getText();
+    Expression exp = context.popExpression(getSourceContext(ctx));
     context.addAlias(new AliasImpl(name,
                                    false,
                                    exp),
-                     sourceContext);
+                     getSourceContext(ctx));
   }
 
   @Override
-  public void exitString(AtmelAsmParser.StringContext ctx)
+  public void exitOrg_dir(AtmelAsmParser.Org_dirContext ctx)
   {
-    String text = removeQoutes(ctx.getChild(0).getText());
-    context.pushExpression(new StringExpression(text,
-                                                context.getConfig().getTargetCharset(),
-                                                sourceContext));
+    Expression ex = context.popExpression(getSourceContext(ctx));
+    context.setCurrentPosition(context.getCurrentSegment(),
+                               ex.evaluate(context) * 2);
   }
 
   @Override
@@ -462,9 +196,27 @@ public class ContextListener extends AtmelAsmBaseListener
                                               2,
                                               context.getConfig().getTargetByteOrder());
       context.addToSeg(se,
-                       sourceContext);
+                       getSourceContext(ctx));
     },
                               true);
+  }
+
+  @Override
+  public void exitDseg_dir(AtmelAsmParser.Dseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.DSEG);
+  }
+
+  @Override
+  public void exitDevice_dir(AtmelAsmParser.Device_dirContext ctx)
+  {
+    super.exitDevice_dir(ctx); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public void exitDef_dir(AtmelAsmParser.Def_dirContext ctx)
+  {
+    super.exitDef_dir(ctx); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
@@ -476,9 +228,56 @@ public class ContextListener extends AtmelAsmBaseListener
                                               1,
                                               context.getConfig().getTargetByteOrder());
       context.addToSeg(se,
-                       sourceContext);
+                       getSourceContext(ctx));
     },
                               true);
+  }
+
+  @Override
+  public void exitCseg_dir(AtmelAsmParser.Cseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.CSEG);
+  }
+
+  @Override
+  public void exitEseg_dir(AtmelAsmParser.Eseg_dirContext ctx)
+  {
+    context.setCurrentSegment(Segment.ESEG);
+  }
+
+  @Override
+  public void exitEqu_dir(AtmelAsmParser.Equ_dirContext ctx)
+  {
+    String name = ctx.NAME().getText();
+    Expression exp = context.popExpression(getSourceContext(ctx));
+    if (exp.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(ctx.DIR_EQU().getText() + "is no register",
+                               getSourceContext(ctx));
+    }
+    context.addAlias(new AliasImpl(name,
+                                   true,
+                                   exp),
+                     getSourceContext(ctx));
+  }
+
+  //*********************************************************************************************************
+  //*
+  //* Instructions
+  //*
+  //*********************************************************************************************************
+  private abstract class Composer1 implements Supplier<Integer>
+  {
+
+    protected final Expression left;
+    protected final int baseOpcode;
+
+    public Composer1(int baseOpcode,
+                     Expression left)
+    {
+      this.left = left.preEvaluate(context);
+      this.baseOpcode = baseOpcode;
+    }
+
   }
 
   private abstract class Composer2 implements Supplier<Integer>
@@ -521,18 +320,32 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd_Rr(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rd_Rr(int baseOpcode,
+                                                SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_Rr(baseOpcode,
                               left,
                               right);
   }
 
-  private Supplier<Integer> composeOpcode_Rd_Rd(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rd_Rd(int baseOpcode,
+                                                SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_Rr(baseOpcode,
                               left,
                               left);
@@ -560,10 +373,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rdl_K6(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rdl_K6(int baseOpcode,
+                                                 SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rdl_K6(baseOpcode,
                                left,
                                right);
@@ -591,28 +413,22 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd_K8(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rd_K8(int baseOpcode,
+                                                SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_K8(baseOpcode,
                               left,
                               right);
-  }
-
-  private abstract class Composer1 implements Supplier<Integer>
-  {
-
-    protected final Expression left;
-    protected final int baseOpcode;
-
-    public Composer1(int baseOpcode,
-                     Expression left)
-    {
-      this.left = left.preEvaluate(context);
-      this.baseOpcode = baseOpcode;
-    }
-
   }
 
   private final class Compose_Rd extends Composer1
@@ -634,9 +450,14 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rd(int baseOpcode,
+                                             SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Compose_Rd(baseOpcode,
                           left);
   }
@@ -667,18 +488,24 @@ public class ContextListener extends AtmelAsmBaseListener
 
   private Supplier<Integer> composeOpcode_Bclr_Bset(int baseOpcode,
                                                     boolean bset,
-                                                    int bit)
+                                                    int bit,
+                                                    SourceContext sctx)
   {
     return new Compose_Bclr_Bset(baseOpcode,
                                  new IntExpression(bit,
-                                                   sourceContext),
+                                                   sctx),
                                  bset);
   }
 
   private Supplier<Integer> composeOpcode_Bclr_Bset(int baseOpcode,
-                                                    boolean bset)
+                                                    boolean bset,
+                                                    SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Compose_Bclr_Bset(baseOpcode,
                                  left,
                                  bset);
@@ -706,10 +533,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd_b(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rd_b(int baseOpcode,
+                                               SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_b(baseOpcode,
                              left,
                              right);
@@ -737,22 +573,47 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_b_k7(int baseOpcode)
+  private Expression getDistanceExpression(Expression label,
+                                           SourceContext sctx)
   {
-    Expression right = getDistanceExpression(context.popExpression(sourceContext));
-    Expression left = context.popExpression(sourceContext);
+    return new DistanceExpression(context.getCurrentPosition(),
+                                  label,
+                                  sctx,
+                                  Segment.CSEG);
+  }
+
+  private Supplier<Integer> composeOpcode_b_k7(int baseOpcode,
+                                               SourceContext sctx)
+  {
+    Expression right = getDistanceExpression(context.popExpression(sctx),
+                                             sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_b_k7(baseOpcode,
                              left,
                              right);
   }
 
   private Supplier<Integer> composeOpcode_b_k7(int baseOpcode,
-                                               int bit)
+                                               int bit,
+                                               SourceContext sctx)
   {
-    Expression left = getDistanceExpression(context.popExpression(sourceContext));
+    Expression left = getDistanceExpression(context.popExpression(sctx),
+                                            sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_b_k7(baseOpcode,
                              new IntExpression(bit,
-                                               sourceContext),
+                                               sctx),
                              left);
   }
 
@@ -775,10 +636,15 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_K22(int baseOpcode)
+  private Supplier<Integer> composeOpcode_K22(int baseOpcode,
+                                              SourceContext sctx)
 
   {
-    Expression left = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_K22(baseOpcode,
                             left);
   }
@@ -805,10 +671,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_P_b(int baseOpcode)
+  private Supplier<Integer> composeOpcode_P_b(int baseOpcode,
+                                              SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_P_b(baseOpcode,
                             left,
                             right);
@@ -833,16 +708,16 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_K4(int baseOpcode)
+  private Supplier<Integer> composeOpcode_K4(int baseOpcode,
+                                             SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_K4(baseOpcode,
                            left);
-  }
-
-  private Supplier<Integer> composeElpm()
-  {
-    throw new UnsupportedOperationException();
   }
 
   private final class Composer_Rdh23_Rrh23 extends Composer2
@@ -867,10 +742,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rdh23_Rrh23(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rdh23_Rrh23(int baseOpcode,
+                                                      SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rdh23_Rrh23(baseOpcode,
                                     left,
                                     right);
@@ -898,42 +782,40 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd_P(int baseOpocde)
+  private Supplier<Integer> composeOpcode_Rd_P(int baseOpocde,
+                                               SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_P(baseOpocde,
                              left,
                              right);
   }
 
-  private Supplier<Integer> composeOpcode_P_Rd(int baseOpocde)
+  private Supplier<Integer> composeOpcode_P_Rd(int baseOpocde,
+                                               SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
-    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    Expression right = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_P(baseOpocde,
                              left,
                              right);
-  }
-
-  private Supplier<Integer> composeOpcode_Ld()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  private Supplier<Integer> composeOpcode_Lpm()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  private Supplier<Integer> composeOpcode_St()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  private Supplier<Integer> composeOpcode_Spm()
-  {
-    throw new UnsupportedOperationException();
   }
 
   private final class Composer_Rd_K16 extends Composer2
@@ -958,19 +840,37 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rd_K16(int baseOpocde)
+  private Supplier<Integer> composeOpcode_Rd_K16(int baseOpocde,
+                                                 SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_K16(baseOpocde,
                                left,
                                right);
   }
 
-  private Supplier<Integer> composeOpcode_K16_Rd(int baseOpocde)
+  private Supplier<Integer> composeOpcode_K16_Rd(int baseOpocde,
+                                                 SourceContext sctx)
   {
-    Expression left = context.popExpression(sourceContext);
-    Expression right = context.popExpression(sourceContext);
+    Expression left = context.popExpression(sctx);
+    Expression right = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rd_K16(baseOpocde,
                                left,
                                right);
@@ -998,10 +898,19 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Supplier<Integer> composeOpcode_Rdh_Rrh(int baseOpcode)
+  private Supplier<Integer> composeOpcode_Rdh_Rrh(int baseOpcode,
+                                                  SourceContext sctx)
   {
-    Expression right = context.popExpression(sourceContext);
-    Expression left = context.popExpression(sourceContext);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    if (right.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(right.toString() + " is no register",
+                               sctx);
+    }
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_Rdh_Rrh(baseOpcode,
                                 left,
                                 right);
@@ -1026,497 +935,1817 @@ public class ContextListener extends AtmelAsmBaseListener
 
   }
 
-  private Expression getDistanceExpression(Expression label)
+  private Supplier<Integer> composeOpcode_k12(int baseOpcode,
+                                              SourceContext sctx)
   {
-    return new DistanceExpression(context.getCurrentPosition(),
-                                  label,
-                                  sourceContext,
-                                  Segment.CSEG);
-  }
-
-  private Supplier<Integer> composeOpcode_k12(int baseOpcode)
-  {
-    Expression left = getDistanceExpression(context.popExpression(sourceContext));
+    Expression left = getDistanceExpression(context.popExpression(sctx),
+                                            sctx);
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new AssemblerError(left.toString() + " is no register",
+                               sctx);
+    }
     return new Composer_k12(baseOpcode,
                             left);
   }
 
-  @Override
-  public void exitInstruction(AtmelAsmParser.InstructionContext ctx)
+  private void addOpcodeToSegment(Supplier<Integer> opcode,
+                                  boolean bigInstruction,
+                                  SourceContext sctx)
   {
-    String mnemonic = ctx.getChild(0).getText();
-    Supplier<Integer> opcode = null;
-    boolean bigInstruciton = false;
-
-    switch (mnemonic) {
-      case "adc":
-        opcode = composeOpcode_Rd_Rr(0x1c00);
-        break;
-      case "add":
-        opcode = composeOpcode_Rd_Rr(0x0c00);
-        break;
-      case "adiw":
-        opcode = composeOpcode_Rdl_K6(0x9600);
-        break;
-      case "and":
-        opcode = composeOpcode_Rd_Rr(0x2000);
-        break;
-      case "andi":
-        opcode = composeOpcode_Rd_K8(0x7000);
-        break;
-      case "asr":
-        opcode = composeOpcode_Rd(0x9405);
-        break;
-      case "bclr":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false);
-        break;
-      case "bld":
-        opcode = composeOpcode_Rd_b(0xf800);
-        break;
-      case "brbc":
-        opcode = composeOpcode_b_k7(0xf400);
-        break;
-      case "brbs":
-        opcode = composeOpcode_b_k7(0xf000);
-        break;
-      case "brcc":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    0);
-        break;
-      case "brcs":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    0);
-        break;
-      case "break":
-        opcode = () -> 0x9598;
-        break;
-      case "breq":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    1);
-        break;
-      case "brge":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    4);
-        break;
-      case "brhc":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    5);
-        break;
-      case "brhs":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    5);
-        break;
-      case "brid":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    7);
-        break;
-      case "brie":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    7);
-        break;
-      case "brlo":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    0);
-        break;
-      case "brlt":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    7);
-        break;
-      case "brmi":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    2);
-        break;
-      case "brne":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    1);
-        break;
-      case "brpl":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    2);
-        break;
-      case "brsh":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    0);
-        break;
-      case "brtc":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    6);
-        break;
-      case "brts":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    6);
-        break;
-      case "brvc":
-        opcode = composeOpcode_b_k7(0xf400,
-                                    3);
-        break;
-      case "brvs":
-        opcode = composeOpcode_b_k7(0xf000,
-                                    3);
-        break;
-      case "bset":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true);
-        break;
-      case "bst":
-        opcode = composeOpcode_Rd_b(0xfa00);
-        break;
-      case "call":
-        opcode = composeOpcode_K22(0x940e);
-        bigInstruciton = true;
-        break;
-      case "cbi":
-        opcode = composeOpcode_P_b(0x9800);
-        break;
-      case "cbr":
-        opcode = composeOpcode_Rd_K8(0x7000);
-        break;
-      case "clc":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         0);
-        break;
-      case "clh":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         5);
-        break;
-      case "cli":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         7);
-        break;
-      case "cln":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         2);
-        break;
-      case "clr":
-        opcode = composeOpcode_Rd_Rd(0x2400);
-        break;
-      case "cls":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         4);
-        break;
-      case "clt":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         6);
-        break;
-      case "clv":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         3);
-        break;
-      case "clz":
-        opcode = composeOpcode_Bclr_Bset(0x9488,
-                                         false,
-                                         1);
-        break;
-      case "com":
-        opcode = composeOpcode_Rd(0x9400);
-        break;
-      case "cp":
-        opcode = composeOpcode_Rd_Rr(0x1400);
-        break;
-      case "cpc":
-        opcode = composeOpcode_Rd_Rr(0x0400);
-        break;
-      case "cpi":
-        opcode = composeOpcode_Rd_K8(0x3000);
-        break;
-      case "cpse":
-        opcode = composeOpcode_Rd_Rr(0x1000);
-        break;
-      case "dec":
-        opcode = composeOpcode_Rd(0x940a);
-        break;
-      case "des":
-        opcode = composeOpcode_K4(0x940b);
-        break;
-      case "eicall":
-        opcode = () -> 0x9519;
-        break;
-      case "eijmp":
-        opcode = () -> 0x9419;
-        break;
-      case "elpm":
-        opcode = composeElpm();
-        break;
-      case "eor":
-        opcode = composeOpcode_Rd_Rr(0x2400);
-        break;
-      case "fmul":
-        opcode = composeOpcode_Rdh23_Rrh23(0x0308);
-        break;
-      case "fmuls":
-        opcode = composeOpcode_Rdh23_Rrh23(0x0380);
-        break;
-      case "fmulsu":
-        opcode = composeOpcode_Rdh23_Rrh23(0x0388);
-        break;
-      case "icall":
-        opcode = () -> 0x9509;
-        break;
-      case "ijmp":
-        opcode = () -> 0x9409;
-        break;
-      case "in":
-        opcode = composeOpcode_Rd_P(0xb000);
-        break;
-      case "inc":
-        opcode = composeOpcode_Rd(0x9403);
-        break;
-      case "jmp":
-        opcode = composeOpcode_K22(0x940c);
-        bigInstruciton = true;
-        break;
-      case "lac":
-        opcode = composeOpcode_Rd(0x9206);
-        break;
-      case "las":
-        opcode = composeOpcode_Rd(0x9205);
-        break;
-      case "lat":
-        opcode = composeOpcode_Rd(0x9207);
-        break;
-      case "ld":
-        opcode = composeOpcode_Ld();
-        break;
-      case "ldd":
-        opcode = composeOpcode_Ld();
-        break;
-      case "ldi":
-        opcode = composeOpcode_Rd_K8(0xe000);
-        break;
-      case "lds":
-        bigInstruciton = true;
-        opcode = composeOpcode_Rd_K16(0x9000);
-        break;
-      case "lpm":
-        opcode = composeOpcode_Lpm();
-        break;
-      case "lsl":
-        opcode = composeOpcode_Rd_Rd(0x0c00);
-        break;
-      case "lsr":
-        opcode = composeOpcode_Rd(0x9406);
-        break;
-      case "mov":
-        opcode = composeOpcode_Rd_Rr(0x2c00);
-        break;
-      case "movw":
-        opcode = composeOpcode_Rdh_Rrh(0x0100);
-        break;
-      case "mul":
-        opcode = composeOpcode_Rd_Rr(0x9c00);
-        break;
-      case "muls":
-        opcode = composeOpcode_Rdh_Rrh(0x0200);
-        break;
-      case "mulsu":
-        opcode = composeOpcode_Rdh_Rrh(0x0300);
-        break;
-      case "neg":
-        opcode = composeOpcode_Rd(0x9401);
-        break;
-      case "nop":
-        opcode = () -> 0x0000;
-        break;
-      case "or":
-        opcode = composeOpcode_Rd_Rr(0x2800);
-        break;
-      case "ori":
-        opcode = composeOpcode_Rd_K8(0x6000);
-        break;
-      case "out":
-        opcode = composeOpcode_P_Rd(0xb800);
-        break;
-      case "pop":
-        opcode = composeOpcode_Rd(0x900f);
-        break;
-      case "push":
-        opcode = composeOpcode_Rd(0x920f);
-        break;
-      case "rcall":
-        opcode = composeOpcode_k12(0xd000);
-        break;
-      case "ret":
-        opcode = () -> 0x9508;
-        break;
-      case "reti":
-        opcode = () -> 0x9518;
-        break;
-      case "rjmp":
-        opcode = composeOpcode_k12(0xc000);
-        break;
-      case "rol":
-        opcode = composeOpcode_Rd_Rd(0x1c00);
-        break;
-      case "ror":
-        opcode = composeOpcode_Rd(0x9407);
-        break;
-      case "sbc":
-        opcode = composeOpcode_Rd_Rr(0x0800);
-        break;
-      case "sbci":
-        opcode = composeOpcode_Rd_K8(0x4000);
-        break;
-      case "sbi":
-        opcode = composeOpcode_P_b(0x9a00);
-        break;
-      case "sbic":
-        opcode = composeOpcode_P_b(0x9900);
-        break;
-      case "sbis":
-        opcode = composeOpcode_P_b(0x9b00);
-        break;
-      case "sbiw":
-        opcode = composeOpcode_Rdl_K6(0x9700);
-        break;
-      case "sbr":
-        opcode = composeOpcode_Rd_K8(0x6000);
-        break;
-      case "sbrc":
-        opcode = composeOpcode_Rd_b(0xfc00);
-        break;
-      case "sbrs":
-        opcode = composeOpcode_Rd_b(0xfe00);
-        break;
-      case "sec":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         0);
-        break;
-      case "seh":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         5);
-        break;
-      case "sei":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         7);
-        break;
-      case "sen":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         2);
-        break;
-      case "ser":
-      case "ses":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         4);
-        break;
-      case "set":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         6);
-        break;
-      case "sev":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         3);
-        break;
-      case "sez":
-        opcode = composeOpcode_Bclr_Bset(0x9408,
-                                         true,
-                                         1);
-        break;
-      case "sleep":
-        opcode = () -> 0x9588;
-        break;
-      case "spm":
-        opcode = composeOpcode_Spm();
-        break;
-      case "st":
-        opcode = composeOpcode_St();
-        break;
-      case "std":
-        opcode = composeOpcode_St();
-        break;
-      case "sts":
-        bigInstruciton = true;
-        opcode = composeOpcode_K16_Rd(0x9200);
-        break;
-      case "sub":
-        opcode = composeOpcode_Rd_Rr(0x1800);
-        break;
-      case "subi":
-        opcode = composeOpcode_Rd_K8(0x5000);
-        break;
-      case "swap":
-        opcode = composeOpcode_Rd(0x9402);
-        break;
-      case "tst":
-        opcode = composeOpcode_Rd_Rd(0x2000);
-        break;
-      case "wdr":
-        opcode = () -> 0x95a8;
-        break;
-      case "xch":
-        opcode = composeOpcode_Rd(0x9204);
-        break;
-    }
-    if (opcode == null) {
-      throw new AssemblerError("unknown mnemonic " + mnemonic,
-                               sourceContext);
-    }
-    if (bigInstruciton) {
+    if (bigInstruction) {
       context.addToSeg(InstructionSegmentElement.getDWordInstance(context.getCurrentSegment(),
                                                                   context.getCurrentPosition(),
                                                                   opcode,
                                                                   context.getConfig().getTargetByteOrder(),
-                                                                  sourceContext),
-                       sourceContext);
+                                                                  sctx),
+                       sctx);
     } else {
       context.addToSeg(InstructionSegmentElement.getWordInstance(context.getCurrentSegment(),
                                                                  context.getCurrentPosition(),
                                                                  opcode,
                                                                  context.getConfig().getTargetByteOrder(),
-                                                                 sourceContext),
-                       sourceContext);
+                                                                 sctx),
+                       sctx);
     }
   }
 
   @Override
-  public void exitOrg_dir(AtmelAsmParser.Org_dirContext ctx)
+  public void exitAsm_break(AtmelAsmParser.Asm_breakContext ctx)
   {
-    Expression ex = context.popExpression(sourceContext);
-    context.setCurrentPosition(context.getCurrentSegment(),
-                               ex.evaluate(context) * 2);
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9598;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
   }
 
+  @Override
+  public void exitAsr(AtmelAsmParser.AsrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9405,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitAndi(AtmelAsmParser.AndiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x7000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitAnd(AtmelAsmParser.AndContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x2000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitAdiw(AtmelAsmParser.AdiwContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdl_K6(0x9600,
+                                                    sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitAdd(AtmelAsmParser.AddContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x0c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitAdc(AtmelAsmParser.AdcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x1c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitXch(AtmelAsmParser.XchContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9204,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitWdr(AtmelAsmParser.WdrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x95a8;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitTst(AtmelAsmParser.TstContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rd(0x2000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSwap(AtmelAsmParser.SwapContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9402,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSubi(AtmelAsmParser.SubiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x5000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSub(AtmelAsmParser.SubContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x1800,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSts(AtmelAsmParser.StsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_K16_Rd(0x9200,
+                                                    sctx);
+    addOpcodeToSegment(opcode,
+                       true,
+                       sctx);
+  }
+
+  @Override
+  public void exitStd(AtmelAsmParser.StdContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSt_M_ALL(AtmelAsmParser.St_M_ALLContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSt_ALL_P(AtmelAsmParser.St_ALL_PContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSt_ALL(AtmelAsmParser.St_ALLContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSpm_naked(AtmelAsmParser.Spm_nakedContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSpm_ZP(AtmelAsmParser.Spm_ZPContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSleep(AtmelAsmParser.SleepContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9588;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSez(AtmelAsmParser.SezContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       1,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSev(AtmelAsmParser.SevContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       3,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSet(AtmelAsmParser.SetContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       6,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSes(AtmelAsmParser.SesContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       4,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSer(AtmelAsmParser.SerContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSen(AtmelAsmParser.SenContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       2,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSei(AtmelAsmParser.SeiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       7,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSeh(AtmelAsmParser.SehContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       5,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSec(AtmelAsmParser.SecContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       0,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbrs(AtmelAsmParser.SbrsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_b(0xfe00,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbrc(AtmelAsmParser.SbrcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_b(0xfc00,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbr(AtmelAsmParser.SbrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x6000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbiw(AtmelAsmParser.SbiwContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdl_K6(0x9700,
+                                                    sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbis(AtmelAsmParser.SbisContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_P_b(0x9b00,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbic(AtmelAsmParser.SbicContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_P_b(0x9900,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbi(AtmelAsmParser.SbiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_P_b(0x9a00,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbci(AtmelAsmParser.SbciContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x4000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitSbc(AtmelAsmParser.SbcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x0800,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitRor(AtmelAsmParser.RorContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9407,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitRol(AtmelAsmParser.RolContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rd(0x1c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitRjmp(AtmelAsmParser.RjmpContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_k12(0xc000,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitReti(AtmelAsmParser.RetiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9518;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitRet(AtmelAsmParser.RetContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9508;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitRcall(AtmelAsmParser.RcallContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_k12(0xd000,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitPush(AtmelAsmParser.PushContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x920f,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitPop(AtmelAsmParser.PopContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x900f,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitOut(AtmelAsmParser.OutContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_P_Rd(0xb800,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitOri(AtmelAsmParser.OriContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x6000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitOr(AtmelAsmParser.OrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x2800,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitNop(AtmelAsmParser.NopContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x0000;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitNeg(AtmelAsmParser.NegContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9401,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitMulsu(AtmelAsmParser.MulsuContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0300,
+                                                     sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitMuls(AtmelAsmParser.MulsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0200,
+                                                     sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitMul(AtmelAsmParser.MulContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x9c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitMovw(AtmelAsmParser.MovwContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0100,
+                                                     sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitMov(AtmelAsmParser.MovContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x2c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLsr(AtmelAsmParser.LsrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9406,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLsl(AtmelAsmParser.LslContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rd(0x0c00,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLpm_naked(AtmelAsmParser.Lpm_nakedContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLpm_Z(AtmelAsmParser.Lpm_ZContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLpm_ZP(AtmelAsmParser.Lpm_ZPContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLds(AtmelAsmParser.LdsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K16(0x9000,
+                                                    sctx);
+    addOpcodeToSegment(opcode,
+                       true,
+                       sctx);
+  }
+
+  @Override
+  public void exitLdi(AtmelAsmParser.LdiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0xe000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLdd(AtmelAsmParser.LddContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLd_ALL_P(AtmelAsmParser.Ld_ALL_PContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLd_M_ALL(AtmelAsmParser.Ld_M_ALLContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLd_ALL(AtmelAsmParser.Ld_ALLContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLat(AtmelAsmParser.LatContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9207,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLas(AtmelAsmParser.LasContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9205,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitLac(AtmelAsmParser.LacContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9206,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitJmp(AtmelAsmParser.JmpContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_K22(0x940c,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       true,
+                       sctx);
+  }
+
+  @Override
+  public void exitInc(AtmelAsmParser.IncContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9403,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitIn(AtmelAsmParser.InContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_P(0xb000,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitIjmp(AtmelAsmParser.IjmpContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9409;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitIcall(AtmelAsmParser.IcallContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9509;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitFmulsu(AtmelAsmParser.FmulsuContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh23_Rrh23(0x0388,
+                                                         sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitFmuls(AtmelAsmParser.FmulsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh23_Rrh23(0x0380,
+                                                         sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitFmul(AtmelAsmParser.FmulContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rdh23_Rrh23(0x0308,
+                                                         sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitEor(AtmelAsmParser.EorContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x2400,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitElpm_ZP(AtmelAsmParser.Elpm_ZPContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitElpm_Z(AtmelAsmParser.Elpm_ZContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitElpm_naked(AtmelAsmParser.Elpm_nakedContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitEijmp(AtmelAsmParser.EijmpContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9419;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitEicall(AtmelAsmParser.EicallContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = () -> 0x9519;
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitDes(AtmelAsmParser.DesContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_K4(0x940b,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitDec(AtmelAsmParser.DecContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x940a,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCpse(AtmelAsmParser.CpseContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x1000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCpi(AtmelAsmParser.CpiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x3000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCpc(AtmelAsmParser.CpcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x0400,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCp(AtmelAsmParser.CpContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rr(0x1400,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCom(AtmelAsmParser.ComContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9400,
+                                                sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClz(AtmelAsmParser.ClzContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       1,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClv(AtmelAsmParser.ClvContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       3,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClt(AtmelAsmParser.CltContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       6,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCls(AtmelAsmParser.ClsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       4,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClr(AtmelAsmParser.ClrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_Rd(0x2400,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCln(AtmelAsmParser.ClnContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       2,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCli(AtmelAsmParser.CliContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       7,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClh(AtmelAsmParser.ClhContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       5,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitClc(AtmelAsmParser.ClcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       0,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCbr(AtmelAsmParser.CbrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_K8(0x7000,
+                                                   sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCbi(AtmelAsmParser.CbiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_P_b(0x9800,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitCall(AtmelAsmParser.CallContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_K22(0x940e,
+                                                 sctx);
+    addOpcodeToSegment(opcode,
+                       true,
+                       sctx);
+  }
+
+  @Override
+  public void exitBst(AtmelAsmParser.BstContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_b(0xfa00,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBset(AtmelAsmParser.BsetContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9408,
+                                                       true,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrvs(AtmelAsmParser.BrvsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  3,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrvc(AtmelAsmParser.BrvcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  3,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrts(AtmelAsmParser.BrtsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  6,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrtc(AtmelAsmParser.BrtcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  6,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrsh(AtmelAsmParser.BrshContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  0,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrpl(AtmelAsmParser.BrplContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  2,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrne(AtmelAsmParser.BrneContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  1,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrmi(AtmelAsmParser.BrmiContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  2,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrlt(AtmelAsmParser.BrltContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  7,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrlo(AtmelAsmParser.BrloContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  0,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrie(AtmelAsmParser.BrieContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  7,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrid(AtmelAsmParser.BridContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  7,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrhs(AtmelAsmParser.BrhsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  5,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrhc(AtmelAsmParser.BrhcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  5,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrge(AtmelAsmParser.BrgeContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  4,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBreq(AtmelAsmParser.BreqContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  1,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrcs(AtmelAsmParser.BrcsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  0,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrcc(AtmelAsmParser.BrccContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  0,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrbs(AtmelAsmParser.BrbsContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf000,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBrbc(AtmelAsmParser.BrbcContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_b_k7(0xf400,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBld(AtmelAsmParser.BldContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Rd_b(0xf800,
+                                                  sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  @Override
+  public void exitBclr(AtmelAsmParser.BclrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Supplier<Integer> opcode = composeOpcode_Bclr_Bset(0x9488,
+                                                       false,
+                                                       sctx);
+    addOpcodeToSegment(opcode,
+                       false,
+                       sctx);
+  }
+
+  //*********************************************************************************************************
+  //*
+  //* Functions and Operators
+  //*
+  //*********************************************************************************************************
+  @Override
+  public void exitFunc_log2(AtmelAsmParser.Func_log2Context ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new Log2Operation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_high(AtmelAsmParser.Func_highContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new HighOperation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_page(AtmelAsmParser.Func_pageContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new PageOperation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_low(AtmelAsmParser.Func_lowContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new LowOperation(right,
+                                            sctx));
+  }
+
+  @Override
+  public void exitFunc_exp2(AtmelAsmParser.Func_exp2Context ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new Exp2Operation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_hwrd(AtmelAsmParser.Func_hwrdContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new HwrdOperation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_lwrd(AtmelAsmParser.Func_lwrdContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new LwrdOperation(right,
+                                             sctx));
+  }
+
+  @Override
+  public void exitFunc_byte3(AtmelAsmParser.Func_byte3Context ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new Byte3Operation(right,
+                                              sctx));
+  }
+
+  @Override
+  public void exitFunc_byte4(AtmelAsmParser.Func_byte4Context ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    context.pushExpression(new Byte4Operation(right,
+                                              sctx));
+  }
+
+  @Override
+  public void exitBitAnd(AtmelAsmParser.BitAndContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    context.pushExpression(new BitAndOperation(left,
+                                               right,
+                                               sctx));
+  }
+
+  @Override
+  public void exitBitXor(AtmelAsmParser.BitXorContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    context.pushExpression(new BitXorOperation(left,
+                                               right,
+                                               sctx));
+  }
+
+  @Override
+  public void exitBitOr(AtmelAsmParser.BitOrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    context.pushExpression(new BitOrOperation(left,
+                                              right,
+                                              sctx));
+  }
+
+  @Override
+  public void exitCompare(AtmelAsmParser.CompareContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    final String text = ctx.getChild(1).getText();
+    switch (text) {
+      case ">":
+        context.pushExpression(new GreaterThanOperation(left,
+                                                        right,
+                                                        sctx));
+        break;
+      case ">=":
+        context.pushExpression(new GreaterEqualThanOperation(left,
+                                                             right,
+                                                             sctx));
+        break;
+      case "<":
+        context.pushExpression(new LessThanOperation(left,
+                                                     right,
+                                                     sctx));
+        break;
+      case "<=":
+        context.pushExpression(new LessEqualOperation(left,
+                                                      right,
+                                                      sctx));
+        break;
+      default:
+        throw new AssemblerError("unknown compare " + text,
+                                 sctx);
+
+    }
+  }
+
+  @Override
+  public void exitProduct(AtmelAsmParser.ProductContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    String text = ctx.getChild(1).getText();
+    switch (text) {
+      case "*":
+        context.pushExpression(new ProductOperation(left,
+                                                    right,
+                                                    sctx));
+        break;
+      case "/":
+        context.pushExpression(new DivisionOperation(left,
+                                                     right,
+                                                     sctx));
+        break;
+      default:
+        throw new AssemblerError("unkown operation " + text,
+                                 sctx);
+    }
+  }
+
+  @Override
+  public void exitEqual(AtmelAsmParser.EqualContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    String text = ctx.getChild(1).getText();
+    switch (text) {
+      case "==":
+        context.pushExpression(new EqualThanOperation(left,
+                                                      right,
+                                                      sctx));
+        break;
+      case "!=":
+        context.pushExpression(new NotEqualThanOperation(left,
+                                                         right,
+                                                         sctx));
+        break;
+      default:
+        throw new AssemblerError("unkown equal " + text,
+                                 sctx);
+    }
+  }
+
+  @Override
+  public void exitLogAnd(AtmelAsmParser.LogAndContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    context.pushExpression(new LogAndOperation(left,
+                                               right,
+                                               sctx));
+  }
+
+  @Override
+  public void exitUnary(AtmelAsmParser.UnaryContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    String text = ctx.getChild(0).getText();
+    switch (text) {
+      case "!":
+        context.pushExpression(new LogNotOperation(right,
+                                                   sctx));
+        break;
+      case "~":
+        context.pushExpression(new BitNotOperation(right,
+                                                   sctx));
+        break;
+      case "-":
+        context.pushExpression(new UniMinusOperation(right,
+                                                     sctx));
+        break;
+      default:
+        throw new AssemblerError("unkown unary " + text,
+                                 sctx);
+    }
+  }
+
+  @Override
+  public void exitSum(AtmelAsmParser.SumContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    String text = ctx.getChild(1).getText();
+    switch (text) {
+      case "+":
+        context.pushExpression(new PlusOperation(left,
+                                                 right,
+                                                 sctx));
+        break;
+      case "-":
+        context.pushExpression(new MinusOperation(left,
+                                                  right,
+                                                  sctx));
+        break;
+      default:
+        throw new AssemblerError("unkown operation " + text,
+                                 sctx);
+    }
+  }
+
+  @Override
+  public void exitLogOr(AtmelAsmParser.LogOrContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    context.pushExpression(new LogOrOperation(left,
+                                              right,
+                                              sctx));
+  }
+
+  @Override
+  public void exitShift(AtmelAsmParser.ShiftContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    Expression right = context.popExpression(sctx);
+    Expression left = context.popExpression(sctx);
+    String text = ctx.getChild(1).getText();
+    switch (text) {
+      case "<<":
+        context.pushExpression(new LeftShiftOperation(left,
+                                                      right,
+                                                      sctx));
+        break;
+      case ">>":
+        context.pushExpression(new RightShiftOperation(left,
+                                                       right,
+                                                       sctx));
+        break;
+      default:
+        throw new AssemblerError("unkonw operation " + text,
+                                 sctx);
+    }
+  }
+
+  //*********************************************************************************************************
+  //*
+  //* Terminals
+  //*
+  //*********************************************************************************************************
   @Override
   public void exitLabel(AtmelAsmParser.LabelContext ctx)
   {
-    String name = ctx.getChild(0).getText();
+    String name = ctx.NAME().getText();
     context.addAlias(new AliasImpl(name,
                                    true,
                                    new IntExpression(context.getCurrentPosition(),
-                                                     sourceContext)),
-                     sourceContext);
+                                                     getSourceContext(ctx))),
+                     getSourceContext(ctx));
   }
 
   @Override
-  public void exitEseg_dir(AtmelAsmParser.Eseg_dirContext ctx)
+  public void exitString(AtmelAsmParser.StringContext ctx)
   {
-    context.setCurrentSegment(Segment.ESEG);
+    String text = removeQoutes(ctx.STRING().getText());
+    context.pushExpression(new StringExpression(text,
+                                                context.getConfig().getTargetCharset(),
+                                                getSourceContext(ctx)));
   }
 
   @Override
-  public void exitDseg_dir(AtmelAsmParser.Dseg_dirContext ctx)
+  public void exitInt(AtmelAsmParser.IntContext ctx)
   {
-    context.setCurrentSegment(Segment.DSEG);
+    context.pushExpression(new IntExpression(ctx.getText(),
+                                             getSourceContext(ctx)));
   }
 
   @Override
-  public void exitCseg_dir(AtmelAsmParser.Cseg_dirContext ctx)
+  public void exitName(AtmelAsmParser.NameContext ctx)
   {
-    context.setCurrentSegment(Segment.CSEG);
+    Alias alias = context.getAlias(ctx.getText());
+    if (alias == null) {
+      if (ctx.getParent().getStart().getType() == AtmelAsmParser.RULE_mnemonic) {
+        context.pushExpression(new ForwardExpression(ctx.getText(),
+                                                     getSourceContext(ctx)));
+        return;
+      } else {
+        throw new AssemblerError("cannot find name " + ctx.getText(),
+                                 getSourceContext(ctx));
+      }
+    }
+    context.pushExpression(alias.getExpression());
   }
 
 }
