@@ -33,12 +33,9 @@ import java.nio.ByteOrder;
 public interface Expression
 {
 
-  public SourceContext getSourceContext();
+  public ExpressionType getType();
 
-  public default boolean isStringExpression()
-  {
-    return false;
-  }
+  public SourceContext getSourceContext();
 
   public default Expression preEvaluate(Context ctx) throws AssemblerError
   {

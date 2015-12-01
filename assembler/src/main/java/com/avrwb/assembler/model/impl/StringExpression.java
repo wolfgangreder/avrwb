@@ -25,6 +25,7 @@ import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.ExpressionType;
 import com.avrwb.assembler.model.SegmentElement;
 import java.nio.ByteOrder;
 import java.nio.charset.CharacterCodingException;
@@ -51,15 +52,15 @@ public class StringExpression implements Expression
   }
 
   @Override
-  public SourceContext getSourceContext()
+  public ExpressionType getType()
   {
-    return fileContext;
+    return ExpressionType.STRING;
   }
 
   @Override
-  public boolean isStringExpression()
+  public SourceContext getSourceContext()
   {
-    return true;
+    return fileContext;
   }
 
   @Override

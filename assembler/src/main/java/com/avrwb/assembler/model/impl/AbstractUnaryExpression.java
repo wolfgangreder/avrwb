@@ -24,6 +24,7 @@ package com.avrwb.assembler.model.impl;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.ExpressionType;
 import com.avrwb.assembler.model.OperatorExpression;
 import com.avrwb.assembler.model.UnaryExpression;
 import java.util.Objects;
@@ -78,6 +79,12 @@ public abstract class AbstractUnaryExpression implements OperatorExpression, Una
     }
     text = tmp.toString();
     this.fileContext = fileContext;
+  }
+
+  @Override
+  public ExpressionType getType()
+  {
+    return ExpressionType.INTEGER;
   }
 
   @Override

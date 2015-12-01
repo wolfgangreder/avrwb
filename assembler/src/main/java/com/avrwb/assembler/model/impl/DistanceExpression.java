@@ -13,6 +13,7 @@ import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
+import com.avrwb.assembler.model.ExpressionType;
 import com.avrwb.assembler.model.Segment;
 
 public class DistanceExpression implements Expression
@@ -32,6 +33,12 @@ public class DistanceExpression implements Expression
     this.labelExpression = labelExpression;
     this.fileContext = fileContext;
     this.segment = segment;
+  }
+
+  @Override
+  public ExpressionType getType()
+  {
+    return ExpressionType.INTEGER;
   }
 
   @Override

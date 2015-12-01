@@ -71,7 +71,7 @@ public class AssemblerImpl implements InternalAssembler
   {
     return compile(source,
                    new ContextListener(this,
-                                       config));
+                                        config));
   }
 
 }

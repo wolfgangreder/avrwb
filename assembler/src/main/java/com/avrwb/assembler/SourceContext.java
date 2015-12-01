@@ -87,4 +87,10 @@ public final class SourceContext
                           other.sourceFile);
   }
 
+  @Override
+  public String toString()
+  {
+    return "(" + line + "," + col + ")@" + sourceFile;
+  }
+
 }

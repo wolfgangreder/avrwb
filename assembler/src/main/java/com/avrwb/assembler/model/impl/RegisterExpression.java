@@ -27,63 +27,35 @@ import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Expression;
 import com.avrwb.assembler.model.ExpressionType;
 
-/**
- *
- * @author wolfi
- */
-public final class IntExpression implements Expression
+public class RegisterExpression implements Expression
 {
 
-  private final int i;
-  private final String text;
-  private final SourceContext fileContext;
+  private final int registerNum;
+  private final SourceContext sourceContext;
 
-  public IntExpression(String str,
-                       SourceContext fileContext)
+  public RegisterExpression(int registerNum,
+                            SourceContext sourceContext)
   {
-    if (str.startsWith("$")) {
-      i = Integer.parseInt(str.substring(1),
-                           16);
-    } else if (str.startsWith("0b")) {
-      i = Integer.parseInt(str.substring(2),
-                           2);
-    } else {
-      i = Integer.decode(str);
-    }
-    text = str;
-    this.fileContext = fileContext;
-  }
-
-  public IntExpression(int i,
-                       SourceContext fileContext)
-  {
-    this.i = i;
-    text = Integer.toString(i);
-    this.fileContext = fileContext;
+    this.registerNum = registerNum;
+    this.sourceContext = sourceContext;
   }
 
   @Override
   public ExpressionType getType()
   {
-    return ExpressionType.INTEGER;
+    return ExpressionType.REGISTER;
   }
 
   @Override
   public SourceContext getSourceContext()
   {
-    return fileContext;
+    return sourceContext;
   }
 
   @Override
   public int evaluate(Context ctx) throws AssemblerError
   {
-    return i;
-  }
-
-  @Override
-  public String toString()
-  {
-    return text;
+    return registerNum;
   }
 
 }
