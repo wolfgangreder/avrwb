@@ -190,12 +190,12 @@ public class AvrAsmMojo extends AbstractMojo
         result.getCSEG(os);
       }
     }
-    if (generateEseg && result.isESEGAvailable()) {
+    if (generateEseg) {
       targetParent.mkdirs();
       File eep = new File(target.toString().replace(".hex",
                                                     ".eep"));
       try (IntelHexOutputStream os = new IntelHexOutputStream(new FileOutputStream(eep))) {
-        result.getCSEG(os);
+        result.getESEG(os);
       }
     }
     if (generateListFile) {

@@ -21,8 +21,7 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.annotations.NotNull;
-import com.avrwb.annotations.NullAllowed;
+import com.avrwb.avr8.api.ClockSink;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.util.List;
@@ -32,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Wolfgang Reder
  */
-public interface Device
+public interface Device extends ClockSink
 {
 
   public Logger getLogger();
@@ -60,23 +59,5 @@ public interface Device
   public Stack getStack();
 
   public void reset(ResetSource source) throws SimulationException;
-
-  /**
-   * Dient zum Zwischenspeichern des Zustandes des aktuellen Befehls zwischen den einzelnen Ausführungsphasen.
-   *
-   * @param instructionContext context
-   * @see #getInstructionContext(java.lang.Class)
-   */
-  public void setInstructionContext(@NullAllowed Object instructionContext);
-
-  /**
-   * Dient zum typsicheren Abfrange des aktuellen Befehlszustandes.
-   *
-   * @param <IC> Klasse des Befehlszustandes
-   * @param clazz Klasse
-   * @return der aktuelle Befehlszustand, oder {@code null}
-   */
-  @NullAllowed
-  public <IC> IC getInstructionContext(@NotNull Class<? extends IC> clazz);
 
 }

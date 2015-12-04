@@ -19,34 +19,19 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.avr8.api;
 
-import com.avrwb.io.MemoryChunk;
-import com.avrwb.io.MemoryChunkOutputStream;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.stream.Stream;
-import org.openide.util.Lookup;
+import com.avrwb.avr8.Memory;
+import java.util.Set;
 
 /**
  *
  * @author wolfi
  */
-public interface AssemblerResult extends Lookup.Provider
+public interface MemoryChangeListener
 {
 
-  public void getCSEG(MemoryChunkOutputStream os) throws IOException;
-
-  public Stream<MemoryChunk> getCSEG();
-
-  public boolean isCSEGAvailable();
-
-  public void getESEG(MemoryChunkOutputStream os) throws IOException;
-
-  public Stream<MemoryChunk> getESEG();
-
-  public boolean isESEGAvailable();
-
-  public void getList(Writer writer) throws IOException;
+  public void memoryChanged(Memory mem,
+                            Set<Integer> addresses);
 
 }

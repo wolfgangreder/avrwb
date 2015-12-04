@@ -21,21 +21,21 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.CPU;
+import com.avrwb.assembler.AssemblerResult;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.ResetSource;
-import com.avrwb.avr8.api.Instruction;
-import com.avrwb.avr8.helper.ItemNotFoundException;
-import com.avrwb.avr8.helper.SimulationException;
-import com.avrwb.avr8.impl.DeviceImplTest;
-import com.avrwb.avr8.spi.InstanceFactories;
-import com.avrwb.io.IntelHexInputStream;
-import com.avrwb.schema.XmlPart;
-import com.avrwb.schema.util.DeviceStreamer;
-import java.io.IOException;
-import static org.testng.AssertJUnit.*;
-import org.testng.annotations.BeforeClass;
+import com.avrwb.avr8.SRAM;
+import static com.avrwb.avr8.api.instructions.AbstractInstructionTest.assembler;
+import com.avrwb.avr8.api.instructions.helper.StringAssemblerSource;
+import java.util.HashSet;
+import java.util.Set;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -45,197 +45,76 @@ import org.testng.annotations.Test;
 public class MovNGTest extends AbstractInstructionTest
 {
 
-  private static XmlPart file;
-  private final ClockStateTestImpl clockState = new ClockStateTestImpl();
-
   public MovNGTest()
   {
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @DataProvider(name = "Provider")
+  public Object[][] getData()
   {
-    file = DeviceStreamer.loadDevice(DeviceImplTest.class.getResource("/com/avrwb/devices/ATmega8.xml"),
-                                     DeviceStreamer.Version.V_1_0);
-    assertNotNull(file);
-//    AVRWBDefaults.setDebugLoggingActive(true);
-//    AVRWBDefaults.setInstructionTraceLvel(Level.INFO);
+    return new Object[][]{
+      {0, 0, 0},
+      {31, 31, 0},
+      {0, 31, 0},
+      {31, 0, 0},
+      {0, 0, 0xff},
+      {31, 31, 0xff},
+      {0, 31, 0xff},
+      {31, 0, 0xff}
+    };
   }
 
-  private Device initDevice(String deviceFile) throws NullPointerException, IllegalStateException, ItemNotFoundException,
-                                                      IOException, SimulationException
+  @Test(dataProvider = "Provider")
+  public void testMov(int rd,
+                      int rr,
+                      int sreg) throws Exception
   {
-    Device device = InstanceFactories.getDeviceBuilder().fromDescriptor(file).
-            //            deviceLogger(AVRWBDefaults.LOGGER).
-            build();
-    Memory flash = device.getFlash();
-    flash.initialize(new IntelHexInputStream(getClass().getResourceAsStream("/avrasm/mov/" + deviceFile)).read());
+    String cmd = "mov r" + rd + ",r" + rr;
+    AssemblerResult asr = assembler.compile(new StringAssemblerSource(cmd + "\nnop",
+                                                                      cmd),
+                                            null);
+    assertNotNull(asr,
+                  cmd + "|asr==null");
+    final Device device = getDevice();
+    final SRAM sram = device.getSRAM();
+    Set<Integer> expectedChange = new HashSet<>();
+    sram.setByteAt(rd,
+                   0);
+    sram.setByteAt(rr,
+                   0xff);
+    final ClockStateTestImpl clock = new ClockStateTestImpl();
+    device.getFlash().initialize(asr.getCSEG());
     device.reset(ResetSource.POWER_UP);
-    clockState.reset();
-    return device;
-  }
+    device.getCPU().getSREG().setValue(sreg);
+    sram.addMemoryChangeListener((Memory mem, Set<Integer> addresses) -> {
+      assertSame(mem,
+                 sram,
+                 cmd + "|memory is not sram");
+      assertFalse(expectedChange.isEmpty(),
+                  cmd + "|dont expect memory change");
+      assertTrue(addresses.containsAll(expectedChange));
+      assertTrue(expectedChange.containsAll(addresses));
+      expectedChange.clear();
+    });
+    device.onClock(clock,
+                   device);
+    clock.next();
+    if (rd != rr) {
+      expectedChange.add(rd);
+    }
+    device.onClock(clock,
+                   device);
+    assertTrue(expectedChange.isEmpty(),
+               cmd + "|event listener not called");
+    assertEquals(sram.getByteAt(rd),
+                 0xff,
+                 cmd + "|value test");
+    assertEquals(sram.getByteAt(rr),
+                 0xff,
+                 cmd + "|value test");
+    assertEquals(device.getCPU().getSREG().getValue(),
+                 sreg);
 
-  @Test
-  public void testDoExecute1() throws Exception
-  {
-    Device device = initDevice("mov1.hex");
-    CPU cpu = device.getCPU();
-    Instruction instruction = cpu.getCurrentInstruction();
-    assertTrue(instruction instanceof Mov);
-    Mov mov = (Mov) instruction;
-    assertEquals(0,
-                 mov.getRdAddress());
-    assertEquals(31,
-                 mov.getRrAddress());
-    Memory sram = device.getSRAM();
-    sram.setByteAt(0,
-                   0xff);
-    sram.setByteAt(1,
-                   0x33);
-    sram.setByteAt(30,
-                   0x22);
-    sram.setByteAt(31,
-                   0x55);
-    sram.setByteAt(32,
-                   0x44);
-    cpu.onClock(clockState,
-                device);
-    assertEquals(0xff,
-                 sram.getByteAt(0));
-    assertEquals(0x33,
-                 sram.getByteAt(1));
-    assertEquals(0x22,
-                 sram.getByteAt(30));
-    assertEquals(0x55,
-                 sram.getByteAt(31));
-    assertEquals(0x44,
-                 sram.getByteAt(32));
-    clockState.next();
-    cpu.onClock(clockState,
-                device);
-    assertEquals(0x55,
-                 sram.getByteAt(0));
-    assertEquals(0x33,
-                 sram.getByteAt(1));
-    assertEquals(0x22,
-                 sram.getByteAt(30));
-    assertEquals(0x55,
-                 sram.getByteAt(31));
-    assertEquals(0x44,
-                 sram.getByteAt(32));
-  }
-
-  @Test
-  public void testDoExecute2() throws Exception
-  {
-    Device device = initDevice("mov2.hex");
-    CPU cpu = device.getCPU();
-    Instruction instruction = cpu.getCurrentInstruction();
-    assertTrue(instruction instanceof Mov);
-    Mov mov = (Mov) instruction;
-    assertEquals(31,
-                 mov.getRdAddress());
-    assertEquals(0,
-                 mov.getRrAddress());
-    Memory sram = device.getSRAM();
-    sram.setByteAt(0,
-                   0xff);
-    sram.setByteAt(31,
-                   0x55);
-    cpu.onClock(clockState,
-                device);
-    assertEquals(0xff,
-                 sram.getByteAt(0));
-    assertEquals(0x55,
-                 sram.getByteAt(31));
-    clockState.next();
-    cpu.onClock(clockState,
-                device);
-    assertEquals(0xff,
-                 sram.getByteAt(0));
-    assertEquals(0xff,
-                 sram.getByteAt(31));
-  }
-
-  /**
-   * r16 und r31 werden über r0 ausgetauscht
-   *
-   * @throws Exception no exception should be thrown
-   */
-  @Test
-  public void testDoExecute3() throws Exception
-  {
-    Device device = initDevice("mov3.hex");
-    CPU cpu = device.getCPU();
-    Memory sram = device.getSRAM();
-    sram.setByteAt(0,
-                   0xff);
-    sram.setByteAt(16,
-                   0x33);
-    sram.setByteAt(31,
-                   0x55);
-    Instruction instruction = cpu.getCurrentInstruction();
-    assertTrue(instruction instanceof Mov);
-    // mov r0,r16
-    Mov mov = (Mov) instruction;
-    assertEquals(0,
-                 mov.getRdAddress());
-    assertEquals(16,
-                 mov.getRrAddress());
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    assertEquals(0x33,
-                 sram.getByteAt(0));
-    assertEquals(0x33,
-                 sram.getByteAt(16));
-    assertEquals(0x55,
-                 sram.getByteAt(31));
-
-    // mov r16,r31
-    instruction = cpu.getCurrentInstruction();
-    assertTrue(instruction instanceof Mov);
-    mov = (Mov) instruction;
-    assertEquals(16,
-                 mov.getRdAddress());
-    assertEquals(31,
-                 mov.getRrAddress());
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    assertEquals(0x33,
-                 sram.getByteAt(0));
-    assertEquals(0x55,
-                 sram.getByteAt(16));
-    assertEquals(0x55,
-                 sram.getByteAt(31));
-
-    // mov r31,r0
-    instruction = cpu.getCurrentInstruction();
-    assertTrue(instruction instanceof Mov);
-    mov = (Mov) instruction;
-    assertEquals(31,
-                 mov.getRdAddress());
-    assertEquals(0,
-                 mov.getRrAddress());
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    cpu.onClock(clockState,
-                device);
-    clockState.next();
-    assertEquals(0x33,
-                 sram.getByteAt(0));
-    assertEquals(0x55,
-                 sram.getByteAt(16));
-    assertEquals(0x33,
-                 sram.getByteAt(31));
   }
 
 }

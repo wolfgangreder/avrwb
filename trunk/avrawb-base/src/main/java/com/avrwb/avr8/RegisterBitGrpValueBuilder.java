@@ -24,6 +24,7 @@ package com.avrwb.avr8;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
+import com.avrwb.annotations.NullAllowed;
 import com.avrwb.schema.XmlBitvalue;
 
 /**
@@ -61,10 +62,9 @@ public interface RegisterBitGrpValueBuilder
    *
    * @param caption caption
    * @return {@code this}
-   * @throws NullPointerException wenn {@code caption} gleich {@code null}
    */
   @NotNull
-  public RegisterBitGrpValueBuilder caption(@NotNull String caption) throws NullPointerException;
+  public RegisterBitGrpValueBuilder caption(@NullAllowed("name") String caption);
 
   /**
    * Setzt den Wert.

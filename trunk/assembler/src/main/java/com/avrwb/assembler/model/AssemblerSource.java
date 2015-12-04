@@ -36,4 +36,9 @@ public interface AssemblerSource
 
   public Path getSourcePath();
 
+  public default String getSourceName()
+  {
+    return getSourcePath().toString();
+  }
+
 }

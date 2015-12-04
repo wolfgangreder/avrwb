@@ -71,10 +71,8 @@ public final class RegisterBitGrpValueBuilderImpl implements RegisterBitGrpValue
 
   @Override
   @NotNull
-  public RegisterBitGrpValueBuilder caption(@NotNull String caption) throws NullPointerException
+  public RegisterBitGrpValueBuilder caption(String caption) throws NullPointerException
   {
-    Objects.requireNonNull(caption,
-                           "caption==null");
     this.caption = caption;
     return this;
   }
@@ -96,8 +94,9 @@ public final class RegisterBitGrpValueBuilderImpl implements RegisterBitGrpValue
     if (name.trim().isEmpty()) {
       throw new IllegalStateException("name is empty");
     }
-    Objects.requireNonNull(caption,
-                           "caption==null");
+    if (caption == null) {
+      caption = null;
+    }
     return new RegisterBitGrpValueImpl(name,
                                        caption,
                                        value);

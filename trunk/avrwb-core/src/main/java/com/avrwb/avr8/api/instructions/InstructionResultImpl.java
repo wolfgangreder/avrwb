@@ -23,10 +23,10 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.Immutable;
 import com.avrwb.avr8.api.InstructionResult;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  *
@@ -38,7 +38,7 @@ final class InstructionResultImpl implements InstructionResult
 
   private final boolean finished;
   private final int nextIP;
-  private final List<Integer> modifiedDataAddresses;
+  private final Set<Integer> modifiedDataAddresses;
 
   public InstructionResultImpl(boolean finished,
                                int nextIP,
@@ -47,9 +47,9 @@ final class InstructionResultImpl implements InstructionResult
     this.finished = finished;
     this.nextIP = nextIP;
     if (modifiedDataAddresses == null || modifiedDataAddresses.isEmpty()) {
-      this.modifiedDataAddresses = Collections.emptyList();
+      this.modifiedDataAddresses = Collections.emptySet();
     } else {
-      this.modifiedDataAddresses = Collections.unmodifiableList(new ArrayList<>(modifiedDataAddresses));
+      this.modifiedDataAddresses = Collections.unmodifiableSet(new HashSet<>(modifiedDataAddresses));
     }
   }
 
@@ -66,7 +66,7 @@ final class InstructionResultImpl implements InstructionResult
   }
 
   @Override
-  public List<Integer> getModifiedDataAddresses()
+  public Set<Integer> getModifiedDataAddresses()
   {
     return modifiedDataAddresses;
   }

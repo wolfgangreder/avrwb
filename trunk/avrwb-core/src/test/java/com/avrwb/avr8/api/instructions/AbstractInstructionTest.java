@@ -21,7 +21,41 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import com.avrwb.assembler.Assembler;
+import com.avrwb.avr8.Device;
+import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.helper.NotFoundStrategy;
+import com.avrwb.avr8.spi.InstanceFactories;
+import com.avrwb.schema.XmlPart;
+import com.avrwb.schema.util.DeviceStreamer;
+import org.openide.util.Lookup;
+import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.BeforeClass;
+
 public class AbstractInstructionTest
 {
+
+  protected static Assembler assembler;
+  protected static XmlPart part;
+
+  protected Device getDevice() throws NullPointerException, IllegalStateException, ItemNotFoundException
+  {
+    Device device = InstanceFactories.getDeviceBuilder().fromDescriptor(part).notFoundStrategy(NotFoundStrategy.ERROR).build();
+    assertNotNull(device,
+                  "testDevice==null");
+    return device;
+  }
+
+  @BeforeClass
+  public static void setUpClass() throws Exception
+  {
+    assembler = Lookup.getDefault().lookup(Assembler.class);
+    assertNotNull(assembler,
+                  "assembler==null");
+    part = DeviceStreamer.loadDevice(LdiNGTest.class.getResource("/com/avrwb/devices/ATtiny4313.xml"),
+                                     DeviceStreamer.Version.V_1_0);
+    assertNotNull(part,
+                  "tmp==null");
+  }
 
 }

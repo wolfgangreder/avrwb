@@ -123,7 +123,7 @@ public class ContextListener extends AtmelAsmBaseListener
     Token startToken = ctx.getStart();
     int line = startToken.getLine();
     int col = startToken.getCharPositionInLine();
-    return new SourceContext(context.getCurrentSource().getSourcePath().toString(),
+    return new SourceContext(context.getCurrentSource().getSourceName(),
                              line,
                              col);
   }

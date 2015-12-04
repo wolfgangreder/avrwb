@@ -24,6 +24,8 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.ResetSource;
+import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.MemoryChangeListener;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.io.MemoryChunk;
 import java.nio.ByteBuffer;
@@ -35,7 +37,12 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.stream.Stream;
 
 class MemoryImpl implements Memory
 {
@@ -47,6 +54,8 @@ class MemoryImpl implements Memory
   private final int start;
   private final ByteBuffer data;
   private final int hexStringLen;
+  private final Set<MemoryChangeListener> allMemoryChangeListener = new CopyOnWriteArraySet<>();
+  private final Map<Integer, Set<MemoryChangeListener>> addressMemoryChangeListener = new ConcurrentHashMap<>();
 
   MemoryImpl(String id,
              String name,
@@ -98,6 +107,14 @@ class MemoryImpl implements Memory
       byteBuffer.reset();
     }
     return limit >= chunk.getSize();
+  }
+
+  @Override
+  public boolean initialize(Stream<MemoryChunk> chunkStream)
+  {
+    Objects.requireNonNull(chunkStream,
+                           "chunkStream==null");
+    return chunkStream.allMatch((MemoryChunk chunk) -> initialize(chunk));
   }
 
   @Override
@@ -371,6 +388,79 @@ class MemoryImpl implements Memory
   public int getHexAddressStringWidth()
   {
     return hexStringLen;
+  }
+
+  @Override
+  public void onClock(ClockState clockState,
+                      Device device) throws SimulationException
+  {
+  }
+
+  @Override
+  public void addMemoryChangeListener(int address,
+                                      MemoryChangeListener listener)
+  {
+    Objects.requireNonNull(listener,
+                           "listener==null");
+    if (address < 0) {
+      throw new IllegalArgumentException("address<0");
+    }
+    Set<MemoryChangeListener> set = addressMemoryChangeListener.computeIfAbsent(address,
+                                                                                (Integer a) -> new CopyOnWriteArraySet());
+    set.add(listener);
+  }
+
+  @Override
+  public void addMemoryChangeListener(MemoryChangeListener listener)
+  {
+    Objects.requireNonNull(listener,
+                           "listener==null");
+    allMemoryChangeListener.add(listener);
+  }
+
+  @Override
+  public void removeMemoryChangeListener(int address,
+                                         MemoryChangeListener listener)
+  {
+    if (address < 0 || listener == null) {
+      return;
+    }
+    Set<MemoryChangeListener> set = addressMemoryChangeListener.get(address);
+    if (set != null && !set.isEmpty()) {
+      set.remove(listener);
+    }
+  }
+
+  @Override
+  public void removeMemoryChangeListener(MemoryChangeListener listener)
+  {
+    if (listener == null) {
+      return;
+    }
+    allMemoryChangeListener.remove(listener);
+  }
+
+  @Override
+  public void fireMemoryChanged(Set<Integer> addresses)
+  {
+    Objects.requireNonNull(addresses,
+                           "adressess==null");
+    if (addresses.isEmpty()) {
+      return;
+    }
+    for (Integer a : addresses) {
+      Set<MemoryChangeListener> s = addressMemoryChangeListener.get(a);
+      if (s != null && !s.isEmpty()) {
+        for (MemoryChangeListener l : s) {
+          l.memoryChanged(this,
+                          addresses);
+        }
+      }
+    }
+    for (MemoryChangeListener l : allMemoryChangeListener) {
+      l.memoryChanged(this,
+                      addresses);
+    }
   }
 
 }
