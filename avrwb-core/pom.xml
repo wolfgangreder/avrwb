@@ -79,6 +79,13 @@
       <version>1.0-SNAPSHOT</version>
       <type>jar</type>
     </dependency>
+    <dependency>
+      <groupId>com.avrwb</groupId>
+      <artifactId>assembler</artifactId>
+      <version>1.0-SNAPSHOT</version>
+      <scope>test</scope>
+      <type>jar</type>
+    </dependency>
   </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

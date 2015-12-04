@@ -23,7 +23,7 @@ package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.Immutable;
 import com.avrwb.annotations.NotNull;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Ergebnis der Befehlsausführung
@@ -52,9 +52,9 @@ public interface InstructionResult
    * Die Adressen der veränderten Daten im SRAM.</p> Es können auch Adressen verändert worden sein, ohne dass
    * {@link #isExecutionFinished() } {@code true} liefert.
    *
-   * @return list of modified addresses.
+   * @return set of modified addresses.
    */
   @NotNull
-  public List<Integer> getModifiedDataAddresses();
+  public Set<Integer> getModifiedDataAddresses();
 
 }

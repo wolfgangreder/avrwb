@@ -19,34 +19,42 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.assembler;
+package com.avrwb.avr8.api.instructions.helper;
 
 import com.avrwb.io.MemoryChunk;
 import com.avrwb.io.MemoryChunkOutputStream;
-import java.io.IOException;
-import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
-import org.openide.util.Lookup;
 
 /**
  *
  * @author wolfi
  */
-public interface AssemblerResult extends Lookup.Provider
+public final class ListMemoryChunkOutputStream implements MemoryChunkOutputStream
 {
 
-  public void getCSEG(MemoryChunkOutputStream os) throws IOException;
+  private final List<MemoryChunk> data = new ArrayList<>();
 
-  public Stream<MemoryChunk> getCSEG();
+  @Override
+  public void write(MemoryChunk chunk)
+  {
+    data.add(chunk);
+  }
 
-  public boolean isCSEGAvailable();
+  public List<MemoryChunk> getData()
+  {
+    return data;
+  }
 
-  public void getESEG(MemoryChunkOutputStream os) throws IOException;
+  public Stream<MemoryChunk> stream()
+  {
+    return data.stream();
+  }
 
-  public Stream<MemoryChunk> getESEG();
-
-  public boolean isESEGAvailable();
-
-  public void getList(Writer writer) throws IOException;
+  @Override
+  public void close()
+  {
+  }
 
 }

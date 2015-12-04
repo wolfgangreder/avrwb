@@ -21,18 +21,23 @@
  */
 package com.avrwb.avr8;
 
+import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
+import com.avrwb.avr8.api.ClockSink;
+import com.avrwb.avr8.api.MemoryChangeListener;
 import com.avrwb.avr8.api.Resetable;
 import com.avrwb.io.MemoryChunk;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  *
  * @author Wolfgang Reder
  */
-public interface Memory extends Resetable
+public interface Memory extends Resetable, ClockSink
 {
 
   @NotNull
@@ -134,6 +139,8 @@ public interface Memory extends Resetable
    */
   public boolean initialize(@NotNull MemoryChunk chunk);
 
+  public boolean initialize(@NotNull Stream<MemoryChunk> chunkStream);
+
   /**
    * Initialisiert alle Adressen mit {@code initVal}.
    *
@@ -147,5 +154,17 @@ public interface Memory extends Resetable
    * @return maxStringWidth
    */
   public int getHexAddressStringWidth();
+
+  public void addMemoryChangeListener(@Invariants(minValue = "0") int address,
+                                      @NotNull MemoryChangeListener listener);
+
+  public void addMemoryChangeListener(@NotNull MemoryChangeListener listener);
+
+  public void removeMemoryChangeListener(int address,
+                                         MemoryChangeListener listener);
+
+  public void removeMemoryChangeListener(MemoryChangeListener listener);
+
+  public void fireMemoryChanged(@NotNull Set<Integer> addresses);
 
 }

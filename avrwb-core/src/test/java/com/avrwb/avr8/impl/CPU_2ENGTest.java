@@ -24,7 +24,7 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
-import com.avrwb.avr8.api.instructions.DummyDevice;
+import com.avrwb.avr8.api.instructions.helper.DummyDevice;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.XmlDevice;

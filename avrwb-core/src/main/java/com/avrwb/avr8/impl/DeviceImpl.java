@@ -33,6 +33,7 @@ import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.Variant;
+import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.ItemNotFoundException;
@@ -273,20 +274,17 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public void setInstructionContext(Object instructionContext)
+  public void onClock(ClockState clockState,
+                      Device device) throws SimulationException
   {
-    this.instructionContext = instructionContext;
-  }
-
-  @Override
-  public <IC> IC getInstructionContext(Class<? extends IC> clazz)
-  {
-    Objects.requireNonNull(clazz,
-                           "clazz==null");
-    if (clazz.isInstance(instructionContext)) {
-      return clazz.cast(instructionContext);
+    for (Module mod : modules) {
+      mod.onClock(clockState,
+                  this);
     }
-    return null;
+    for (Memory mem : memories) {
+      mem.onClock(clockState,
+                  this);
+    }
   }
 
   @Override

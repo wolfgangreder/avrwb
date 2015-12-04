@@ -108,7 +108,9 @@ public class InstructionSegmentElement extends AbstractSegmentElement
         data.putInt(opcodeGenerator.get());
       }
     }
-    return data;
+    ByteBuffer result = data.asReadOnlyBuffer();
+    result.position(0);
+    return result;
   }
 
 }

@@ -21,6 +21,7 @@
  */
 package com.avrwb.assembler;
 
+import com.avrwb.annotations.ThreadSave;
 import com.avrwb.assembler.model.AssemblerSource;
 import java.io.IOException;
 
@@ -28,6 +29,7 @@ import java.io.IOException;
  *
  * @author wolfi
  */
+@ThreadSave
 public interface Assembler
 {
 

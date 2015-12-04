@@ -86,7 +86,7 @@ public class AssemblerImpl implements InternalAssembler
   {
     try {
       ANTLRInputStream ais = new ANTLRInputStream(new AppendNewLineReader(source.getReader()));
-      ais.name = source.getSourcePath().toString();
+      ais.name = source.getSourceName();
       contextListener.getContext().pushSource(source);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);

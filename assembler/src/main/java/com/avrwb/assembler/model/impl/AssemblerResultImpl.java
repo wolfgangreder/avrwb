@@ -29,6 +29,7 @@ import com.avrwb.assembler.model.Context;
 import com.avrwb.assembler.model.Inline;
 import com.avrwb.assembler.model.Segment;
 import com.avrwb.assembler.model.SegmentElement;
+import com.avrwb.io.MemoryChunk;
 import com.avrwb.io.MemoryChunkOutputStream;
 import com.avrwb.schema.util.Converter;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.Lookups;
@@ -69,8 +71,8 @@ public class AssemblerResultImpl implements AssemblerResult
     myLookup = Lookups.singleton(context);
   }
 
-  private void writeIntelHex(List<? extends SegmentElement> elements,
-                             MemoryChunkOutputStream os) throws IOException
+  private void writeMemoryChunks(List<? extends SegmentElement> elements,
+                                 MemoryChunkOutputStream os) throws IOException
   {
     for (SegmentElement e : elements) {
       os.write(e);
@@ -216,8 +218,14 @@ public class AssemblerResultImpl implements AssemblerResult
   @Override
   public void getCSEG(MemoryChunkOutputStream os) throws IOException
   {
-    writeIntelHex(context.getSegment(Segment.CSEG),
-                  os);
+    writeMemoryChunks(context.getSegment(Segment.CSEG),
+                      os);
+  }
+
+  @Override
+  public Stream<MemoryChunk> getCSEG()
+  {
+    return context.getSegment(Segment.CSEG).stream().map((SegmentElement e) -> (MemoryChunk) e);
   }
 
   @Override
@@ -229,8 +237,14 @@ public class AssemblerResultImpl implements AssemblerResult
   @Override
   public void getESEG(MemoryChunkOutputStream os) throws IOException
   {
-    writeIntelHex(context.getSegment(Segment.ESEG),
-                  os);
+    writeMemoryChunks(context.getSegment(Segment.ESEG),
+                      os);
+  }
+
+  @Override
+  public Stream<MemoryChunk> getESEG()
+  {
+    return context.getSegment(Segment.ESEG).stream().map((SegmentElement e) -> (MemoryChunk) e);
   }
 
   @Override

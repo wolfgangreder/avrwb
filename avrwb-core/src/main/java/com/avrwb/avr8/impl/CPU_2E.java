@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  *
@@ -191,6 +192,10 @@ public class CPU_2E implements CPU
   {
     InstructionResult result = currentInstruction.execute(clockState,
                                                           device);
+    Set<Integer> changedAddresses = result.getModifiedDataAddresses();
+    if (!changedAddresses.isEmpty()) {
+      device.getSRAM().fireMemoryChanged(changedAddresses);
+    }
     if (result.isExecutionFinished()) {
       setIP(device,
             result.getNextIP());

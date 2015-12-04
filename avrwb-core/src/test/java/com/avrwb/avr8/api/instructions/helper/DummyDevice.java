@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.api.instructions;
+package com.avrwb.avr8.api.instructions.helper;
 
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
@@ -29,6 +29,7 @@ import com.avrwb.avr8.Module;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
+import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;
@@ -41,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.logging.Logger;
 
 /**
@@ -204,20 +204,17 @@ public class DummyDevice implements Device
   }
 
   @Override
-  public void setInstructionContext(Object instructionContext)
+  public void onClock(ClockState clockState,
+                      Device device) throws SimulationException
   {
-    this.instructionContext = instructionContext;
-  }
-
-  @Override
-  public <IC> IC getInstructionContext(Class<? extends IC> clazz)
-  {
-    Objects.requireNonNull(clazz,
-                           "clazz==null");
-    if (clazz.isInstance(instructionContext)) {
-      return clazz.cast(instructionContext);
+    for (Module mod : modules) {
+      mod.onClock(clockState,
+                  this);
     }
-    return null;
+    for (Memory mem : memories) {
+      mem.onClock(clockState,
+                  this);
+    }
   }
 
 }

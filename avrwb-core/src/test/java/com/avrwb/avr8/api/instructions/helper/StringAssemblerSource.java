@@ -19,54 +19,53 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.io;
+package com.avrwb.avr8.api.instructions.helper;
 
 import com.avrwb.annotations.NotNull;
-import java.nio.ByteBuffer;
+import com.avrwb.assembler.model.AssemblerSource;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+import java.nio.file.Path;
 import java.util.Objects;
 
-public final class DefaultMemoryChunk implements MemoryChunk
+/**
+ *
+ * @author wolfi
+ */
+public final class StringAssemblerSource implements AssemblerSource
 {
 
-  private final int startAddress;
-  private final int size;
-  private final ByteBuffer data;
+  private final String source;
+  private final String sourceName;
 
-  public DefaultMemoryChunk(int startAddress,
-                            @NotNull ByteBuffer data,
-                            int size)
+  public StringAssemblerSource(@NotNull String source,
+                               @NotNull String sourceName)
   {
-    Objects.requireNonNull(data,
-                           "data==null");
-    this.startAddress = startAddress;
-    this.data = data;
-    this.size = size;
+    Objects.requireNonNull(source,
+                           "source==null");
+    Objects.requireNonNull(sourceName,
+                           "sourceName==null");
+    this.source = source;
+    this.sourceName = sourceName;
   }
 
   @Override
-  public int getSize()
+  public Reader getReader() throws IOException
   {
-    return size;
+    return new StringReader(source);
   }
 
   @Override
-  public int getStartAddress()
+  public Path getSourcePath()
   {
-    return startAddress;
+    return null;
   }
 
   @Override
-  public ByteBuffer getData()
+  public String getSourceName()
   {
-    ByteBuffer result = data.asReadOnlyBuffer();
-    result.position(0);
-    return result;
-  }
-
-  @Override
-  public String toString()
-  {
-    return "DefaultMemoryChunk{" + "startAddress=" + startAddress + ", size=" + size + '}';
+    return sourceName;
   }
 
 }
