@@ -58,4 +58,10 @@ public class RegisterExpression implements Expression
     return registerNum;
   }
 
+  @Override
+  public String toString()
+  {
+    return "r" + registerNum;
+  }
+
 }

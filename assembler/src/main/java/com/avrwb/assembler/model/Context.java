@@ -24,6 +24,7 @@ package com.avrwb.assembler.model;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
+import com.avrwb.assembler.NameAlreadyDefinedException;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.StandardAssemblerConfig;
 import com.avrwb.avr8.helper.AVRWBDefaults;
@@ -169,7 +170,7 @@ public final class Context
                                           result));
       return result;
     } catch (NoSuchElementException ex) {
-      throw new AssemblerError(ex.getMessage(),
+      throw new AssemblerError("Expression Stack underflow",
                                sourceContext);
     }
   }
@@ -178,9 +179,10 @@ public final class Context
   {
     Objects.requireNonNull(key,
                            "key==null");
-    Alias result = constMap.get(key);
+    String lowerKey = key.toLowerCase();
+    Alias result = constMap.get(lowerKey);
     if (result == null) {
-      result = varMap.get(key);
+      result = varMap.get(lowerKey);
     }
     return result;
   }
@@ -190,19 +192,23 @@ public final class Context
   {
     Objects.requireNonNull(alias,
                            "alias==null");
-    Alias current = getAlias(alias.getName());
+    String key = alias.getName().toLowerCase();
+    Alias current = getAlias(key);
     if (current != null && (current.isConst() || alias.isConst())) {
-      throw new AssemblerError("alias already defined:" + alias.getName(),
+      throw new AssemblerError(new NameAlreadyDefinedException("alias already defined:" + alias.getName(),
+                                                               sourceContext),
                                sourceContext);
     }
     if (alias.isConst()) {
-      Alias tmp = constMap.putIfAbsent(alias.getName(),
+      Alias tmp = constMap.putIfAbsent(key,
                                        alias);
       if (tmp != null) {
-        throw new IllegalStateException("alias collision");
+        throw new AssemblerError(new NameAlreadyDefinedException("alias collision",
+                                                                 sourceContext),
+                                 sourceContext);
       }
     } else {
-      varMap.put(alias.getName(),
+      varMap.put(key,
                  alias);
     }
     return current;
