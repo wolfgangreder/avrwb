@@ -32,8 +32,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,10 +108,13 @@ public class AvrAsmMojo extends AbstractMojo
     Assembler asm = Lookup.getDefault().lookup(Assembler.class);
     for (Map.Entry<File, File> e : mapping.entrySet()) {
       try {
-        compile(e.getKey(),
-                e.getValue(),
-                asm,
-                asmConfig);
+        if (!isUpToDate(e.getKey(),
+                        e.getValue())) {
+          compile(e.getKey(),
+                  e.getValue(),
+                  asm,
+                  asmConfig);
+        }
       } catch (IOException ex) {
         String msg = "Error while compiling " + e.getKey().toString();
         getLog().error(msg,
@@ -126,12 +131,55 @@ public class AvrAsmMojo extends AbstractMojo
     }
   }
 
+  private boolean isUpToDate(File source,
+                             File target) throws IOException
+  {
+    if (!generateCseg && !generateEseg && !generateListFile) {
+      return true;
+    }
+    final FileTime sourceTime = Files.getLastModifiedTime(source.toPath());
+    FileTime targetTime;
+    if (generateCseg) {
+      if (!target.exists()) {
+        return false;
+      }
+      targetTime = Files.getLastModifiedTime(target.toPath());
+      if (sourceTime.compareTo(targetTime) >= 0) {
+        return false;
+      }
+    }
+    if (generateEseg) {
+      Path p = Paths.get(target.toString().replace(".hex",
+                                                   ".eep"));
+      if (!Files.exists(p)) {
+        return false;
+      }
+      targetTime = Files.getLastModifiedTime(p);
+      if (sourceTime.compareTo(targetTime) >= 0) {
+        return false;
+      }
+    }
+    if (generateListFile) {
+      Path p = Paths.get(target.toString().replace(".hex",
+                                                   ".lst"));
+      if (!Files.exists(p)) {
+        return false;
+      }
+      targetTime = Files.getLastModifiedTime(p);
+      if (sourceTime.compareTo(targetTime) >= 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private void compile(File source,
                        File target,
                        Assembler asm,
                        AssemblerConfig asmConfig) throws IOException, AssemblerException
 
   {
+    getLog().info(source.toString());
     AssemblerResult result = asm.compile(new StandardAssemblerSource(source.toPath()),
                                          asmConfig);
     File targetParent = target.getParentFile();

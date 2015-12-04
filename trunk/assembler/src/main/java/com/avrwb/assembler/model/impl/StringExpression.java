@@ -84,7 +84,7 @@ public class StringExpression implements Expression
                                                   charset,
                                                   fileContext);
     } catch (CharacterCodingException ex) {
-      throw new AssemblerError(ex,
+      throw new AssemblerError(ex.getMessage(),
                                getSourceContext());
     }
   }

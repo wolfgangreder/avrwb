@@ -26,42 +26,94 @@ import com.avrwb.assembler.AssemblerConfig;
 import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.SyntaxException;
 import com.avrwb.assembler.model.AssemblerSource;
 import com.avrwb.assembler.model.ContextListener;
 import com.avrwb.assembler.model.InternalAssembler;
 import com.avrwb.assembler.parser.AtmelAsmLexer;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import java.io.IOException;
+import java.io.Reader;
 import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.openide.util.lookup.ServiceProvider;
 
-/**
- *
- * @author wolfi
- */
 @ServiceProvider(service = Assembler.class)
 public class AssemblerImpl implements InternalAssembler
 {
+
+  private static final class AppendNewLineReader extends Reader
+  {
+
+    private final Reader wrapped;
+
+    public AppendNewLineReader(Reader wrapped)
+    {
+      this.wrapped = wrapped;
+    }
+
+    @Override
+    public int read(char[] cbuf,
+                    int off,
+                    int len) throws IOException
+    {
+      int read = wrapped.read(cbuf,
+                              off,
+                              len);
+      if (read >= 0 && read < len) {
+        cbuf[off + read] = '\n';
+        ++read;
+      }
+      return read;
+    }
+
+    @Override
+    public void close() throws IOException
+    {
+      wrapped.close();
+    }
+
+  }
 
   @Override
   public AssemblerResult compile(AssemblerSource source,
                                  ContextListener contextListener) throws IOException, AssemblerException
   {
     try {
-      ANTLRInputStream ais = new ANTLRInputStream(source.getReader());
+      ANTLRInputStream ais = new ANTLRInputStream(new AppendNewLineReader(source.getReader()));
       ais.name = source.getSourcePath().toString();
       contextListener.getContext().pushSource(source);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
       AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
-      parser.addParseListener(contextListener);
-      parser.init();
+      parser.setErrorHandler(new BailErrorStrategy());
+      ParseTreeWalker walker = new ParseTreeWalker();
+      ParserRuleContext tree = parser.init();
+      walker.walk(contextListener,
+                  tree);
       contextListener.getContext().popSource();
       return new AssemblerResultImpl(contextListener.getContext());
+    } catch (RecognitionException e) {
+      throw new SyntaxException(e);
+    } catch (ParseCancellationException e) {
+      if (e.getCause() instanceof RecognitionException) {
+        throw new SyntaxException((RecognitionException) e.getCause());
+      } else {
+        throw new AssemblerException(e.getCause(),
+                                     null);
+      }
     } catch (AssemblerError ae) {
-      throw new AssemblerException(ae,
-                                   ae.getSourceContext());
+      if (ae.getCause() instanceof AssemblerException) {
+        throw ((AssemblerException) ae.getCause());
+      } else {
+        throw new AssemblerException(ae,
+                                     ae.getSourceContext());
+      }
     }
   }
 
@@ -71,7 +123,7 @@ public class AssemblerImpl implements InternalAssembler
   {
     return compile(source,
                    new ContextListener(this,
-                                        config));
+                                       config));
   }
 
 }

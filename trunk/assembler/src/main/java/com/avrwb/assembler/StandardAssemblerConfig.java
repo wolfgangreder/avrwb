@@ -24,7 +24,7 @@ package com.avrwb.assembler;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.assembler.model.Alias;
 import com.avrwb.assembler.model.impl.AliasImpl;
-import com.avrwb.assembler.model.impl.IntExpression;
+import com.avrwb.assembler.model.impl.RegisterExpression;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -111,8 +111,8 @@ public class StandardAssemblerConfig implements AssemblerConfig
     for (int i = 0; i < 32; ++i) {
       result.add(new AliasImpl("r" + i,
                                true,
-                               new IntExpression(i,
-                                                 null)));
+                               new RegisterExpression(i,
+                                                      null)));
     }
     return result;
   }

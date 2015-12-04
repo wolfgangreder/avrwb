@@ -69,7 +69,7 @@ public class MovNGTest extends AbstractInstructionTest
             //            deviceLogger(AVRWBDefaults.LOGGER).
             build();
     Memory flash = device.getFlash();
-    flash.initialize(new IntelHexInputStream(getClass().getResourceAsStream("/testprojects/mov/" + deviceFile)).read());
+    flash.initialize(new IntelHexInputStream(getClass().getResourceAsStream("/avrasm/mov/" + deviceFile)).read());
     device.reset(ResetSource.POWER_UP);
     clockState.reset();
     return device;

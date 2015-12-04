@@ -24,6 +24,7 @@ package com.avrwb.assembler.model;
 import com.avrwb.assembler.Assembler;
 import com.avrwb.assembler.AssemblerException;
 import com.avrwb.assembler.AssemblerResult;
+import com.avrwb.assembler.NameAlreadyDefinedException;
 import com.avrwb.assembler.StandardAssemblerSource;
 import com.avrwb.assembler.model.impl.AssemblerImpl;
 import com.avrwb.io.IntelHexOutputStream;
@@ -76,15 +77,15 @@ public class ContextNGTest
     return ".include \"" + includeFile.toString() + "\"\n";
   }
 
-  @Test(enabled = false, expectedExceptions = AssemblerException.class)
+  @Test(expectedExceptions = NameAlreadyDefinedException.class)
   public void testEquCollision() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
-    tcl.parse(".equ	sreg	= 0x3f\n" + ".equ tmp=0x20\n" + ".equ sreg=0x20\n");
+    tcl.parse(".equ	sreg	= 0x3f\n" + ".equ tmp=0x20\n" + ".equ sReg=0x20");
     fail();
   }
 
-  @Test(enabled = false)
+  @Test
   public void testInclude() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
@@ -133,8 +134,7 @@ public class ContextNGTest
   public void testAdc() throws IOException, AssemblerException
   {
     TestContextListener tcl = new TestContextListener(assembler);
-    AssemblerResult asr = tcl.parse(getIncludeLine()
-                                    + "\nrjmp pushseq\nrjmp init\nadc r32,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
+    AssemblerResult asr = tcl.parse("adc r30,r31");
     assertNotNull(asr);
     try (Writer writer = new PrintWriter(System.out)) {
       asr.getList(writer);
@@ -145,6 +145,21 @@ public class ContextNGTest
   }
 
   @Test
+  public void testAdc1() throws IOException, AssemblerException
+  {
+    TestContextListener tcl = new TestContextListener(assembler);
+    AssemblerResult asr = tcl.parse(getIncludeLine()
+                                            + "\nrjmp pushseq\nrjmp init\nadc r30,r31\nmov r0,r1\n\nmov r20,r0\npush r0 ; push hot gfeugelt\nnop\nnop\n.org 0x21\ninit:\nmov r22,r23\npop r22\npushseq:\npush r0\npush r1\npush r2\nin r0,spl\npush r0\nout spl,r1\nrjmp init\n");
+    assertNotNull(asr);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test(enabled = false)
   public void testBranch() throws IOException, AssemblerException, URISyntaxException
   {
     URL u = getClass().getResource("/asm/br1.asm");
@@ -160,7 +175,7 @@ public class ContextNGTest
 
   }
 
-  @Test
+  @Test(enabled = false)
   public void testMov1() throws IOException, AssemblerException, URISyntaxException
   {
     URL u = getClass().getResource("/asm/mov1.asm");

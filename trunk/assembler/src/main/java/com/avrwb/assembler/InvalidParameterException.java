@@ -25,43 +25,30 @@ package com.avrwb.assembler;
  *
  * @author wolfi
  */
-public class AssemblerException extends Exception
+public class InvalidParameterException extends AssemblerException
 {
 
-  private final SourceContext sourceContext;
-
-  public AssemblerException(String msg,
-                            SourceContext sourceContext)
-  {
-    super(msg);
-    this.sourceContext = sourceContext;
-  }
-
-  public AssemblerException(Throwable th,
-                            SourceContext sourceContext)
-  {
-    super(th);
-    this.sourceContext = sourceContext;
-  }
-
-  public AssemblerException(String msg,
-                            Throwable th,
-                            SourceContext sourceContext)
+  public InvalidParameterException(String msg,
+                                   SourceContext sourceContext)
   {
     super(msg,
-          th);
-    this.sourceContext = sourceContext;
+          sourceContext);
   }
 
-  public SourceContext getSourceContext()
+  public InvalidParameterException(Throwable th,
+                                   SourceContext sourceContext)
   {
-    return sourceContext;
+    super(th,
+          sourceContext);
   }
 
-  public AssemblerError toWrapper()
+  public InvalidParameterException(String msg,
+                                   Throwable th,
+                                   SourceContext sourceContext)
   {
-    return new AssemblerError(this,
-                              sourceContext);
+    super(msg,
+          th,
+          sourceContext);
   }
 
 }

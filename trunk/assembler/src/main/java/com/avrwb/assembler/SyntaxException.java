@@ -21,47 +21,43 @@
  */
 package com.avrwb.assembler;
 
+import org.antlr.v4.runtime.RecognitionException;
+
 /**
  *
  * @author wolfi
  */
-public class AssemblerException extends Exception
+public class SyntaxException extends AssemblerException
 {
 
-  private final SourceContext sourceContext;
-
-  public AssemblerException(String msg,
-                            SourceContext sourceContext)
+  public SyntaxException(RecognitionException err)
   {
-    super(msg);
-    this.sourceContext = sourceContext;
+    super(AssemblerError.constructMessage(err),
+          err,
+          AssemblerError.createSourceContext(err));
   }
 
-  public AssemblerException(Throwable th,
-                            SourceContext sourceContext)
-  {
-    super(th);
-    this.sourceContext = sourceContext;
-  }
-
-  public AssemblerException(String msg,
-                            Throwable th,
-                            SourceContext sourceContext)
+  public SyntaxException(String msg,
+                         SourceContext sourceContext)
   {
     super(msg,
-          th);
-    this.sourceContext = sourceContext;
+          sourceContext);
   }
 
-  public SourceContext getSourceContext()
+  public SyntaxException(Throwable th,
+                         SourceContext sourceContext)
   {
-    return sourceContext;
+    super(th,
+          sourceContext);
   }
 
-  public AssemblerError toWrapper()
+  public SyntaxException(String msg,
+                         Throwable th,
+                         SourceContext sourceContext)
   {
-    return new AssemblerError(this,
-                              sourceContext);
+    super(msg,
+          th,
+          sourceContext);
   }
 
 }

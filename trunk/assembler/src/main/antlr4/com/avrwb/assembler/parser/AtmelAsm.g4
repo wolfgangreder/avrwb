@@ -21,14 +21,14 @@ grammar AtmelAsm;
  *
  */
 
-init: stat + ;
+init: stat* EOF;
 
 stat: directive NEWLINE
     | directive COMMENT
     | instruction NEWLINE
     | instruction COMMENT
     | label? COMMENT 
-    | label? NEWLINE 
+    | label? NEWLINE
     ;
 
 directive: 
@@ -497,11 +497,11 @@ X_PTR: [Xx] ;
 Y_PTR: [Yy] ;
 Z_PTR: [Zz] ;
 
-ALL_PTR: [XxYyZz] ;
+ALL_PTR: X_PTR|Z_PTR|Y_PTR;
 ALL_P_PTR : ALL_PTR'+';
 M_ALL_PTR: '-'ALL_PTR;
-YZ_PTR: [Yy][Zz] ;
-YZ_P_PTR: YZ_PTR'+';
+YZ_PTR: Y_PTR|Z_PTR;
+YZ_P_PTR: (Y_PTR|Z_PTR)'+';
 Z_P_PTR: Z_PTR'+';
 
 DIR_BYTE: '.'[Bb][Yy][Tt][Ee];
@@ -546,6 +546,6 @@ NAME: [a-zA-Z_][a-zA-Z0-9_]* ;
 
 STRING: '"' .*? '"' ;
 
-NEWLINE: ('\r'? '\n')|EOF ;
+NEWLINE: ('\r'? '\n') ;
 
 WS: [ \t]+ -> skip;
