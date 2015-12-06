@@ -21,19 +21,12 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.assembler.AssemblerResult;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.Memory;
-import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
-import static com.avrwb.avr8.api.instructions.AbstractInstructionTest.assembler;
-import com.avrwb.avr8.api.instructions.helper.StringAssemblerSource;
+import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertSame;
 import static org.testng.Assert.assertTrue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -70,12 +63,7 @@ public class MovNGTest extends AbstractInstructionTest
                       int sreg) throws Exception
   {
     String cmd = "mov r" + rd + ",r" + rr;
-    AssemblerResult asr = assembler.compile(new StringAssemblerSource(cmd + "\nnop",
-                                                                      cmd),
-                                            null);
-    assertNotNull(asr,
-                  cmd + "|asr==null");
-    final Device device = getDevice();
+    final Device device = getDevice(cmd);
     final SRAM sram = device.getSRAM();
     Set<Integer> expectedChange = new HashSet<>();
     sram.setByteAt(rd,
@@ -83,27 +71,16 @@ public class MovNGTest extends AbstractInstructionTest
     sram.setByteAt(rr,
                    0xff);
     final ClockStateTestImpl clock = new ClockStateTestImpl();
-    device.getFlash().initialize(asr.getCSEG());
-    device.reset(ResetSource.POWER_UP);
     device.getCPU().getSREG().setValue(sreg);
-    sram.addMemoryChangeListener((Memory mem, Set<Integer> addresses) -> {
-      assertSame(mem,
-                 sram,
-                 cmd + "|memory is not sram");
-      assertFalse(expectedChange.isEmpty(),
-                  cmd + "|dont expect memory change");
-      assertTrue(addresses.containsAll(expectedChange));
-      assertTrue(expectedChange.containsAll(addresses));
-      expectedChange.clear();
-    });
-    device.onClock(clock,
-                   device);
-    clock.next();
+    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
+                                                         expectedChange,
+                                                         cmd)::onMemoryChanged);
+
+    device.onClock(clock.getAndNext());
     if (rd != rr) {
       expectedChange.add(rd);
     }
-    device.onClock(clock,
-                   device);
+    device.onClock(clock.getAndNext());
     assertTrue(expectedChange.isEmpty(),
                cmd + "|event listener not called");
     assertEquals(sram.getByteAt(rd),
@@ -112,9 +89,12 @@ public class MovNGTest extends AbstractInstructionTest
     assertEquals(sram.getByteAt(rr),
                  0xff,
                  cmd + "|value test");
-    assertEquals(device.getCPU().getSREG().getValue(),
-                 sreg);
-
+    assertSREG(device.getCPU().getSREG().getValue(),
+               sreg,
+               cmd);
+    assertEquals(device.getCPU().getIP(),
+                 1,
+                 cmd);
   }
 
 }

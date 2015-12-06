@@ -11,6 +11,6 @@ reset: .org 0
  mov r0,r31  ;kommentar 3
 .org 23
 label1: neg r2
-xch Z,erf
-ldi r1,low(23+34<<2)
+xch Z,r22
+ldi r22,low(23+34<<2)
 nop

@@ -21,7 +21,8 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.avr8.api.ClockSink;
+import com.avrwb.annotations.NotNull;
+import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.util.List;
@@ -31,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author Wolfgang Reder
  */
-public interface Device extends ClockSink
+public interface Device
 {
 
   public Logger getLogger();
@@ -59,5 +60,7 @@ public interface Device extends ClockSink
   public Stack getStack();
 
   public void reset(ResetSource source) throws SimulationException;
+
+  public void onClock(@NotNull ClockState clockState) throws SimulationException;
 
 }

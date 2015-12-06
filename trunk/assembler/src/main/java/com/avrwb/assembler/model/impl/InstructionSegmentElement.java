@@ -105,10 +105,12 @@ public class InstructionSegmentElement extends AbstractSegmentElement
       if (size == 2) {
         data.putShort((short) (opcodeGenerator.get() & 0xffff));
       } else {
-        data.putInt(opcodeGenerator.get());
+        int opc = opcodeGenerator.get();
+        data.putShort((short) ((opc >> 16) & 0xffff));
+        data.putShort((short) (opc & 0xffff));
       }
     }
-    ByteBuffer result = data.asReadOnlyBuffer();
+    ByteBuffer result = data.asReadOnlyBuffer().order(byteOrder);
     result.position(0);
     return result;
   }

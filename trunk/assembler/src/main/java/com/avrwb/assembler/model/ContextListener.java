@@ -635,7 +635,7 @@ public class ContextListener extends AtmelAsmBaseListener
     public Integer get()
     {
       return InstructionComposer.composeOpcode_K22(baseOpcode,
-                                                   left.evaluate(context));
+                                                   left.evaluate(context) >> 1);
     }
 
   }
@@ -645,7 +645,7 @@ public class ContextListener extends AtmelAsmBaseListener
 
   {
     Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.INTEGER) {
+    if (left.getType() != ExpressionType.INTEGER && left.getType() != ExpressionType.FORWARD) {
       throw new InvalidTypeException(left.toString() + " is no integer",
                                      sctx).toWrapper();
     }

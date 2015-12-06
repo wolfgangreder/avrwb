@@ -51,11 +51,11 @@ public class DistanceExpression implements Expression
   public int evaluate(Context ctx) throws AssemblerError
   {
     int labelVal = labelExpression.evaluate(ctx);
-    int tmp = labelVal - position - 1;
+    int tmp = labelVal - position;
     if (segment == Segment.CSEG) {
       tmp >>= 1;
     }
-    return tmp;
+    return tmp - 1;
   }
 
 }

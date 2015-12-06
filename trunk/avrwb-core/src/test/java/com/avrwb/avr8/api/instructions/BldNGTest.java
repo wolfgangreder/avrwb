@@ -21,7 +21,16 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import org.testng.annotations.BeforeClass;
+import com.avrwb.avr8.Device;
+import com.avrwb.avr8.SRAM;
+import com.avrwb.avr8.SREG;
+import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
+import java.util.HashSet;
+import java.util.Set;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -30,13 +39,61 @@ import org.testng.annotations.BeforeClass;
 public class BldNGTest extends AbstractInstructionTest
 {
 
-  public BldNGTest()
+  @DataProvider(name = "Provider")
+  public Object[][] getData()
   {
+    return new Object[][]{
+      {0, 0, 0, 0, 0},
+      {1, 0, 0, SREG.MASK_T, 1},
+      {2, 0, 1, ~SREG.MASK_T, 0},
+      {3, 0, 1, SREG.MASK_T, 2},
+      {4, 0xff, 2, SREG.MASK_T, 0xff},
+      {5, 0xff, 2, ~SREG.MASK_T, 0xfb},
+      {6, 0, 3, SREG.MASK_T, 0x08},
+      {7, 0, 4, SREG.MASK_T, 0x10},
+      {8, 0, 5, SREG.MASK_T, 0x20},
+      {9, 0, 6, SREG.MASK_T, 0x40},
+      {10, 0, 7, SREG.MASK_T, 0x80}
+    };
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @Test(dataProvider = "Provider")
+  public void testBld(int rd,
+                      int rdVal,
+                      int b,
+                      int sregInit,
+                      int rdExpected) throws Exception
   {
+    final String cmd = "bld r" + rd + "," + b + "; r" + rd + "=0x" + Integer.toHexString(rdVal);
+    final Device device = getDevice(cmd);
+    final SRAM sram = device.getSRAM();
+    final SREG sreg = device.getCPU().getSREG();
+    final Set<Integer> expectedChange = new HashSet<>();
+    final ClockStateTestImpl cs = new ClockStateTestImpl();
+
+    sram.setByteAt(rd,
+                   rdVal);
+    sreg.setValue(sregInit & 0xff);
+    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
+                                                         expectedChange,
+                                                         cmd)::onMemoryChanged);
+
+    device.onClock(cs.getAndNext());
+    if (rdVal != rdExpected) {
+      expectedChange.add(rd);
+    }
+    device.onClock(cs.getAndNext());
+    assertEquals(sram.getByteAt(rd),
+                 rdExpected,
+                 cmd);
+    assertSREG(sreg.getValue(),
+               sregInit & 0xff,
+               cmd);
+    assertTrue(expectedChange.isEmpty(),
+               cmd);
+    assertEquals(device.getCPU().getIP(),
+                 1,
+                 cmd);
   }
 
 }

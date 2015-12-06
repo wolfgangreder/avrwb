@@ -58,7 +58,7 @@ public final class DefaultMemoryChunk implements MemoryChunk
   @Override
   public ByteBuffer getData()
   {
-    ByteBuffer result = data.asReadOnlyBuffer();
+    ByteBuffer result = data.asReadOnlyBuffer().order(data.order());
     result.position(0);
     return result;
   }
