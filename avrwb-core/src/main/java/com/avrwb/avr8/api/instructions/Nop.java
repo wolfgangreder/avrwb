@@ -23,7 +23,6 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockPhase;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
@@ -61,15 +60,12 @@ public final class Nop extends AbstractInstruction
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
-    if (clockState.getPhase() == ClockPhase.FALLING) {
-      resultBuilder.finished(true,
-                             device.getCPU().getIP() + 1);
-      if (AVRWBDefaults.isDebugLoggingActive()) {
-        device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
-                               getCurrentDeviceMessage(clockState,
-                                                       device));
-      }
-
+    resultBuilder.finished(true,
+                           device.getCPU().getIP() + 1);
+    if (AVRWBDefaults.isDebugLoggingActive()) {
+      device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
+                             getCurrentDeviceMessage(clockState,
+                                                     device));
     }
   }
 

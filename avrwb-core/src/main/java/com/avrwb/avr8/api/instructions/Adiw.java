@@ -74,6 +74,8 @@ public final class Adiw extends Instruction_Rdl_K6
       sreg.setN((rdVal & 0x8000) != 0);
       sreg.setV(((oldRdh & 0x80) == 0) && (rdVal & 0x8000) != 0);
       sreg.fixSignBit();
+      sram.setWordAt(getRdlAddress(),
+                     rdVal);
       if (oldSREG != sreg.getValue()) {
         resultBuilder.addModifiedRegister(sreg);
       }

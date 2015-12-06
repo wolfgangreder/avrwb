@@ -21,7 +21,15 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import org.testng.annotations.BeforeClass;
+import com.avrwb.avr8.CPU;
+import com.avrwb.avr8.Device;
+import com.avrwb.avr8.SREG;
+import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
+import java.util.HashSet;
+import java.util.Set;
+import static org.testng.Assert.assertEquals;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -34,9 +42,38 @@ public class BreakNGTest extends AbstractInstructionTest
   {
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @DataProvider(name = "Provider")
+  public Object[][] getData()
   {
+    return new Object[][]{
+      {0xff},
+      {0}
+    };
+  }
+
+  @Test(dataProvider = "Provider")
+  public void testBreak(int sregInit) throws Exception
+  {
+    final String cmd = "break";
+    final Device device = getDevice(cmd);
+    final CPU cpu = device.getCPU();
+    final SREG sreg = cpu.getSREG();
+    final Set<Integer> expectedChange = new HashSet<>();
+    final ClockStateTestImpl cs = new ClockStateTestImpl();
+
+    sreg.setValue(sregInit);
+    device.getSRAM().addMemoryChangeListener(new MemoryChangeHandler(device.getSRAM(),
+                                                                     expectedChange,
+                                                                     cmd)::onMemoryChanged);
+
+    device.onClock(cs.getAndNext());
+    device.onClock(cs.getAndNext());
+    assertSREG(sreg.getValue(),
+               sregInit,
+               cmd);
+    assertEquals(cpu.getIP(),
+                 1,
+                 cmd);
   }
 
 }

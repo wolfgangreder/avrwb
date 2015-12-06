@@ -76,7 +76,9 @@ public final class InstructionResultBuilderImpl implements InstructionResultBuil
   public InstructionResultBuilder addModifiedRegister(Register modifiedRegister) throws NullPointerException
   {
     Objects.requireNonNull(modifiedRegister);
-    addModifiedDataAddresses(modifiedRegister.getMemoryAddress());
+    for (int i = 0; i < modifiedRegister.getSize(); ++i) {
+      addModifiedDataAddresses(modifiedRegister.getMemoryAddress() + i);
+    }
     return this;
   }
 

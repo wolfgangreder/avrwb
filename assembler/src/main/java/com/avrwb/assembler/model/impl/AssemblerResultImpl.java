@@ -146,7 +146,11 @@ public class AssemblerResultImpl implements AssemblerResult
                                Writer writer) throws IOException
   {
     writer.append("URL: ");
-    writer.append(src.getSourcePath().toString());
+    if (src.getSourcePath() != null) {
+      writer.append(src.getSourcePath().toString());
+    } else {
+      writer.append("<internal>");
+    }
   }
 
   private String getLineNumberString(int line)
@@ -180,7 +184,7 @@ public class AssemblerResultImpl implements AssemblerResult
     try (LineNumberReader reader = new LineNumberReader(src.getReader())) {
       String line;
       while ((line = reader.readLine()) != null) {
-        SourceContext fctx = new SourceContext(src.getSourcePath().toString(),
+        SourceContext fctx = new SourceContext(src.getSourceName(),
                                                reader.getLineNumber(),
                                                0);
         writer.append(getLineNumberString(reader.getLineNumber()));

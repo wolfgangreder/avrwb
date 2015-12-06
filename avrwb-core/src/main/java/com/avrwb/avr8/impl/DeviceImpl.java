@@ -274,8 +274,7 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public void onClock(ClockState clockState,
-                      Device device) throws SimulationException
+  public void onClock(ClockState clockState) throws SimulationException
   {
     for (Module mod : modules) {
       mod.onClock(clockState,

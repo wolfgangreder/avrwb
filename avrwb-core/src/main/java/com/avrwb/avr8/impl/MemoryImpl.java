@@ -375,7 +375,7 @@ class MemoryImpl implements Memory
 
   private int calculateHexStringLen()
   {
-    int maxAddress = start + size;
+    int maxAddress = start + size - 1;
     int len = Integer.toHexString(maxAddress).length();
     if (len % 2 == 0) {
       return len;

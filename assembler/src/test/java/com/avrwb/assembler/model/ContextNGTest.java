@@ -159,7 +159,7 @@ public class ContextNGTest
     }
   }
 
-  @Test(enabled = false)
+  @Test
   public void testBranch() throws IOException, AssemblerException, URISyntaxException
   {
     URL u = getClass().getResource("/asm/br1.asm");
@@ -175,7 +175,7 @@ public class ContextNGTest
 
   }
 
-  @Test(enabled = false)
+  @Test
   public void testMov1() throws IOException, AssemblerException, URISyntaxException
   {
     URL u = getClass().getResource("/asm/mov1.asm");
@@ -189,6 +189,66 @@ public class ContextNGTest
       asr.getCSEG(os);
     }
 
+  }
+
+  @Test
+  public void testBr2() throws Exception
+  {
+    URL u = getClass().getResource("/asm/br2.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test
+  public void testBr3() throws Exception
+  {
+    URL u = getClass().getResource("/asm/br3.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test
+  public void testBr4() throws Exception
+  {
+    URL u = getClass().getResource("/asm/br4.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test
+  public void testCall1() throws Exception
+  {
+    URL u = getClass().getResource("/asm/call1.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
   }
 
 }

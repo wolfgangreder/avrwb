@@ -19,78 +19,61 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.api.instructions;
+package com.avrwb.avr8.api.instructions.helper;
 
 import com.avrwb.avr8.api.ClockPhase;
 import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockStateImpl;
 
 /**
  *
  * @author wolfi
  */
-public final class ClockStateTestImpl implements ClockState
+public final class ClockStateTestImpl
 {
 
-  private ClockPhase phase;
-  private long cycleCount;
+  private ClockStateImpl state = new ClockStateImpl(1_000_000);
 
   public ClockStateTestImpl()
   {
-    reset();
   }
 
-  @Override
   public ClockPhase getPhase()
   {
-    return phase;
+    return state.getPhase();
   }
 
-  @Override
   public long getCycleCount()
   {
-    return cycleCount;
+    return state.getCycleCount();
   }
 
-  @Override
   public long getClockFrequency()
   {
-    return 1_000_000;
+    return state.getClockFrequency();
   }
 
-  @Override
   public long getCurrentNanos()
   {
-    switch (phase) {
-      case FALLING:
-      case LO:
-        return (cycleCount + 1) * 1000L - 500;
-      case RISING:
-      case HI:
-        return cycleCount * 1000;
-    }
-    return 0;
+    return state.getCurrentNanos();
   }
 
-  public void next()
+  public ClockState getAndNext()
   {
-    if (phase == ClockPhase.HI) {
-      phase = ClockPhase.LO;
-    } else {
-      phase = ClockPhase.HI;
-      ++cycleCount;
-    }
+    ClockState result = state;
+    state = state.next();
+    return result;
   }
 
   public void reset()
   {
-    phase = ClockPhase.HI;
-    cycleCount = 0;
+    state = state.reset();
   }
 
   @Override
   public String toString()
   {
-    return "ClockStateTestImpl{" + "phase=" + phase + ", cycleCount=" + cycleCount + '}';
+    return state.toString();
   }
 
 }

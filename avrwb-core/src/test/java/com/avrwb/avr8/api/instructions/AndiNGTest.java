@@ -21,14 +21,13 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -36,60 +35,61 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class JmpNGTest extends AbstractInstructionTest
+public class AndiNGTest extends AbstractInstructionTest
 {
-
-  public JmpNGTest()
-  {
-  }
 
   @DataProvider(name = "Provider")
   public Object[][] getData()
   {
     return new Object[][]{
-      {0x1f0, 0, false, 0x0ff0, 3},
-      {0xff0, 0, false, 0x01f0, 3},
-      {0x1f0, 0xff, false, 0x0ff0, 3},
-      {0xff0, 0xff, true, 0x01f0, 3}
+      {16, 0, 0xff, SREG.MASK_V, 0, SREG.MASK_Z},
+      {17, 0xff, 0, SREG.MASK_V, 0, SREG.MASK_Z},
+      {18, 0xff, 0xaa, SREG.MASK_V, 0xaa, SREG.MASK_N | SREG.MASK_S},
+      {19, 0xaa, 0x55, SREG.MASK_V, 0, SREG.MASK_Z}
     };
   }
 
   @Test(dataProvider = "Provider")
-  public void testJmp(int ip,
-                      int sregInit,
-                      boolean list,
-                      int targetAddress,
-                      int expectedCycles) throws Exception
+  public void testAndi(int rd,
+                       int rdVal,
+                       int k8,
+                       int sregInit,
+                       int rdExpected,
+                       int sregExptected) throws Exception
   {
-    final String cmd = "nop\n.org 0x" + Integer.toHexString(ip) + "\njmp label\nnop\n.org 0x" + Integer.
-            toHexString(targetAddress) + "\nlabel:\nnop";
-    final Device device = getDevice(cmd,
-                                    list);
-    final CPU cpu = device.getCPU();
-    final SREG sreg = cpu.getSREG();
+    final String cmd = "andi r" + rd + ",0x" + Integer.toHexString(k8) + "; r" + rd + "=0x" + Integer.toHexString(rdVal);
+    final Device device = getDevice(cmd);
+    final SRAM sram = device.getSRAM();
+    final SREG sreg = device.getCPU().getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
     final ClockStateTestImpl cs = new ClockStateTestImpl();
 
-    cpu.setIP(device,
-              ip);
+    sram.setByteAt(rd,
+                   rdVal);
     sreg.setValue(sregInit);
-    device.getSRAM().addMemoryChangeListener(new MemoryChangeHandler(device.getSRAM(),
-                                                                     expectedChange,
-                                                                     cmd)::onMemoryChanged);
+    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
+                                                         expectedChange,
+                                                         cmd)::onMemoryChanged);
 
-    for (int i = 0; i < (expectedCycles - 1) * 2; ++i) {
-      device.onClock(cs.getAndNext());
+    device.onClock(cs.getAndNext());
+    if (rdVal != rdExpected) {
+      expectedChange.add(rd);
+    }
+    if (sregInit != sregExptected) {
+      expectedChange.add(sreg.getMemoryAddress());
     }
     device.onClock(cs.getAndNext());
-    device.onClock(cs.getAndNext());
-    assertSREG(sreg.getValue(),
-               sregInit,
-               cmd);
-    assertEquals(cpu.getIP(),
-                 targetAddress,
+    assertEquals(sram.getByteAt(rd),
+                 rdExpected,
                  cmd);
+    assertSREG(sreg.getValue(),
+               sregExptected,
+               cmd);
     assertTrue(expectedChange.isEmpty(),
                cmd);
+    assertEquals(device.getCPU().getIP(),
+                 1,
+                 cmd);
   }
 
 }

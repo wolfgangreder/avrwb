@@ -38,7 +38,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.concurrent.atomic.LongAdder;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Level;
@@ -57,7 +57,7 @@ public final class Context
   private final Map<String, Alias> varMap = new HashMap<>();
   private final LinkedList<Expression> expStack = new LinkedList<>();
   private final Map<Segment, List<SegmentElement>> segments = new HashMap<>();
-  private final Map<Segment, LongAdder> segmentPositions = new HashMap<>();
+  private final Map<Segment, AtomicInteger> segmentPositions = new HashMap<>();
   private Segment currentSegment = Segment.CSEG;
   private final AssemblerConfig config;
   private final InternalAssembler assembler;
@@ -219,7 +219,7 @@ public final class Context
     Objects.requireNonNull(seg,
                            "seg==null");
     return segmentPositions.computeIfAbsent(seg,
-                                            (Segment s) -> new LongAdder()).intValue();
+                                            (Segment s) -> new AtomicInteger()).get();
   }
 
   public int getCurrentPosition()
@@ -232,10 +232,9 @@ public final class Context
   {
     Objects.requireNonNull(seg,
                            "seg==null");
-    LongAdder adder = segmentPositions.computeIfAbsent(seg,
-                                                       (Segment s) -> new LongAdder());
-    adder.reset();
-    adder.add(currentPosition);
+    AtomicInteger adder = segmentPositions.computeIfAbsent(seg,
+                                                           (Segment s) -> new AtomicInteger());
+    adder.set(currentPosition);
   }
 
   private int addToSegment(@NotNull SegmentElement element,
@@ -252,6 +251,11 @@ public final class Context
     } else {
       int index = -(Collections.binarySearch(seg,
                                              element) + 1);
+      if (index < 0) {
+        throw new AssemblerError("address collision in " + segment + " at offset 0x" + Integer.
+                toHexString(element.getStartAddress()),
+                                 sourceContext);
+      }
       if (index == seg.size()) {
         SegmentElement prev = seg.get(index - 1);
         if ((prev.getStartAddress() + prev.getSize()) > element.getStartAddress()) {
@@ -259,8 +263,6 @@ public final class Context
                   toHexString(element.getStartAddress()),
                                    sourceContext);
         }
-        seg.add(index,
-                element);
       } else {
         SegmentElement next = seg.get(index);
         if (next.getStartAddress() < maxAddress) {
@@ -277,6 +279,9 @@ public final class Context
           }
         }
       }
+      seg.add(index,
+              element);
+
     }
     return element.getSize();
   }
@@ -299,11 +304,11 @@ public final class Context
                            "seg==null");
     Objects.requireNonNull(element,
                            "element==null");
-    LongAdder adder = segmentPositions.computeIfAbsent(seg,
-                                                       (Segment s) -> new LongAdder());
-    adder.add(addToSegment(element,
-                           seg,
-                           sourceContext));
+    AtomicInteger adder = segmentPositions.computeIfAbsent(seg,
+                                                           (Segment s) -> new AtomicInteger());
+    adder.addAndGet(addToSegment(element,
+                                 seg,
+                                 sourceContext));
 
   }
 

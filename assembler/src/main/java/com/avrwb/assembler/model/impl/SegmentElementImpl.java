@@ -133,7 +133,7 @@ public class SegmentElementImpl extends AbstractSegmentElement
   @Override
   public ByteBuffer getData()
   {
-    ByteBuffer tmp = data.asReadOnlyBuffer();
+    ByteBuffer tmp = data.asReadOnlyBuffer().order(data.order());
     tmp.position(0);
     return tmp;
   }

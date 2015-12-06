@@ -88,7 +88,7 @@ public abstract class AbstractInstruction implements Instruction
     sreg.setN((v & 0x80) != 0);
     sreg.setV((((rr & rd & ~v) & 0x80) != 0) || (((~rr & ~rd & v) & 0x80) != 0));
     sreg.fixSignBit();
-    sreg.setH((((rr & rd & ~v) & 0x08) != 0) || (((~rr & ~rd & v) & 0x08) != 0));
+    sreg.setH((rd & rr & 0x08) != 0 || (rr & (~v) & 0x08) != 0 || ((~v) & rd & 0x08) != 0);
     return v;
   }
 

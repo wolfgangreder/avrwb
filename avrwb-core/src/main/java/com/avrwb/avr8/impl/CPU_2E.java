@@ -214,4 +214,10 @@ public class CPU_2E implements CPU
     return version;
   }
 
+  @Override
+  public String toString()
+  {
+    return "CPU_2E{" + "ip=0x" + Integer.toHexString(ip) + ", currentInstruction=" + currentInstruction + ", sreg=" + sreg + '}';
+  }
+
 }

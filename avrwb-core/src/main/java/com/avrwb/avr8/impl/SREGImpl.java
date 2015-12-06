@@ -27,8 +27,9 @@ import com.avrwb.avr8.RegisterBitGrpValue;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import java.util.Collection;
+import java.util.function.Function;
 
-final class SREGImpl extends RegisterImpl implements SREG
+public final class SREGImpl extends RegisterImpl implements SREG
 {
 
   public static final char[] BITNAMES = {'C', 'Z', 'N', 'V', 'S', 'H', 'T', 'I'};
@@ -219,12 +220,13 @@ final class SREGImpl extends RegisterImpl implements SREG
     setS(((v & MASK_N) != 0) ^ ((v & MASK_V) != 0));
   }
 
-  private void appendBit(int index,
-                         StringBuilder builder)
+  private static void appendBit(int index,
+                                StringBuilder builder,
+                                Function<Integer, Boolean> bitSet)
   {
     builder.append(BITNAMES[index]);
     builder.append(':');
-    if (getBit(index)) {
+    if (bitSet.apply(index)) {
       builder.append('1');
     } else {
       builder.append('0');
@@ -235,17 +237,23 @@ final class SREGImpl extends RegisterImpl implements SREG
   public synchronized String toString()
   {
     if (toString == null) {
-      StringBuilder tmp = new StringBuilder("SREG{");
-      for (int i = 0; i < 7; ++i) {
-        appendBit(i,
-                  tmp);
-        tmp.append(", ");
-      }
-      tmp.setLength(tmp.length() - 2);
-      tmp.append('}');
-      toString = tmp.toString();
+      toString = getSREGString(getValue());
     }
     return toString;
+  }
+
+  public static String getSREGString(int sregValue)
+  {
+    StringBuilder tmp = new StringBuilder("SREG{");
+    for (int i = 0; i < 8; ++i) {
+      appendBit(i,
+                tmp,
+                (Integer b) -> (sregValue & (1 << b)) != 0);
+      tmp.append(", ");
+    }
+    tmp.setLength(tmp.length() - 2);
+    tmp.append('}');
+    return tmp.toString();
   }
 
 }
