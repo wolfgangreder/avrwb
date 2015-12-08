@@ -25,9 +25,11 @@ import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBuilder;
 import com.avrwb.avr8.ResetSource;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
@@ -65,9 +67,15 @@ public class CPU_2E implements CPU
   private final List<Register> register;
   private final CPU_2EInstructionDecoder instructionDecoder;
   private final AvrCore version;
+  private final Register rampd;
+  private final Register rampx;
+  private final Register rampy;
+  private final Register rampz;
+  private final Register eind;
 
   CPU_2E(@NotNull XmlDevice device,
          @NotNull XmlModule module,
+         @NotNull SRAM sram,
          @NotNull NotFoundStrategy nfStrategy) throws NullPointerException, ItemNotFoundException
   {
     Objects.requireNonNull(device,
@@ -76,14 +84,21 @@ public class CPU_2E implements CPU
                            "module==null");
     Objects.requireNonNull(nfStrategy,
                            "nfStrategy==null");
+    Objects.requireNonNull(sram,
+                           "sram==null");
     if (module.getClazz() != ModuleClass.CPU) {
       throw new IllegalArgumentException("module is no cpu");
     }
     this.name = module.getName();
-    final RegisterBuilder registerBuilder = InstanceFactories.getRegisterBuilder();
+    final RegisterBuilder registerBuilder = InstanceFactories.getRegisterBuilder().sram(sram);
     final List<Register> tmpRegister = new ArrayList<>();
     SREG tmpSREG = null;
     Register tmpSP = null;
+    Register tmprampd = null;
+    Register tmprampx = null;
+    Register tmprampy = null;
+    Register tmprampz = null;
+    Register tmpeind = null;
     for (XmlRegister r : module.getRegister()) {
       Register reg = registerBuilder.fromDescritpor(r).build();
       switch (reg.getName()) {
@@ -99,6 +114,26 @@ public class CPU_2E implements CPU
           tmpSP = reg;
           tmpRegister.add(reg);
           break;
+        case "RAMPD":
+          tmprampd = reg;
+          tmpRegister.add(reg);
+          break;
+        case "RAMPX":
+          tmprampx = reg;
+          tmpRegister.add(reg);
+          break;
+        case "RAMPY":
+          tmprampy = reg;
+          tmpRegister.add(reg);
+          break;
+        case "RAMPZ":
+          tmprampz = reg;
+          tmpRegister.add(reg);
+          break;
+        case "EIND":
+          tmpeind = reg;
+          tmpRegister.add(reg);
+          break;
         default:
           tmpRegister.add(reg);
           break;
@@ -107,6 +142,11 @@ public class CPU_2E implements CPU
     this.register = Collections.unmodifiableList(tmpRegister);
     this.sreg = tmpSREG;
     this.sp = tmpSP;
+    this.rampd = tmprampd;
+    this.rampx = tmprampx;
+    this.rampy = tmprampy;
+    this.rampz = tmprampz;
+    this.eind = tmpeind;
     if (sreg == null) {
       ItemNotFoundException.processItemNotFound(device.getName(),
                                                 "SREG",
@@ -212,6 +252,35 @@ public class CPU_2E implements CPU
   public AvrCore getCoreVersion()
   {
     return version;
+  }
+
+  @Override
+  public Register getEIND()
+  {
+    return eind;
+  }
+
+  @Override
+  public Register getRAMP(Pointer ptr)
+  {
+    Objects.requireNonNull(ptr,
+                           "ptr==null");
+    switch (ptr) {
+      case X:
+        return rampx;
+      case Y:
+        return rampy;
+      case Z:
+        return rampz;
+      default:
+        throw new IllegalArgumentException("unexpected ptr " + ptr.name());
+    }
+  }
+
+  @Override
+  public Register getRAMPD()
+  {
+    return rampd;
   }
 
   @Override

@@ -251,4 +251,49 @@ public class ContextNGTest
     }
   }
 
+  @Test
+  public void testPadding1() throws Exception
+  {
+    URL u = getClass().getResource("/asm/padding1.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test
+  public void testPadding2() throws Exception
+  {
+    URL u = getClass().getResource("/asm/padding2.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
+  @Test
+  public void testElpm1() throws Exception
+  {
+    URL u = getClass().getResource("/asm/elpm1.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+  }
+
 }

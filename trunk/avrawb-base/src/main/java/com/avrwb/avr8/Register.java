@@ -170,4 +170,10 @@ public interface Register
    */
   public void decrement();
 
+  /**
+   *
+   * @return dataspace
+   */
+  public SRAM getMemory();
+
 }

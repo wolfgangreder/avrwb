@@ -37,6 +37,7 @@ public class DesNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
+    System.err.println("implement me");
   }
 
 }

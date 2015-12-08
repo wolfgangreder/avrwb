@@ -68,7 +68,7 @@ public final class Adiw extends Instruction_Rdl_K6
       int oldSREG = sreg.getValue();
       int oldRdl = sram.getByteAt(getRdlAddress());
       int oldRdh = sram.getByteAt(getRdlAddress() + 1);
-      rdVal += getK6();
+      rdVal = (rdVal + getK6()) & 0xffff;
       sreg.setC(((rdVal & 0x8000) == 0) && ((oldRdh & 0x80) != 0));
       sreg.setZ(rdVal == 0);
       sreg.setN((rdVal & 0x8000) != 0);

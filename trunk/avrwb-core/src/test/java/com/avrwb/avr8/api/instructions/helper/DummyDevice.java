@@ -26,6 +26,7 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.Module;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
@@ -42,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -58,7 +60,6 @@ public class DummyDevice implements Device
   private final List<Memory> memories;
   private final Stack stack;
   private final AvrDeviceKey deviceKey;
-  private Object instructionContext;
 
   public DummyDevice(CPU cpu)
   {
@@ -210,10 +211,12 @@ public class DummyDevice implements Device
       mod.onClock(clockState,
                   this);
     }
-    for (Memory mem : memories) {
-      mem.onClock(clockState,
-                  this);
-    }
+  }
+
+  @Override
+  public Map<Integer, Register> getIOSpace()
+  {
+    return Collections.emptyMap();
   }
 
 }

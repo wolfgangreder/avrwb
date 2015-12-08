@@ -22,6 +22,7 @@
 package com.avrwb.avr8.impl;
 
 import com.avrwb.avr8.ModuleBuilder;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.schema.XmlDevice;
 import com.avrwb.schema.XmlModule;
@@ -37,8 +38,18 @@ public abstract class AbstractModuleBuilder<B extends ModuleBuilder> implements 
   protected XmlDevice device;
   protected XmlModule module;
   protected NotFoundStrategy nfStrategy;
+  protected SRAM sram;
 
   protected abstract B getThis();
+
+  @Override
+  public B sram(SRAM sram) throws NullPointerException
+  {
+    Objects.requireNonNull(sram,
+                           "sram==null");
+    this.sram = sram;
+    return getThis();
+  }
 
   @Override
   public B notFoundStrategy(NotFoundStrategy nfStrategy) throws NullPointerException

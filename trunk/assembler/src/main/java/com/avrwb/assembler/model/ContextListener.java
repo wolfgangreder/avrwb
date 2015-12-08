@@ -64,11 +64,13 @@ import com.avrwb.assembler.model.impl.ProductOperation;
 import com.avrwb.assembler.model.impl.RightShiftOperation;
 import com.avrwb.assembler.model.impl.StringExpression;
 import com.avrwb.assembler.model.impl.UniMinusOperation;
+import com.avrwb.assembler.model.impl.WordExpression;
 import com.avrwb.assembler.parser.AtmelAsmBaseListener;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import com.avrwb.avr8.api.InstructionComposer;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -226,15 +228,51 @@ public class ContextListener extends AtmelAsmBaseListener
   @Override
   public void exitDb_dir(AtmelAsmParser.Db_dirContext ctx)
   {
-    context.forEachExpression((Expression ex) -> {
-      SegmentElement se = ex.toSegmentElement(context,
-                                              context.getCurrentPosition(),
-                                              1,
-                                              context.getConfig().getTargetByteOrder());
-      context.addToSeg(se,
-                       getSourceContext(ctx));
-    },
-                              true);
+    if (context.getCurrentSegment() == Segment.CSEG) {
+      final SourceContext sctx = getSourceContext(ctx);
+      List<Expression> tmpList = new LinkedList<>();
+      context.forEachExpression((Expression ex) -> {
+        if (tmpList.size() == 2) {
+          WordExpression we = new WordExpression(sctx,
+                                                 tmpList.get(0),
+                                                 tmpList.get(1));
+          SegmentElement se = we.toSegmentElement(context,
+                                                  context.getCurrentPosition(),
+                                                  2,
+                                                  context.getConfig().getTargetByteOrder());
+          context.addToSeg(se,
+                           getSourceContext(ctx));
+          tmpList.clear();
+        }
+        tmpList.add(ex);
+      },
+                                true);
+      if (tmpList.size() == 1) {
+        tmpList.add(new IntExpression(0,
+                                      sctx));
+      }
+      if (tmpList.size() == 2) {
+        WordExpression we = new WordExpression(sctx,
+                                               tmpList.get(0),
+                                               tmpList.get(1));
+        SegmentElement se = we.toSegmentElement(context,
+                                                context.getCurrentPosition(),
+                                                2,
+                                                context.getConfig().getTargetByteOrder());
+        context.addToSeg(se,
+                         getSourceContext(ctx));
+      }
+    } else {
+      context.forEachExpression((Expression ex) -> {
+        SegmentElement se = ex.toSegmentElement(context,
+                                                context.getCurrentPosition(),
+                                                1,
+                                                context.getConfig().getTargetByteOrder());
+        context.addToSeg(se,
+                         getSourceContext(ctx));
+      },
+                                true);
+    }
   }
 
   @Override
@@ -2117,7 +2155,7 @@ public class ContextListener extends AtmelAsmBaseListener
   {
     final SourceContext sctx = getSourceContext(ctx);
 
-    Supplier<Integer> opcode = composeOpcode_Rd(0x9006,
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9007,
                                                 sctx);
     addOpcodeToSegment(opcode,
                        false,
@@ -2128,7 +2166,7 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitElpm_Z(AtmelAsmParser.Elpm_ZContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    Supplier<Integer> opcode = composeOpcode_Rd(0x9007,
+    Supplier<Integer> opcode = composeOpcode_Rd(0x9006,
                                                 sctx);
     addOpcodeToSegment(opcode,
                        false,

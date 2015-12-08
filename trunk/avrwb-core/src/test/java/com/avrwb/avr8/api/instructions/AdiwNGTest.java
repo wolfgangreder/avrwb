@@ -50,7 +50,7 @@ public class AdiwNGTest extends AbstractInstructionTest
       {24, 0, 0, 0, 0, SREG.MASK_Z},
       {26, 0xfff0, 0x3f, SREG.MASK_I, (0xfff0 + 0x3f) & 0xffff, SREG.MASK_C | SREG.MASK_I},
       {28, 25, 47, SREG.MASK_C | SREG.MASK_Z, 72, 0},
-      {30, (short) 0x7ffe, 0x10, 0, (short) 0x800e, SREG.MASK_N | SREG.MASK_V},
+      {30, 0x7ffe, 0x10, 0, 0x800e, SREG.MASK_N | SREG.MASK_V},
       {24, 0xffff, 1, 0, 0, SREG.MASK_Z | SREG.MASK_C}
     };
   }

@@ -22,11 +22,17 @@
 package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
+import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.helper.AVRWBDefaults;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.schema.util.Converter;
+import java.text.MessageFormat;
 
 /**
  *
@@ -37,6 +43,7 @@ public final class EICall extends AbstractInstruction
 {
 
   public static final int OPCODE = 0x9519;
+  private int callTarget;
 
   public static EICall getInstance(AvrDeviceKey deviceKey,
                                    int opcode,
@@ -56,11 +63,53 @@ public final class EICall extends AbstractInstruction
   }
 
   @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder) throws SimulationException
+  {
+    if (finishCycle == -1) {
+      callTarget = device.getSRAM().getPointer(Pointer.Z) + (device.getCPU().getEIND().getValue() << 16);
+      finishCycle = clockState.getCycleCount() + 3;
+    }
+  }
+
+  @Override
   protected void doExecute(ClockState clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (finishCycle == clockState.getCycleCount()) {
+      final Stack stack = device.getStack();
+      final CPU cpu = device.getCPU();
+      final int ipToPush = cpu.getIP() + 2;
+      int toPush = ipToPush & 0xff;
+      int oldByte = stack.push(toPush);
+      resultBuilder.addModifiedRegister(cpu.getStackPointer());
+      if (oldByte != toPush) {
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
+      }
+      toPush = (ipToPush & 0xff00) >> 8;
+      oldByte = stack.push(toPush);
+      if (oldByte != toPush) {
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
+      }
+      toPush = (ipToPush & 0x3f0000) >> 16;
+      oldByte = stack.push(toPush);
+      if (oldByte != toPush) {
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
+      }
+      resultBuilder.finished(true,
+                             callTarget);
+      if (AVRWBDefaults.isDebugLoggingActive()) {
+        device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
+                               () -> MessageFormat.format("{0} calling ip {1}",
+                                                          getCurrentDeviceMessage(clockState,
+                                                                                  device),
+                                                          Converter.printHexString(callTarget,
+                                                                                   device.getFlash().getHexAddressStringWidth())));
+      }
+
+    }
   }
 
 }

@@ -79,4 +79,26 @@ public interface CPU extends Module
   @NotNull
   public AvrCore getCoreVersion();
 
+  /**
+   * Liefert, wenn vorhanden, das Register EIND.
+   *
+   * @return eind oder {@code null}
+   */
+  public Register getEIND();
+
+  /**
+   * Liefert, wenn vorhanden eines der Register RAMPx
+   *
+   * @param ptr zeiger
+   * @return ramp(x,y,z) oder {@code null}
+   */
+  public Register getRAMP(Pointer ptr);
+
+  /**
+   * Liefert, wenn vorhanden eines das Register RAMPD
+   *
+   * @return rampd oder {@code null}
+   */
+  public Register getRAMPD();
+
 }

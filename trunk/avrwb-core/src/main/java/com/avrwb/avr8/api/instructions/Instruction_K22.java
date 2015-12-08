@@ -48,6 +48,12 @@ public abstract class Instruction_K22 extends AbstractInstruction
   }
 
   @Override
+  public int getSize()
+  {
+    return 4;
+  }
+
+  @Override
   public String toString()
   {
     return toStringValue;

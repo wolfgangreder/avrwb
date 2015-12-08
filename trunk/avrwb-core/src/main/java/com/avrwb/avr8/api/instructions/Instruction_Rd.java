@@ -63,17 +63,20 @@ public abstract class Instruction_Rd extends AbstractInstruction
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    final int rdAddress = getRdAddress();
-    rdVal = device.getSRAM().getByteAt(rdAddress);
-    if (AVRWBDefaults.isDebugLoggingActive()) {
-      Logger logger = device.getLogger();
-      logger.log(AVRWBDefaults.getInstructionTraceLevel(),
-                 "{0} reading rdVal r{1,number,0}={2}",
-                 new Object[]{getCurrentDeviceMessage(clockState,
-                                                      device),
-                              rdAddress,
-                              Converter.printHexString(rdVal,
-                                                       2)});
+    if (finishCycle == -1) {
+      final int rdAddress = getRdAddress();
+      rdVal = device.getSRAM().getByteAt(rdAddress);
+      if (AVRWBDefaults.isDebugLoggingActive()) {
+        Logger logger = device.getLogger();
+        logger.log(AVRWBDefaults.getInstructionTraceLevel(),
+                   "{0} reading rdVal r{1,number,0}={2}",
+                   new Object[]{getCurrentDeviceMessage(clockState,
+                                                        device),
+                                rdAddress,
+                                Converter.printHexString(rdVal,
+                                                         2)});
+      }
+      finishCycle = clockState.getCycleCount() + getCycleCount() - 1;
     }
   }
 

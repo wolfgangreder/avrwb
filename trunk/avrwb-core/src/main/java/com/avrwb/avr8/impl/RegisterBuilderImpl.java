@@ -26,6 +26,7 @@ import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpBuilder;
 import com.avrwb.avr8.RegisterBuilder;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.schema.XmlBitgroup;
 import com.avrwb.schema.XmlRegister;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   private int ioAddress = -1;
   private int mask = -1;
   private int size = -1;
+  private SRAM memory = null;
   private final List<RegisterBitGrp> registerBits = new ArrayList<>();
 
   @Override
@@ -131,6 +133,9 @@ public final class RegisterBuilderImpl implements RegisterBuilder
     if (size < 1) {
       throw new IllegalArgumentException("size<1");
     }
+    if (size > 4) {
+      throw new IllegalArgumentException("size>4");
+    }
     this.size = size;
     return this;
   }
@@ -152,6 +157,15 @@ public final class RegisterBuilderImpl implements RegisterBuilder
   }
 
   @Override
+  public RegisterBuilder sram(SRAM sram) throws NullPointerException
+  {
+    Objects.requireNonNull(sram,
+                           "sram==null");
+    this.memory = sram;
+    return this;
+  }
+
+  @Override
   public Register build() throws NullPointerException, IllegalStateException
   {
     Objects.requireNonNull(name,
@@ -161,6 +175,8 @@ public final class RegisterBuilderImpl implements RegisterBuilder
     }
     Objects.requireNonNull(caption,
                            "caption==null");
+    Objects.requireNonNull(memory,
+                           "memory==null");
     if (memoryAddress < 0) {
       throw new IllegalStateException("memoryAddress<0");
     }
@@ -176,7 +192,8 @@ public final class RegisterBuilderImpl implements RegisterBuilder
                             ioAddress,
                             mask,
                             size,
-                            registerBits);
+                            registerBits,
+                            memory);
   }
 
 }

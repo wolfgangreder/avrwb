@@ -57,6 +57,7 @@ final class CPU_2EBuilder extends AbstractModuleBuilder<CPU_2EBuilder> implement
   {
     return new CPU_2E(device,
                       module,
+                      sram,
                       nfStrategy);
   }
 

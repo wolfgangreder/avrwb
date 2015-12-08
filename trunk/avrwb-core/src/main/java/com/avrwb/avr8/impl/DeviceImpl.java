@@ -29,6 +29,7 @@ import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
 import com.avrwb.avr8.Module;
 import com.avrwb.avr8.ModuleBuilderFactory;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
@@ -47,7 +48,9 @@ import com.avrwb.schema.XmlDevice;
 import com.avrwb.schema.XmlModule;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -72,7 +75,7 @@ final class DeviceImpl implements Device
   private final Memory flash;
   private final SRAM sram;
   private final Stack stack;
-  private Object instructionContext;
+  private final Map<Integer, Register> ioSpace;
 
   DeviceImpl(@NotNull XmlDevice device,
              Variant variant,
@@ -94,21 +97,6 @@ final class DeviceImpl implements Device
       speedMax = AVRWBDefaults.SPEED_MAX;
     }
     name = device.getName();
-    List<Module> tmpModules = initModules(device,
-                                          nfStrategy);
-    if (tmpModules.isEmpty()) {
-      modules = Collections.emptyList();
-      cpu = null;
-    } else {
-      CPU tmpCpu = null;
-      modules = Collections.unmodifiableList(tmpModules);
-      for (Module m : modules) {
-        if (AVRWBDefaults.MODULENAME_CPU.equals(m.getName()) && m instanceof CPU) {
-          tmpCpu = (CPU) m;
-        }
-      }
-      cpu = tmpCpu;
-    }
     List<Memory> tmpMemories = initMemories(device,
                                             nfStrategy);
     Memory tmpFlash = null;
@@ -128,6 +116,31 @@ final class DeviceImpl implements Device
     }
     flash = tmpFlash;
     sram = tmpSRAM;
+    List<Module> tmpModules = initModules(device,
+                                          nfStrategy,
+                                          sram);
+    if (tmpModules.isEmpty()) {
+      modules = Collections.emptyList();
+      cpu = null;
+      ioSpace = Collections.emptyMap();
+    } else {
+      Map<Integer, Register> tmpIOSpace = new HashMap<>();
+      CPU tmpCpu = null;
+      modules = Collections.unmodifiableList(tmpModules);
+      for (Module m : modules) {
+        if (AVRWBDefaults.MODULENAME_CPU.equals(m.getName()) && m instanceof CPU) {
+          tmpCpu = (CPU) m;
+        }
+        for (Register r : m.getRegister()) {
+          if (r.getIOAddress() != -1) {
+            tmpIOSpace.put(r.getIOAddress(),
+                           r);
+          }
+        }
+      }
+      cpu = tmpCpu;
+      ioSpace = Collections.unmodifiableMap(tmpIOSpace);
+    }
     stack = new MemoryStack(cpu.getStackPointer(),
                             sram);
     deviceKey = new AvrDeviceKey(device.getFamily(),
@@ -156,7 +169,8 @@ final class DeviceImpl implements Device
   }
 
   private static List<Module> initModules(XmlDevice device,
-                                          NotFoundStrategy nfStrategy) throws ItemNotFoundException
+                                          NotFoundStrategy nfStrategy,
+                                          SRAM sram) throws ItemNotFoundException
   {
     ModuleKey baseKey = new ModuleKey("",
                                       device.getAvrCore(),
@@ -170,6 +184,7 @@ final class DeviceImpl implements Device
       ModuleBuilderFactory factory = moduleResolver.findModuleBuilder(currentKey);
       if (factory != null) {
         result.add(factory.createBuilder().
+                sram(sram).
                 moduleDescriptor(mod).
                 device(device).
                 notFoundStrategy(nfStrategy).
@@ -274,14 +289,16 @@ final class DeviceImpl implements Device
   }
 
   @Override
+  public Map<Integer, Register> getIOSpace()
+  {
+    return ioSpace;
+  }
+
+  @Override
   public void onClock(ClockState clockState) throws SimulationException
   {
     for (Module mod : modules) {
       mod.onClock(clockState,
-                  this);
-    }
-    for (Memory mem : memories) {
-      mem.onClock(clockState,
                   this);
     }
   }

@@ -24,6 +24,7 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpValue;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import java.util.Collection;
@@ -44,7 +45,8 @@ public final class SREGImpl extends RegisterImpl implements SREG
          register.getIOAddress(),
          register.getMask(),
          register.getSize(),
-         register.getBits());
+         register.getBits(),
+         register.getMemory());
   }
 
   public SREGImpl(String name,
@@ -53,7 +55,8 @@ public final class SREGImpl extends RegisterImpl implements SREG
                   int ioAddress,
                   int mask,
                   int size,
-                  Collection<? extends RegisterBitGrp> bits)
+                  Collection<? extends RegisterBitGrp> bits,
+                  SRAM sram)
   {
     super(name,
           caption,
@@ -61,7 +64,8 @@ public final class SREGImpl extends RegisterImpl implements SREG
           ioAddress,
           mask,
           size,
-          bits);
+          bits,
+          sram);
     if (!"SREG".equals(name)) {
       throw new IllegalArgumentException("register is not SREG");
     }

@@ -24,7 +24,6 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.ResetSource;
-import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.MemoryChangeListener;
 import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.io.MemoryChunk;
@@ -182,7 +181,7 @@ class MemoryImpl implements Memory
   @Override
   public int getWordAt(int address)
   {
-    return data.getShort(checkAddress(address));
+    return (data.getShort(checkAddress(address)) & 0xffff);
   }
 
   @Override
@@ -196,7 +195,7 @@ class MemoryImpl implements Memory
   @Override
   public long getDWordAt(int address)
   {
-    return data.getInt(checkAddress(address));
+    return data.getInt(checkAddress(address)) & 0xffffffff;
   }
 
   @Override
@@ -388,12 +387,6 @@ class MemoryImpl implements Memory
   public int getHexAddressStringWidth()
   {
     return hexStringLen;
-  }
-
-  @Override
-  public void onClock(ClockState clockState,
-                      Device device) throws SimulationException
-  {
   }
 
   @Override

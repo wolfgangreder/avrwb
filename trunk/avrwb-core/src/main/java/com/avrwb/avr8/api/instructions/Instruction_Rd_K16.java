@@ -62,6 +62,12 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
   }
 
   @Override
+  public int getSize()
+  {
+    return 4;
+  }
+
+  @Override
   protected void doPrepare(ClockState clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException

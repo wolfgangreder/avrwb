@@ -92,18 +92,18 @@ public final class ICall extends AbstractInstruction
       int oldByte = stack.push(toPush);
       resultBuilder.addModifiedRegister(cpu.getStackPointer());
       if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
       }
       toPush = (ipToPush & 0xff00) >> 8;
       oldByte = stack.push(toPush);
       if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
       }
       if (longCall) {
         toPush = (ipToPush & 0x3f0000) >> 16;
         oldByte = stack.push(toPush);
         if (oldByte != toPush) {
-          resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+          resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
         }
       }
       resultBuilder.finished(true,

@@ -26,6 +26,7 @@ import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.helper.AvrDeviceKey;
 import com.avrwb.avr8.helper.SimulationException;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -58,6 +59,8 @@ public interface Device
   public SRAM getSRAM();
 
   public Stack getStack();
+
+  public Map<Integer, Register> getIOSpace();
 
   public void reset(ResetSource source) throws SimulationException;
 
