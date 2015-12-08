@@ -45,6 +45,9 @@ public interface ModuleBuilder<B extends ModuleBuilder>
   public B moduleDescriptor(@NotNull XmlModule module) throws NullPointerException, IllegalArgumentException;
 
   @NotNull
+  public B sram(@NotNull SRAM sram) throws NullPointerException;
+
+  @NotNull
   public Module build() throws IllegalStateException, ItemNotFoundException, NullPointerException;
 
 }

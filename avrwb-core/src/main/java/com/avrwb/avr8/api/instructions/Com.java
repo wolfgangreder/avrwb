@@ -70,7 +70,7 @@ public final class Com extends Instruction_Rd
     sreg.setV(false);
     sreg.setZ(rdVal == 0);
     sreg.setN((rdVal & 0x80) != 0);
-    sreg.setS(sreg.getV() ^ sreg.getN());
+    sreg.fixSignBit();
     if (rdVal != oldRd) {
       resultBuilder.addModifiedDataAddresses(rdAddress);
       device.getSRAM().setByteAt(rdAddress,

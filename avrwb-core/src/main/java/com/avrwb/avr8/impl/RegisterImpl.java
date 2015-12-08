@@ -24,6 +24,7 @@ package com.avrwb.avr8.impl;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpValue;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.helper.ItemNotFoundException;
 import com.avrwb.avr8.helper.NotFoundStrategy;
 import com.avrwb.schema.util.Converter;
@@ -49,7 +50,8 @@ class RegisterImpl implements Register
   private final int mask;
   private final int size;
   private final List<RegisterBitGrp> registerBits;
-  private int value;
+  private final SRAM sram;
+  private final MemoryCellAdapter cellAdapter;
 
   RegisterImpl(String name,
                String caption,
@@ -57,7 +59,8 @@ class RegisterImpl implements Register
                int ioAddress,
                int mask,
                int size,
-               Collection<? extends RegisterBitGrp> bits)
+               Collection<? extends RegisterBitGrp> bits,
+               SRAM sram)
   {
     this.name = name;
     this.caption = caption;
@@ -69,6 +72,30 @@ class RegisterImpl implements Register
       registerBits = Collections.emptyList();
     } else {
       registerBits = Collections.unmodifiableList(new ArrayList<>(bits));
+    }
+    this.sram = sram;
+    switch (size) {
+      case 1:
+        cellAdapter = new ByteMemoryCellAdapter(sram,
+                                                memoryAddress,
+                                                mask);
+        break;
+      case 2:
+        cellAdapter = new WordMemoryCellAdapter(sram,
+                                                memoryAddress,
+                                                mask);
+        break;
+      case 3:
+        cellAdapter = new ThreeByteMemoryCellAdapter(sram,
+                                                     memoryAddress,
+                                                     mask);
+        break;
+      case 4:
+        cellAdapter = new DWordMemoryCellAdapter(sram,
+                                                 memoryAddress,
+                                                 mask);
+      default:
+        throw new IllegalArgumentException("invalid registersize " + size);
     }
   }
 
@@ -117,25 +144,25 @@ class RegisterImpl implements Register
   @Override
   public int getValue()
   {
-    return value;
+    return cellAdapter.getValue();
   }
 
   @Override
   public void setValue(int newValue)
   {
-    this.value = newValue & mask;
+    cellAdapter.setValue(newValue);
   }
 
   @Override
   public void increment()
   {
-    this.value = (value + 1) & mask;
+    cellAdapter.increment();
   }
 
   @Override
   public void decrement()
   {
-    this.value = (value - 1) & mask;
+    cellAdapter.decrement();
   }
 
   @Override
@@ -164,7 +191,7 @@ class RegisterImpl implements Register
 
   @Override
   public int setBitGrpValue(RegisterBitGrp bitGrp,
-                            int value) throws ItemNotFoundException, NullPointerException
+                            int val) throws ItemNotFoundException, NullPointerException
   {
     Objects.requireNonNull(bitGrp,
                            "bitGrp==null");
@@ -174,36 +201,40 @@ class RegisterImpl implements Register
                                                 NotFoundStrategy.ERROR);
       assert false;
     }
-    int newBits = (value << bitGrp.getRightShift()) & bitGrp.getMask();
+    int newBits = (val << bitGrp.getRightShift()) & bitGrp.getMask();
     int oldValue = getBitGrpValue(bitGrp);
-    this.value &= ~bitGrp.getMask();
-    this.value |= newBits;
+    int value = cellAdapter.getValue();
+    value &= ~bitGrp.getMask();
+    value |= newBits;
+    cellAdapter.setValue(value);
     return oldValue;
   }
 
   @Override
   public boolean getBit(int bit) throws IllegalArgumentException
   {
-    if (bit < 0 || bit > 7) {
+    if (bit < 0 || bit > ((getSize() * 8) - 1)) {
       throw new IllegalArgumentException("bitindex out of range");
     }
-    return (value & (1 << bit)) != 0;
+    return (getValue() & (1 << bit)) != 0;
   }
 
   @Override
   public boolean setBit(int bit,
                         boolean state) throws IllegalArgumentException
   {
-    if (bit < 0 || bit > 7) {
+    if (bit < 0 || bit > ((getSize() * 8) - 1)) {
       throw new IllegalArgumentException("bitindex out of range");
     }
     final int m = 1 << bit;
+    int value = cellAdapter.getValue();
     boolean old = (value & m) != 0;
     if (state) {
       value |= m;
     } else {
       value &= ~m;
     }
+    cellAdapter.setValue(value);
     return old;
   }
 
@@ -218,8 +249,15 @@ class RegisterImpl implements Register
                                                 NotFoundStrategy.ERROR);
       assert false;
     }
+    int value = cellAdapter.getValue();
     int tmp = value & bitGrp.getMask();
     return tmp >> bitGrp.getRightShift();
+  }
+
+  @Override
+  public SRAM getMemory()
+  {
+    return sram;
   }
 
   @Override
@@ -228,7 +266,7 @@ class RegisterImpl implements Register
     return "Register{" + "name=" + name + ", address(" + Converter.printHexString(memoryAddress,
                                                                                   2) + ","
                    + Converter.printHexString(ioAddress,
-                                              2) + ")}";
+                                              2) + "), value=0x" + Integer.toHexString(cellAdapter.getValue()) + "}";
   }
 
 }

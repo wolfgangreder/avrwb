@@ -104,6 +104,16 @@ public class AssemblerResultImpl implements AssemblerResult
               writer);
   }
 
+  private short getShort(ByteBuffer data)
+  {
+    if (data.remaining() > 1) {
+      return data.getShort();
+    } else {
+      short tmp = data.get();
+      return (short) (tmp & 0xff);
+    }
+  }
+
   private void writeCodeSegment(SegmentElement seg,
                                 String line,
                                 Writer writer) throws IOException
@@ -114,13 +124,13 @@ public class AssemblerResultImpl implements AssemblerResult
     int pos = data.position();
     try {
       data.position(0);
-      op1 = Converter.printHexString(data.getShort() & 0xffff,
+      op1 = Converter.printHexString(getShort(data) & 0xffff,
                                      4,
                                      false);
-      if (seg.getSize() == 2) {
+      if (seg.getSize() < 3) {
         op2 = "    ";
       } else {
-        op2 = Converter.printHexString(data.getShort() & 0xffff,
+        op2 = Converter.printHexString(getShort(data) & 0xffff,
                                        4,
                                        false);
       }

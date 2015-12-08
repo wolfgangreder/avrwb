@@ -79,7 +79,7 @@ public class InstructionSegmentElement extends AbstractSegmentElement
                                    SourceContext fileContext)
   {
     super(segment,
-          offset,
+          (offset % 2) != 0 ? offset + 1 : offset,
           fileContext);
     Objects.requireNonNull(opcodeGenerator,
                            "opcodeGenerator==null");

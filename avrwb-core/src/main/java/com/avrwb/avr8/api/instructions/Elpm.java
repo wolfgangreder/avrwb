@@ -24,9 +24,13 @@ package com.avrwb.avr8.api.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Register;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AvrDeviceKey;
+import com.avrwb.avr8.helper.OperationNotSupportedException;
 import com.avrwb.avr8.helper.SimulationException;
 
 /**
@@ -75,6 +79,9 @@ public final class Elpm extends AbstractInstruction
 
   private final int rdAddress;
   private final boolean postIncrement;
+  private int z;
+  private int rampz;
+  private int rdVal;
 
   private Elpm(int opcode,
                int rdAddress,
@@ -98,11 +105,58 @@ public final class Elpm extends AbstractInstruction
   }
 
   @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder) throws SimulationException
+  {
+    if (finishCycle == -1) {
+      Register rz = device.getCPU().getRAMP(Pointer.Z);
+      if (rz == null) {
+        throw new OperationNotSupportedException(toString());
+      }
+      z = device.getSRAM().getPointer(Pointer.Z);
+      rampz = rz.getValue();
+      rdVal = device.getSRAM().getByteAt(rdAddress);
+      finishCycle = clockState.getCycleCount() + 2;
+    }
+  }
+
+  @Override
   protected void doExecute(ClockState clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (clockState.getCycleCount() == finishCycle) {
+      final SRAM sram = device.getSRAM();
+      int oldVal = rdVal;
+      int address = z + (rampz << 16);
+      rdVal = device.getFlash().getByteAt(address);
+      if (oldVal != rdVal) {
+        resultBuilder.addModifiedDataAddresses(rdAddress);
+        sram.setByteAt(rdAddress,
+                       rdVal);
+      }
+      if (postIncrement) {
+        int newaddress = address + 1;
+        if ((address & 0xff) != (newaddress & 0xff)) {
+          resultBuilder.addModifiedDataAddresses(30);
+          sram.setByteAt(30,
+                         newaddress & 0xff);
+        }
+        if ((address & 0xff00) != (newaddress & 0xff00)) {
+          resultBuilder.addModifiedDataAddresses(31);
+          sram.setByteAt(31,
+                         (newaddress >> 8) & 0xff);
+        }
+        if ((address & 0xff0000) != (newaddress & 0xff0000)) {
+          Register rz = device.getCPU().getRAMP(Pointer.Z);
+          resultBuilder.addModifiedRegister(rz);
+          rz.setValue((newaddress >> 16) & 0xff);
+        }
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
+    }
   }
 
 }

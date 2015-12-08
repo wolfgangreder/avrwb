@@ -90,14 +90,14 @@ public final class Cpse extends Instruction_Rd_Rr
         }
         CPU cpu = device.getCPU();
         nextInstruction = device.getCPU().getInstructionDecoder().getInstruction(device,
-                                                                                 cpu.getIP() + 1);
+                                                                                 2 * (cpu.getIP() + 1));
         if (AVRWBDefaults.isDebugLoggingActive()) {
           device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                                  () -> MessageFormat.format("{0} next instruction is {1} @ip {2}",
                                                             getCurrentDeviceMessage(clockState,
                                                                                     device),
                                                             nextInstruction.toString(),
-                                                            Converter.printHexString(cpu.getIP() + 1,
+                                                            Converter.printHexString(2 * (cpu.getIP() + 1),
                                                                                      device.getFlash().getHexAddressStringWidth())));
         }
         if (nextInstruction.getSize() == 2) {

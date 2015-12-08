@@ -26,7 +26,7 @@ init: stat* EOF;
 stat: directive NEWLINE
     | directive COMMENT
     | instruction NEWLINE
-    | instruction COMMENT
+    | instruction COMMENT 
     | label? COMMENT 
     | label? NEWLINE
     ;
@@ -250,7 +250,7 @@ eicall: EICALL ;
 eijmp: EIJMP ;
 elpm: ELPM  # Elpm_naked
   | ELPM exp ',' Z_PTR # Elpm_Z
-  | ELPM exp ',' Z_P_PTR # Elpm_ZP
+  | ELPM exp ',''Z+' # Elpm_ZP
   ;
 eor: EOR exp ',' exp ;
 fmul: FMUL exp ',' exp ;

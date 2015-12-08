@@ -24,7 +24,6 @@ package com.avrwb.avr8;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
-import com.avrwb.avr8.api.ClockSink;
 import com.avrwb.avr8.api.MemoryChangeListener;
 import com.avrwb.avr8.api.Resetable;
 import com.avrwb.io.MemoryChunk;
@@ -37,7 +36,7 @@ import java.util.stream.Stream;
  *
  * @author Wolfgang Reder
  */
-public interface Memory extends Resetable, ClockSink
+public interface Memory extends Resetable
 {
 
   @NotNull

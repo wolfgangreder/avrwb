@@ -108,10 +108,10 @@ public interface RegisterBuilder
    * @see Register#getSize()
    * @param size größe
    * @return {@code this}
-   * @throws IllegalArgumentException wenn {@code size<1}
+   * @throws IllegalArgumentException wenn {@code size<1} oder {@code size>4}.
    */
   @NotNull
-  public RegisterBuilder size(@Invariants(minValue = "1") int size) throws IllegalArgumentException;
+  public RegisterBuilder size(@Invariants(minValue = "1", maxValue = "4") int size) throws IllegalArgumentException;
 
   /**
    * Fügt ein Registerbit hinzu.
@@ -130,6 +130,16 @@ public interface RegisterBuilder
    */
   @NotNull
   public RegisterBuilder clearRegisterBits();
+
+  /**
+   * Weist den Dataspace zu.
+   *
+   * @param sram dataspace
+   * @return {@code this}
+   * @throws NullPointerException wenn {@code sram==null}.
+   */
+  @NotNull
+  public RegisterBuilder sram(@NotNull SRAM sram) throws NullPointerException;
 
   /**
    * Erzeugt die Registerinstanz.

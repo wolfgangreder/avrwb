@@ -1,16 +1,23 @@
-;.include "m8def.inc"
-; kommentar 1
-   ; kommentar 2
-.dseg
-var1: .db 23, (1<<4)+0x75*20
-.db 15
+startlabel: 
+.equ spl = 22
+rjmp pushseq
+rjmp init
+adc r23,r31
+mov r0,r1
 
-.cseg
-reset: .org 0
- rjmp label1
- mov r0,r31  ;kommentar 3
-.org 23
-label1: neg r2
-xch Z,r22
-ldi r22,low(23+34<<2)
+mov r20,r0
+push r0 ; push hot gfeugelt
 nop
+nop
+.org 0x21
+init:
+mov r22,r23
+pop r22
+pushseq:
+push r0
+push r1
+push r2
+in r0,spl
+push r0
+out spl,r1
+rjmp init

@@ -50,7 +50,7 @@ public class JmpNGTest extends AbstractInstructionTest
       {0x1f0, 0, false, 0x0ff0, 3},
       {0xff0, 0, false, 0x01f0, 3},
       {0x1f0, 0xff, false, 0x0ff0, 3},
-      {0xff0, 0xff, true, 0x01f0, 3}
+      {0xff0, 0xff, false, 0x01f0, 3}
     };
   }
 
@@ -77,10 +77,9 @@ public class JmpNGTest extends AbstractInstructionTest
                                                                      expectedChange,
                                                                      cmd)::onMemoryChanged);
 
-    for (int i = 0; i < (expectedCycles - 1) * 2; ++i) {
+    for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
       device.onClock(cs.getAndNext());
     }
-    device.onClock(cs.getAndNext());
     device.onClock(cs.getAndNext());
     assertSREG(sreg.getValue(),
                sregInit,

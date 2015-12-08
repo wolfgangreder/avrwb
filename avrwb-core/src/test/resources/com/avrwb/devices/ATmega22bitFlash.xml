@@ -52,19 +52,19 @@ MA 02110-1301  USA
     <avr:address-spaces>
       <avr:address-space xml:id="progmem">
         <avr:name>progmem</avr:name>
-        <avr:max-size>0x300000</avr:max-size>
+        <avr:max-size>0x800000</avr:max-size>
         <avr:byte-order>little-endian</avr:byte-order>
         <avr:segment>
           <avr:name>progmem</avr:name>
           <avr:start>0</avr:start>
-          <avr:size>0x300000</avr:size>
+          <avr:size>0x800000</avr:size>
           <avr:access>r w x</avr:access>
           <avr:type>flash</avr:type>
         </avr:segment>
       </avr:address-space>
       <avr:address-space xml:id="data">
         <avr:name>data</avr:name>
-        <avr:max-size>0x160</avr:max-size>
+        <avr:max-size>0x800000</avr:max-size>
         <avr:byte-order>little-endian</avr:byte-order>
         <avr:segment>
           <avr:name>register file</avr:name>          
@@ -83,7 +83,7 @@ MA 02110-1301  USA
         <avr:segment>
           <avr:name>iram</avr:name>
           <avr:start>0x60</avr:start>
-          <avr:size>0x100</avr:size>
+          <avr:size>0x700000</avr:size>
           <avr:access>r w</avr:access>
           <avr:type>internal-ram</avr:type>
         </avr:segment>
@@ -157,9 +157,49 @@ MA 02110-1301  USA
           <avr:name>SP</avr:name>
           <avr:caption>Stack Pointer</avr:caption>
           <avr:io-address>0x3d</avr:io-address>
-          <avr:ram-address>0x5d</avr:ram-address>
-          <avr:bitmask>0x1ff</avr:bitmask>
-          <avr:size>2</avr:size>
+          <avr:ram-address>0x5c</avr:ram-address>
+          <avr:bitmask>0xffffff</avr:bitmask>
+          <avr:size>3</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>EIND</avr:name>
+          <avr:caption>Extended Indirect Jump</avr:caption>
+          <avr:io-address>0x0c</avr:io-address>
+          <avr:ram-address>0x2c</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>RAMPD</avr:name>
+          <avr:caption>Ramp D</avr:caption>
+          <avr:io-address>0x08</avr:io-address>
+          <avr:ram-address>0x28</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>RAMPX</avr:name>
+          <avr:caption>Ramp X</avr:caption>
+          <avr:io-address>0x09</avr:io-address>
+          <avr:ram-address>0x29</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>RAMPY</avr:name>
+          <avr:caption>Ramp Y</avr:caption>
+          <avr:io-address>0x0a</avr:io-address>
+          <avr:ram-address>0x2a</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>RAMPZ</avr:name>
+          <avr:caption>Ramp Z</avr:caption>
+          <avr:io-address>0x0b</avr:io-address>
+          <avr:ram-address>0x2b</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
         </avr:register>
   
         <avr:interrupt>

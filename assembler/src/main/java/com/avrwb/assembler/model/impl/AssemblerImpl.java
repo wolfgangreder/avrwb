@@ -93,6 +93,11 @@ public class AssemblerImpl implements InternalAssembler
       AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
       parser.setErrorHandler(new BailErrorStrategy());
       ParseTreeWalker walker = new ParseTreeWalker();
+//      ParseListener pl = new ParseListener(lexer,
+//                                           parser);
+//      parser.setErrorHandler(pl);
+//      parser.addParseListener(pl);
+//      parser.addErrorListener(pl);
       ParserRuleContext tree = parser.init();
       walker.walk(contextListener,
                   tree);

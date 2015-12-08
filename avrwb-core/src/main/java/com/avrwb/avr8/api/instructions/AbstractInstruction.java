@@ -24,6 +24,9 @@ package com.avrwb.avr8.api.instructions;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Register;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
@@ -108,7 +111,7 @@ public abstract class AbstractInstruction implements Instruction
   {
     int v = (rd - rr - (withCarry && sreg.getC() ? 1 : 0)) & 0xff;
     sreg.setC(((~rd & rr & 0x80) != 0) || ((rr & v & 0x80) != 0) || ((~rd & v & 0x80) != 0));
-    sreg.setZ((v == 0) && sreg.getZ());
+    sreg.setZ(v == 0);
     sreg.setN((v & 0x80) != 0);
     sreg.setV(((rd & ~rr & ~v & 0x80) != 0) || ((~rd & rr & v & 0x80) != 0));
     sreg.fixSignBit();
@@ -197,6 +200,18 @@ public abstract class AbstractInstruction implements Instruction
                                                        clockState.getCycleCount());
     }
     return currentDeviceStateMessage;
+  }
+
+  protected int computePointer(Pointer ptr,
+                               Device device)
+  {
+    SRAM sram = device.getSRAM();
+    Register ramp = device.getCPU().getRAMP(ptr);
+    int tmp = sram.getPointer(ptr);
+    if (ramp != null) {
+      tmp += ramp.getValue() << 16;
+    }
+    return tmp;
   }
 
 }
