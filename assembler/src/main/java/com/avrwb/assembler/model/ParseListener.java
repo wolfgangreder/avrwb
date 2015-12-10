@@ -25,6 +25,8 @@ import com.avrwb.assembler.parser.AtmelAsmBaseListener;
 import com.avrwb.assembler.parser.AtmelAsmLexer;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRErrorStrategy;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
@@ -48,36 +50,59 @@ public class ParseListener extends AtmelAsmBaseListener implements ANTLRErrorLis
   private final AtmelAsmLexer lexer;
   private final AtmelAsmParser parser;
   private final ANTLRErrorStrategy stat = new DefaultErrorStrategy();
+  private final boolean tracing;
+  private final List<RecognitionException> errors = new LinkedList<>();
 
   public ParseListener(AtmelAsmLexer lexer,
-                       AtmelAsmParser parser)
+                       AtmelAsmParser parser,
+                       boolean tracing)
   {
+    this.tracing = tracing;
     this.lexer = lexer;
     this.parser = parser;
+  }
+
+  public List<RecognitionException> getErrors()
+  {
+    return errors;
+  }
+
+  @Override
+  public void enterName(AtmelAsmParser.NameContext ctx)
+  {
+    super.enterName(ctx); //To change body of generated methods, choose Tools | Templates.
   }
 
   @Override
   public void visitTerminal(TerminalNode node)
   {
-    System.out.println("Visit terminal " + node.getText());
+    if (tracing) {
+      System.out.println("Visit terminal " + node.getText());
+    }
   }
 
   @Override
   public void exitEveryRule(ParserRuleContext ctx)
   {
-    System.out.println("Exit rule " + ctx.toInfoString(parser));
+    if (tracing) {
+      System.out.println("Exit rule " + ctx.toInfoString(parser));
+    }
   }
 
   @Override
   public void enterEveryRule(ParserRuleContext ctx)
   {
-    System.out.println("Enter rule" + ctx.toInfoString(parser));
+    if (tracing) {
+      System.out.println("Enter rule" + ctx.toInfoString(parser));
+    }
   }
 
   @Override
   public void visitErrorNode(ErrorNode node)
   {
-    System.out.println(node.toStringTree(parser));
+    if (tracing) {
+      System.out.println(node.toStringTree(parser));
+    }
   }
 
   @Override
@@ -88,6 +113,7 @@ public class ParseListener extends AtmelAsmBaseListener implements ANTLRErrorLis
                           String msg,
                           RecognitionException e)
   {
+    errors.add(e);
   }
 
   @Override

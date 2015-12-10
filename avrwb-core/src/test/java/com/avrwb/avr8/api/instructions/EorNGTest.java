@@ -48,10 +48,10 @@ public class EorNGTest extends AbstractInstructionTest
   public Object[][] getData()
   {
     return new Object[][]{
-      {0, 0, 1, 0, 0, true, 0, SREG.MASK_Z},
-      {0, 0xff, 2, 0xff, SREG.MASK_I | SREG.MASK_T | SREG.MASK_V, true, 0, SREG.MASK_Z | SREG.MASK_I | SREG.MASK_T},
-      {0, 0x55, 3, 0xaa, SREG.MASK_Z, true, 0xff, SREG.MASK_N | SREG.MASK_S},
-      {0, 0x80, 4, 0xff, SREG.MASK_V, true, 0x7f, 0}
+      {0, 0, 1, 0, 0, false, 0, SREG.MASK_Z},
+      {0, 0xff, 2, 0xff, SREG.MASK_I | SREG.MASK_T | SREG.MASK_V, false, 0, SREG.MASK_Z | SREG.MASK_I | SREG.MASK_T},
+      {0, 0x55, 3, 0xaa, SREG.MASK_Z, false, 0xff, SREG.MASK_N | SREG.MASK_S},
+      {0, 0x80, 4, 0xff, SREG.MASK_V, false, 0x7f, 0}
     };
   }
 
@@ -67,7 +67,8 @@ public class EorNGTest extends AbstractInstructionTest
   {
     final String cmd = "eor r" + rd + ",r" + rr + "; r" + rd + "=0x" + Integer.toHexString(rdVal) + ", r" + rr + "=0x" + Integer.
             toHexString(rrVal);
-    final Device device = getDevice(cmd);
+    final Device device = getDevice(cmd,
+                                    list);
     final CPU cpu = device.getCPU();
     final SRAM sram = device.getSRAM();
     final SREG sreg = cpu.getSREG();

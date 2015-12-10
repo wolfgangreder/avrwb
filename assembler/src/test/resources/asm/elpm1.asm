@@ -1,1 +1,1 @@
-elpm r0, Z+
+elpm

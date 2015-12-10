@@ -25,6 +25,7 @@ import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
@@ -127,27 +128,34 @@ public final class Ld extends Instruction_LdSt
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
     if (finishCycle == clockState.getCycleCount()) {
+      final SRAM sram = device.getSRAM();
       if (mode == Mode.POST_INCREMENT) {
         ptrVal++;
       }
-      final SRAM sram = device.getSRAM();
-      final int oldPointerVal = sram.getPointer(ptr);
-      final int oldRdVal = rdVal;
-      if (ptrVal != oldPointerVal) {
+      if (ptrVal != originalPtrVal) {
         sram.setPointer(ptr,
                         ptrVal);
-        if ((ptrVal & 0xff) != (oldPointerVal & 0xff)) {
+        if ((ptrVal & 0xff) != (originalPtrVal & 0xff)) {
           resultBuilder.addModifiedDataAddresses(ptr.getAddressLo());
         }
-        if ((ptrVal & 0xff00) != (oldPointerVal & 0xff00)) {
+        if ((ptrVal & 0xff00) != (originalPtrVal & 0xff00)) {
           resultBuilder.addModifiedDataAddresses(ptr.getAddressHi());
         }
+        if ((ptrVal & 0xff0000) != (originalPtrVal & 0xff0000)) {
+          Register ramp = device.getCPU().getRAMP(ptr);
+          if (ramp != null) {
+            resultBuilder.addModifiedRegister(ramp);
+            ramp.setValue((ptrVal & 0xff0000) >> 16);
+          }
+        }
       }
-      if (oldRdVal != rdVal) {
+      if (pointeeVal != rdVal) {
         sram.setByteAt(rdAddress,
-                       rdVal);
+                       pointeeVal);
         resultBuilder.addModifiedDataAddresses(rdAddress);
       }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
       if (AVRWBDefaults.isDebugLoggingActive()) {
         Logger logger = device.getLogger();
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),

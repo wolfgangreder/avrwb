@@ -51,12 +51,19 @@ public class StandardAssemblerConfig implements AssemblerConfig
     private ByteOrder bo;
     private final List<Alias> defaultAliases = new LinkedList<>();
     private final List<Path> includePaths = new LinkedList<>();
+    private boolean tracing;
 
     public AssemblerConfigBuilder includePath(Path path)
     {
       Objects.requireNonNull(path,
                              "path==null");
       includePaths.add(path);
+      return this;
+    }
+
+    public AssemblerConfigBuilder tracing(boolean tr)
+    {
+      this.tracing = tr;
       return this;
     }
 
@@ -100,7 +107,8 @@ public class StandardAssemblerConfig implements AssemblerConfig
                                          charset,
                                          bo,
                                          defaultAliases,
-                                         includePaths);
+                                         includePaths,
+                                         tracing);
     }
 
   }
@@ -121,12 +129,14 @@ public class StandardAssemblerConfig implements AssemblerConfig
                                                                                       StandardCharsets.ISO_8859_1,
                                                                                       ByteOrder.LITTLE_ENDIAN,
                                                                                       Collections.EMPTY_LIST,
-                                                                                      Collections.EMPTY_LIST);
+                                                                                      Collections.EMPTY_LIST,
+                                                                                      false);
   private final FileResolver fileResolver;
   private final Charset targetCharset;
   private final ByteOrder byteOrder;
   private final List<Alias> defaultAliases;
   private final List<Path> includePaths;
+  private final boolean tracing;
 
   public static AssemblerConfig getDefaultInstance()
   {
@@ -137,8 +147,10 @@ public class StandardAssemblerConfig implements AssemblerConfig
                                  Charset targetCharset,
                                  ByteOrder byteOrder,
                                  Collection<? extends Alias> defAliases,
-                                 Collection<? extends Path> includePaths)
+                                 Collection<? extends Path> includePaths,
+                                 boolean tracing)
   {
+    this.tracing = tracing;
     this.fileResolver = fileResolver;
     this.targetCharset = targetCharset;
     this.byteOrder = byteOrder;
@@ -183,6 +195,12 @@ public class StandardAssemblerConfig implements AssemblerConfig
   public List<Alias> getDefaultAliases()
   {
     return defaultAliases;
+  }
+
+  @Override
+  public boolean isTracingEnabled()
+  {
+    return tracing;
   }
 
 }

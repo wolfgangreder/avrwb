@@ -214,4 +214,19 @@ public abstract class AbstractInstruction implements Instruction
     return tmp;
   }
 
+  protected int getLoPart(int ptr)
+  {
+    return ptr & 0xff;
+  }
+
+  protected int getHiPart(int ptr)
+  {
+    return (ptr & 0xff00) >> 8;
+  }
+
+  protected int getRampPart(int ptr)
+  {
+    return (ptr & 0xff0000) >> 16;
+  }
+
 }

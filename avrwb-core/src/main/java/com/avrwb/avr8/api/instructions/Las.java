@@ -23,6 +23,7 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AvrDeviceKey;
@@ -37,6 +38,8 @@ public final class Las extends Instruction_Rd
 {
 
   public static final int OPCODE = 0x9205;
+  private int ptr;
+  private int zval;
 
   public static Las getInstance(AvrDeviceKey deviceKey,
                                 int opcode,
@@ -56,11 +59,46 @@ public final class Las extends Instruction_Rd
   }
 
   @Override
+  public int getCycleCount()
+  {
+    return 2;
+  }
+
+  @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder) throws SimulationException
+  {
+    if (finishCycle == -1) {
+      super.doPrepare(clockState,
+                      device,
+                      resultBuilder);
+      ptr = computePointer(Pointer.Z,
+                           device);
+      zval = device.getSRAM().getByteAt(ptr);
+    }
+  }
+
+  @Override
   protected void doExecute(ClockState clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (finishCycle == clockState.getCycleCount()) {
+      int result = rdVal | zval;
+      if (result != rdVal) {
+        resultBuilder.addModifiedDataAddresses(getRdAddress());
+        device.getSRAM().setByteAt(getRdAddress(),
+                                   result);
+      }
+      if (result != zval) {
+        resultBuilder.addModifiedDataAddresses(ptr);
+        device.getSRAM().setByteAt(ptr,
+                                   result);
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
+    }
   }
 
 }

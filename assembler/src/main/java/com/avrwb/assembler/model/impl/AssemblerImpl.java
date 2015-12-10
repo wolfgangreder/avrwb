@@ -30,12 +30,13 @@ import com.avrwb.assembler.SyntaxException;
 import com.avrwb.assembler.model.AssemblerSource;
 import com.avrwb.assembler.model.ContextListener;
 import com.avrwb.assembler.model.InternalAssembler;
+import com.avrwb.assembler.model.ParseListener;
 import com.avrwb.assembler.parser.AtmelAsmLexer;
 import com.avrwb.assembler.parser.AtmelAsmParser;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
@@ -85,20 +86,29 @@ public class AssemblerImpl implements InternalAssembler
                                  ContextListener contextListener) throws IOException, AssemblerException
   {
     try {
+      AssemblerConfig cfg = contextListener.getContext().getConfig();
       ANTLRInputStream ais = new ANTLRInputStream(new AppendNewLineReader(source.getReader()));
       ais.name = source.getSourceName();
       contextListener.getContext().pushSource(source);
       AtmelAsmLexer lexer = new AtmelAsmLexer(ais);
+
       CommonTokenStream tokenStream = new CommonTokenStream(lexer);
       AtmelAsmParser parser = new AtmelAsmParser(tokenStream);
-      parser.setErrorHandler(new BailErrorStrategy());
       ParseTreeWalker walker = new ParseTreeWalker();
-//      ParseListener pl = new ParseListener(lexer,
-//                                           parser);
+      ParseListener pl = new ParseListener(lexer,
+                                           parser,
+                                           cfg.isTracingEnabled());
 //      parser.setErrorHandler(pl);
-//      parser.addParseListener(pl);
-//      parser.addErrorListener(pl);
+      parser.addParseListener(pl);
+      parser.addErrorListener(pl);
+      if (cfg.isTracingEnabled()) {
+        parser.setTrace(true);
+      }
       ParserRuleContext tree = parser.init();
+      Collection<RecognitionException> errors = pl.getErrors();
+      if (!errors.isEmpty()) {
+        throw new SyntaxException(errors);
+      }
       walker.walk(contextListener,
                   tree);
       contextListener.getContext().popSource();

@@ -44,4 +44,6 @@ public interface AssemblerConfig
 
   public List<Path> getIncludePaths();
 
+  public boolean isTracingEnabled();
+
 }

@@ -905,12 +905,12 @@ public class ContextListener extends AtmelAsmBaseListener
   {
     Expression left = context.popExpression(sctx);
     Expression right = context.popExpression(sctx);
-    if (right.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(right.toString() + " is no register",
+    if (left.getType() != ExpressionType.REGISTER) {
+      throw new InvalidTypeException(left.toString() + " is no register",
                                      sctx).toWrapper();
     }
-    if (left.getType() != ExpressionType.INTEGER) {
-      throw new InvalidTypeException(left.toString() + " is no integer",
+    if (right.getType() != ExpressionType.INTEGER) {
+      throw new InvalidTypeException(right.toString() + " is no integer",
                                      sctx).toWrapper();
     }
     return new Composer_Rd_K16(baseOpocde,
@@ -1164,126 +1164,11 @@ public class ContextListener extends AtmelAsmBaseListener
   }
 
   @Override
-  public void exitStd(AtmelAsmParser.StdContext ctx)
-  {
-    final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.YZ_P_PTR().getSymbol().getType();
-    int baseOpcode;
-    switch (ptr) {
-      case AtmelAsmParser.Y_PTR:
-        baseOpcode = 0x8008;
-        break;
-      case AtmelAsmParser.Z_PTR:
-        baseOpcode = 0x8000;
-        break;
-      default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.YZ_P_PTR().getText(),
-                                       sctx).toWrapper();
-    }
-    final Expression left = context.popExpression(sctx);
-    final Expression right = context.popExpression(sctx);
-    if (right.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(right.toString() + " is no register",
-                                     sctx).toWrapper();
-    }
-    if (left.getType() != ExpressionType.INTEGER) {
-      throw new InvalidTypeException(left.toString() + " is no integer",
-                                     sctx).toWrapper();
-    }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      int displacement = right.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new IllegalArgumentException("invalid rd");
-      }
-      return baseOpcode | rd << 4 | ((displacement & 0x20) << 0x8) | ((displacement & 0x18) << 7) | (displacement & 0x7);
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
-  }
-
-  @Override
-  public void exitSt_M_ALL(AtmelAsmParser.St_M_ALLContext ctx)
-  {
-    final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.M_ALL_PTR().getSymbol().getType();
-    int baseOpcode;
-    switch (ptr) {
-      case AtmelAsmParser.X_PTR:
-        baseOpcode = 0x920e;
-        break;
-      case AtmelAsmParser.Y_PTR:
-        baseOpcode = 0x920a;
-        break;
-      case AtmelAsmParser.Z_PTR:
-        baseOpcode = 0x9202;
-        break;
-      default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.M_ALL_PTR().getText(),
-                                       sctx).toWrapper();
-    }
-    Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
-                                     sctx).toWrapper();
-    }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new InvalidParameterException("invalid rd value " + rd,
-                                            sctx).toWrapper();
-      }
-      return baseOpcode | rd << 4;
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
-  }
-
-  @Override
-  public void exitSt_ALL_P(AtmelAsmParser.St_ALL_PContext ctx)
-  {
-    final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.ALL_P_PTR().getSymbol().getType();
-    int baseOpcode;
-    switch (ptr) {
-      case AtmelAsmParser.X_PTR:
-        baseOpcode = 0x920d;
-        break;
-      case AtmelAsmParser.Y_PTR:
-        baseOpcode = 0x9209;
-        break;
-      case AtmelAsmParser.Z_PTR:
-        baseOpcode = 0x9201;
-        break;
-      default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.ALL_P_PTR().getText(),
-                                       sctx).toWrapper();
-    }
-    Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
-                                     sctx).toWrapper();
-    }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new InvalidParameterException("invalid rd " + rd,
-                                            sctx).toWrapper();
-      }
-      return baseOpcode | rd << 4;
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
-  }
-
-  @Override
   public void exitSt_ALL(AtmelAsmParser.St_ALLContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.ALL_PTR().getSymbol().getType();
+    final AtmelAsmParser.Ptr_nakedContext ptrCtx = ctx.ptr_naked();
+    final int ptr = ptrCtx.getStart().getType();
     int baseOpcode;
     switch (ptr) {
       case AtmelAsmParser.X_PTR:
@@ -1296,25 +1181,82 @@ public class ContextListener extends AtmelAsmBaseListener
         baseOpcode = 0x8200;
         break;
       default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.ALL_PTR().getText(),
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
                                        sctx).toWrapper();
     }
-    Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
-                                     sctx).toWrapper();
+    processLdSt(baseOpcode,
+                sctx);
+  }
+
+  @Override
+  public void exitStd(AtmelAsmParser.StdContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    final AtmelAsmParser.Ptr_qContext ptrCtx = ctx.ptr_q();
+    int ptr = ptrCtx.getStart().getType();
+    int baseOpcode;
+    switch (ptr) {
+      case AtmelAsmParser.Y_PTR:
+        baseOpcode = 0x8008;
+        break;
+      case AtmelAsmParser.Z_PTR:
+        baseOpcode = 0x8000;
+        break;
+      default:
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
+                                       sctx).toWrapper();
     }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new InvalidParameterException("invalid rd " + rd,
-                                            sctx).toWrapper();
-      }
-      return baseOpcode | rd << 4;
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
+    processLddStd(baseOpcode,
+                  sctx);
+  }
+
+  @Override
+  public void exitSt_M_ALL(AtmelAsmParser.St_M_ALLContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    final AtmelAsmParser.Ptr_minusContext ptrCtx = ctx.ptr_minus();
+    final int ptr = ptrCtx.getStart().getType();
+    final int baseOpcode;
+    switch (ptr) {
+      case AtmelAsmParser.X_PTR:
+        baseOpcode = 0x920e;
+        break;
+      case AtmelAsmParser.Y_PTR:
+        baseOpcode = 0x920a;
+        break;
+      case AtmelAsmParser.Z_PTR:
+        baseOpcode = 0x9202;
+        break;
+      default:
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
+                                       sctx).toWrapper();
+    }
+    processLdSt(baseOpcode,
+                sctx);
+  }
+
+  @Override
+  public void exitSt_ALL_P(AtmelAsmParser.St_ALL_PContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    int ptr = ctx.ptr_plus().getRuleIndex();
+    int baseOpcode;
+    switch (ptr) {
+      case AtmelAsmParser.X_PTR:
+        baseOpcode = 0x920d;
+        break;
+      case AtmelAsmParser.Y_PTR:
+        baseOpcode = 0x9209;
+        break;
+      case AtmelAsmParser.Z_PTR:
+        baseOpcode = 0x9201;
+        break;
+      default:
+        throw new InvalidTypeException("Invalid PTR " + ctx.ptr_plus().getText(),
+                                       sctx).toWrapper();
+    }
+    processLdSt(baseOpcode,
+                sctx);
   }
 
   @Override
@@ -1865,23 +1807,9 @@ public class ContextListener extends AtmelAsmBaseListener
                        sctx);
   }
 
-  @Override
-  public void exitLdd(AtmelAsmParser.LddContext ctx)
+  private void processLddStd(int baseOpcode,
+                             SourceContext sctx)
   {
-    final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.YZ_P_PTR().getSymbol().getType();
-    int baseOpcode;
-    switch (ptr) {
-      case AtmelAsmParser.Y_PTR:
-        baseOpcode = 0x8008;
-        break;
-      case AtmelAsmParser.Z_PTR:
-        baseOpcode = 0x8000;
-        break;
-      default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.YZ_P_PTR().getText(),
-                                       sctx).toWrapper();
-    }
     final Expression right = context.popExpression(sctx);
     final Expression left = context.popExpression(sctx);
     if (left.getType() != ExpressionType.REGISTER) {
@@ -1907,11 +1835,59 @@ public class ContextListener extends AtmelAsmBaseListener
   }
 
   @Override
-  public void exitLd_ALL_P(AtmelAsmParser.Ld_ALL_PContext ctx)
+  public void exitLd_naked(AtmelAsmParser.Ld_nakedContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.ALL_P_PTR().getSymbol().getType();
-    int baseOpcode;
+    AtmelAsmParser.Ptr_nakedContext ptrCtx = ctx.ptr_naked();
+    int type = ptrCtx.getStart().getType();
+    final int baseOpcode;
+    switch (type) {
+      case AtmelAsmParser.X_PTR:
+        baseOpcode = 0x900c;
+        break;
+      case AtmelAsmParser.Y_PTR:
+        baseOpcode = 0x8008;
+        break;
+      case AtmelAsmParser.Z_PTR:
+        baseOpcode = 0x8000;
+        break;
+      default:
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
+                                       sctx).toWrapper();
+    }
+    processLdSt(baseOpcode,
+                sctx);
+  }
+
+  @Override
+  public void exitLdd(AtmelAsmParser.LddContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    final AtmelAsmParser.Ptr_qContext ptrCtx = ctx.ptr_q();
+    final int ptr = ptrCtx.getStart().getType();
+    final int baseOpcode;
+    switch (ptr) {
+      case AtmelAsmParser.Y_PTR:
+        baseOpcode = 0x8008;
+        break;
+      case AtmelAsmParser.Z_PTR:
+        baseOpcode = 0x8000;
+        break;
+      default:
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
+                                       sctx).toWrapper();
+    }
+    processLddStd(baseOpcode,
+                  sctx);
+  }
+
+  @Override
+  public void exitLd_plus(AtmelAsmParser.Ld_plusContext ctx)
+  {
+    final SourceContext sctx = getSourceContext(ctx);
+    final AtmelAsmParser.Ptr_plusContext ptrCtx = ctx.ptr_plus();
+    final int ptr = ptrCtx.getStart().getType();
+    final int baseOpcode;
     switch (ptr) {
       case AtmelAsmParser.X_PTR:
         baseOpcode = 0x900d;
@@ -1923,33 +1899,20 @@ public class ContextListener extends AtmelAsmBaseListener
         baseOpcode = 0x9001;
         break;
       default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.ALL_P_PTR().getText(),
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
                                        sctx).toWrapper();
     }
-    Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
-                                     sctx).toWrapper();
-    }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new InvalidParameterException("invalid rd " + rd,
-                                            sctx).toWrapper();
-      }
-      return baseOpcode | rd << 4;
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
+    processLdSt(baseOpcode,
+                sctx);
   }
 
   @Override
-  public void exitLd_M_ALL(AtmelAsmParser.Ld_M_ALLContext ctx)
+  public void exitLd_minus(AtmelAsmParser.Ld_minusContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.M_ALL_PTR().getSymbol().getType();
-    int baseOpcode;
+    final AtmelAsmParser.Ptr_minusContext ptrCtx = ctx.ptr_minus();
+    final int ptr = ptrCtx.getStop().getType();
+    final int baseOpcode;
     switch (ptr) {
       case AtmelAsmParser.X_PTR:
         baseOpcode = 0x900e;
@@ -1961,47 +1924,16 @@ public class ContextListener extends AtmelAsmBaseListener
         baseOpcode = 0x9002;
         break;
       default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.M_ALL_PTR(),
+        throw new InvalidTypeException("Invalid PTR " + ptrCtx.getText(),
                                        sctx).toWrapper();
     }
-    Expression left = context.popExpression(sctx);
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
-                                     sctx).toWrapper();
-    }
-    Supplier<Integer> opcode = () -> {
-      int rd = left.evaluate(context);
-      if (rd < 0 || rd > 31) {
-        throw new InvalidParameterException("invalid rd " + rd,
-                                            sctx).toWrapper();
-      }
-      return baseOpcode | rd << 4;
-    };
-    addOpcodeToSegment(opcode,
-                       false,
-                       sctx);
+    processLdSt(baseOpcode,
+                sctx);
   }
 
-  @Override
-  public void exitLd_ALL(AtmelAsmParser.Ld_ALLContext ctx)
+  public void processLdSt(int baseOpcode,
+                          SourceContext sctx)
   {
-    final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.ALL_PTR().getSymbol().getType();
-    int baseOpcode;
-    switch (ptr) {
-      case AtmelAsmParser.X_PTR:
-        baseOpcode = 0x900c;
-        break;
-      case AtmelAsmParser.Y_PTR:
-        baseOpcode = 0x8008;
-        break;
-      case AtmelAsmParser.Z_PTR:
-        baseOpcode = 0x8000;
-        break;
-      default:
-        throw new InvalidTypeException("Invalid PTR " + ctx.ALL_PTR().getText(),
-                                       sctx).toWrapper();
-    }
     Expression left = context.popExpression(sctx);
     if (left.getType() != ExpressionType.REGISTER) {
       throw new InvalidTypeException(left.toString() + " is no register",
@@ -3041,32 +2973,14 @@ public class ContextListener extends AtmelAsmBaseListener
                                              getSourceContext(ctx)));
   }
 
-  private boolean isMnemonicRule(AtmelAsmParser.NameContext ctx)
-  {
-    ParserRuleContext c = ctx;
-    while (c != null) {
-      int type = c.invokingState;//getStart().getType();
-      if (type == AtmelAsmParser.RULE_mnemonic) {
-        return true;
-      }
-      c = c.getParent();
-    }
-    return false;
-  }
-
   @Override
   public void exitName(AtmelAsmParser.NameContext ctx)
   {
     Alias alias = context.getAlias(ctx.getText());
     if (alias == null) {
-//      if (isMnemonicRule(ctx)) {
       context.pushExpression(new ForwardExpression(ctx.getText(),
                                                    getSourceContext(ctx)));
       return;
-//      } else {
-//        throw new NameNotFoundException("cannot find name " + ctx.getText(),
-//                                        getSourceContext(ctx)).toWrapper();
-//      }
     }
     context.pushExpression(alias.getExpression());
   }

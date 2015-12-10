@@ -22,6 +22,8 @@
 package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Register;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.SimulationException;
@@ -39,6 +41,9 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
   private final int rdAddress;
   private final int k16;
   private final String toStringValue;
+  protected int rdVal;
+  protected int pointer;
+  protected int pointee;
 
   protected Instruction_Rd_K16(int opcode,
                                String mnemonic)
@@ -68,11 +73,28 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
   }
 
   @Override
+  public int getCycleCount()
+  {
+    return 2;
+  }
+
+  @Override
   protected void doPrepare(ClockState clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("not implemented yet");
+    if (finishCycle == -1) {
+      SRAM sram = device.getSRAM();
+      rdVal = sram.getByteAt(rdAddress);
+      Register rampd = device.getCPU().getRAMPD();
+      if (rampd != null) {
+        pointer = (rampd.getValue() << 16) + k16;
+      } else {
+        pointer = k16;
+      }
+      pointee = sram.getByteAt(pointer);
+      finishCycle = clockState.getCycleCount() + getCycleCount() - 1;
+    }
   }
 
   @Override
