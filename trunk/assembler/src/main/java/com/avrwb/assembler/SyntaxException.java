@@ -21,6 +21,10 @@
  */
 package com.avrwb.assembler;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.antlr.v4.runtime.RecognitionException;
 
 /**
@@ -30,11 +34,26 @@ import org.antlr.v4.runtime.RecognitionException;
 public class SyntaxException extends AssemblerException
 {
 
-  public SyntaxException(RecognitionException err)
+  private final List<RecognitionException> errors;
+
+  private SyntaxException(RecognitionException err,
+                          Collection<? extends RecognitionException> errors)
   {
     super(AssemblerError.constructMessage(err),
           err,
           AssemblerError.createSourceContext(err));
+    this.errors = Collections.unmodifiableList(new ArrayList<>(errors));
+  }
+
+  public SyntaxException(Collection<? extends RecognitionException> errors)
+  {
+    this(errors.iterator().next(),
+         errors);
+  }
+
+  public SyntaxException(RecognitionException err)
+  {
+    this(Collections.singleton(err));
   }
 
   public SyntaxException(String msg,
@@ -42,6 +61,7 @@ public class SyntaxException extends AssemblerException
   {
     super(msg,
           sourceContext);
+    errors = Collections.emptyList();
   }
 
   public SyntaxException(Throwable th,
@@ -49,6 +69,11 @@ public class SyntaxException extends AssemblerException
   {
     super(th,
           sourceContext);
+    if (th instanceof RecognitionException) {
+      errors = Collections.singletonList((RecognitionException) th);
+    } else {
+      errors = Collections.emptyList();
+    }
   }
 
   public SyntaxException(String msg,
@@ -58,6 +83,11 @@ public class SyntaxException extends AssemblerException
     super(msg,
           th,
           sourceContext);
+    if (th instanceof RecognitionException) {
+      errors = Collections.singletonList((RecognitionException) th);
+    } else {
+      errors = Collections.emptyList();
+    }
   }
 
 }

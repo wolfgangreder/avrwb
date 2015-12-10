@@ -74,10 +74,10 @@ public class EICallNGTest extends AbstractInstructionTest
   public Object[][] getData()
   {
     return new Object[][]{
-      {part, 0x101f0, 0x1, 0x0, 0x0, true, 4, 3},
-      {part, 0x20ff0, 0x0, 0x1, 0x1, true, 4, 3},
-      {part, 0x101f0, 0x2, 0x2, 0x0, true, 4, 3},
-      {part, 0x20ff0, 0xcc, 0xff, 0x20, true, 4, 3}
+      {part, 0x101f0, 0x1, 0x0, 0x0, false, 4, 3},
+      {part, 0x20ff0, 0x0, 0x1, 0x1, false, 4, 3},
+      {part, 0x101f0, 0x2, 0x2, 0x0, false, 4, 3},
+      {part, 0x20ff0, 0xcc, 0xff, 0x20, false, 4, 3}
     // TODO wenn xmega core implementiert ist, die folgenden tests aktivieren
     //      {partxmega22, 0x101f0, 0, 3, false, 0x2ff0, 4},
     //      {partxmega22, 0x20ff0, 0, 3, false, 0x1f0, 4},

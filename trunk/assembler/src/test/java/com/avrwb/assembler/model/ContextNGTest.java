@@ -40,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -294,6 +295,91 @@ public class ContextNGTest
     try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
       asr.getCSEG(os);
     }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @Test
+  public void testElpm2() throws Exception
+  {
+    URL u = getClass().getResource("/asm/elpm2.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @Test
+  public void testElpm3() throws Exception
+  {
+    URL u = getClass().getResource("/asm/elpm3.asm");
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @DataProvider(name = "LDNakedProvider")
+  public Object[][] getData()
+  {
+    return new Object[][]{
+      {"/asm/ld_X.asm"},
+      {"/asm/ld_Y.asm"},
+      {"/asm/ld_Z.asm"}
+    };
+  }
+
+  @Test(dataProvider = "LDNakedProvider")
+  public void testLdNaked(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @DataProvider(name = "LDMinusProvider")
+  public Object[][] getDataLDM()
+  {
+    return new Object[][]{
+      {"/asm/ld_MX.asm"},
+      {"/asm/ld_MY.asm"},
+      {"/asm/ld_MZ.asm"}
+    };
+  }
+
+  @Test(dataProvider = "LDMinusProvider")
+  public void testLdMinus(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
   }
 
 }

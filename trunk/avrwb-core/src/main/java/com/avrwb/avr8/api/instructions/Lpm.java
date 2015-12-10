@@ -24,6 +24,9 @@ package com.avrwb.avr8.api.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Register;
+import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AvrDeviceKey;
@@ -45,6 +48,12 @@ public final class Lpm extends AbstractInstruction
   public static final int OPCODE_LPM = 0x95c8;
   public static final int OPCODE_LPM_RD = 0x9004;
   public static final int OPCODE_LPM_RD_P = 0x9005;
+  private final int rdAddress;
+  private final boolean postIncrement;
+  private int pointer;
+  private int pointee;
+  private int rdVal;
+  private int rampzVal;
 
   public static Lpm getInstance(AvrDeviceKey deviceKey,
                                 int opcode,
@@ -57,6 +66,46 @@ public final class Lpm extends AbstractInstruction
   {
     super(opcode,
           "lpm");
+    switch (opcode & OPCODE_MASK_LPM_RD) {
+      case OPCODE_LPM_RD:
+        rdAddress = (opcode & 0x1f0) >> 4;
+        postIncrement = false;
+        break;
+      case OPCODE_LPM_RD_P:
+        rdAddress = (opcode & 0x1f0) >> 4;
+        postIncrement = true;
+        break;
+      default:
+        postIncrement = false;
+        rdAddress = 0;
+    }
+  }
+
+  @Override
+  public int getCycleCount()
+  {
+    return 3;
+  }
+
+  @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder) throws SimulationException
+  {
+    if (finishCycle == -1) {
+      SRAM sram = device.getSRAM();
+      rdVal = sram.getByteAt(rdAddress);
+      Register rampz = device.getCPU().getRAMP(Pointer.Z);
+      if (rampz != null) {
+        rampzVal = rampz.getValue();
+      } else {
+        rampzVal = 0;
+      }
+      pointer = computePointer(Pointer.Z,
+                               device);
+      pointee = device.getFlash().getByteAt(pointer);
+      finishCycle = clockState.getCycleCount() + 2;
+    }
   }
 
   @Override
@@ -64,7 +113,36 @@ public final class Lpm extends AbstractInstruction
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (finishCycle == clockState.getCycleCount()) {
+      SRAM sram = device.getSRAM();
+      if (rdVal != pointee) {
+        sram.setByteAt(rdAddress,
+                       pointee);
+        resultBuilder.addModifiedDataAddresses(rdAddress);
+      }
+      if (postIncrement) {
+        int newPointer = pointer + 1;
+        if (getLoPart(pointer) != getLoPart(newPointer)) {
+          sram.setByteAt(30,
+                         getLoPart(newPointer));
+          resultBuilder.addModifiedDataAddresses(30);
+        }
+        if (getHiPart(pointer) != getHiPart(newPointer)) {
+          sram.setByteAt(31,
+                         getHiPart(newPointer));
+          resultBuilder.addModifiedDataAddresses(31);
+        }
+        if (getRampPart(pointer) != getRampPart(newPointer)) {
+          Register rampz = device.getCPU().getRAMP(Pointer.Z);
+          if (rampz != null) {
+            resultBuilder.addModifiedRegister(rampz);
+            rampz.setValue(getRampPart(newPointer));
+          }
+        }
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
+    }
   }
 
 }

@@ -60,7 +60,15 @@ public final class Lds extends Instruction_Rd_K16
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet.");
+    if (finishCycle == clockState.getCycleCount()) {
+      if (rdVal != pointee) {
+        resultBuilder.addModifiedDataAddresses(getRdAddress());
+        device.getSRAM().setByteAt(getRdAddress(),
+                                   pointee);
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 2);
+    }
   }
 
 }

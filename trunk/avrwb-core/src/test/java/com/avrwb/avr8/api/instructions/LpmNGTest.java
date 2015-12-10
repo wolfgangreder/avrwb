@@ -26,7 +26,6 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import static com.avrwb.avr8.api.instructions.AbstractInstructionTest.part;
 import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
@@ -43,14 +42,10 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class LatNGTest extends AbstractInstructionTest
+public class LpmNGTest extends AbstractInstructionTest
 {
 
   private static XmlPart part22bit;
-
-  public LatNGTest()
-  {
-  }
 
   @BeforeClass
   public static void setUpClass() throws Exception
@@ -62,38 +57,40 @@ public class LatNGTest extends AbstractInstructionTest
                   "tmp==null");
   }
 
-  @DataProvider(name = "Provider")
-  public Object[][] getData()
+  @DataProvider(name = "ProviderNaked")
+  public Object[][] getDataNaked()
   {
     return new Object[][]{
-      // ohne rampz
-      {part, 0x00, 0x00, 0x60, 0x00, 0x00, 0x00, false, 0x00, 0x000060},
-      {part, 0x01, 0xff, 0x61, 0x00, 0x00, 0xee, false, 0x11, 0x000061},
-      {part, 0x02, 0x00, 0x62, 0x00, 0x00, 0xee, false, 0xee, 0x000062},
-      {part, 0x03, 0xcc, 0x20, 0x01, 0x00, 0xee, false, 0x22, 0x000120},
-      {part, 0x04, 0xaa, 0x21, 0x01, 0xff, 0xee, false, 0x44, 0x000121},
-      // mit rampz
-      {part22bit, 0x05, 0x00, 0x60, 0x00, 0x01, 0x00, false, 0x00, 0x010060},
-      {part22bit, 0x06, 0xff, 0x61, 0x00, 0x02, 0xee, false, 0x11, 0x020061},
-      {part22bit, 0x07, 0x00, 0x62, 0x00, 0x03, 0xee, false, 0xee, 0x030062},
-      {part22bit, 0x08, 0xcc, 0x20, 0x01, 0x04, 0xee, false, 0x22, 0x040120},
-      {part22bit, 0x09, 0xaa, 0x21, 0x01, 0x05, 0xee, false, 0x44, 0x050121}
+      {part, 0x00, 0x00, 0x00, -1, true, 0x95},
+      {part, 0x00, 0x01, 0x00, -1, true, 0xc8},
+      {part, 0x00, 0x02, 0x00, -1, true, 0xff},
+      {part, 0x00, 0x03, 0x00, -1, true, 0xff}
     };
   }
 
-  @Test(dataProvider = "Provider")
-  public void testLat(XmlPart p,
-                      int rd,
-                      int rdVal,
-                      int r30,
-                      int r31,
-                      int rampzInit,
-                      int ramInit,
-                      boolean list,
-                      int rdExpected,
-                      int expectedPtr) throws Exception
+  @Test(dataProvider = "ProviderNaked")
+  public void testLPMNaked(XmlPart p,
+                           int rdVal,
+                           int ptrLo,
+                           int ptrHi,
+                           int rampzInit,
+                           boolean list,
+                           int rdExpected) throws Exception
   {
-    final String cmd = "lat Z,r" + rd + "; r" + rd + "=0x" + Integer.toHexString(rdVal);
+    final int rampzVal;
+    final int ptr;
+    if (rampzInit != -1) {
+      rampzVal = rampzInit;
+    } else {
+      rampzVal = 0;
+    }
+    ptr = (rampzVal << 16) + (ptrHi << 8) + ptrLo;
+    final String cmd;
+    if (ptr > 4) {
+      cmd = "lpm\nnop\n.dw 0xffff\n.org 0x" + Integer.toHexString(ptr / 2) + "\n.db 0x" + Integer.toHexString(rdExpected);
+    } else {
+      cmd = "lpm\nnop\n.dw 0xffff";
+    }
     final Device device = getDevice(p,
                                     cmd,
                                     list);
@@ -102,59 +99,53 @@ public class LatNGTest extends AbstractInstructionTest
     final Set<Integer> expectedChange = new HashSet<>();
     final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
-    final int zptr = r30 + (r31 << 8);
-    final int ptr = zptr + (rampz != null ? (rampzInit << 16) : 0);
-
-    sram.setByteAt(rd,
-                   rdVal);
-    sram.setByteAt(30,
-                   r30);
-    sram.setByteAt(31,
-                   r31);
     if (rampz != null) {
       rampz.setValue(rampzInit);
     }
+    sram.setByteAt(0,
+                   rdVal);
     sram.setByteAt(ptr,
-                   ramInit);
+                   rdExpected);
+    sram.setByteAt(30,
+                   ptrLo);
+    sram.setByteAt(31,
+                   ptrHi);
     assertEquals(sram.getPointer(Pointer.Z),
-                 zptr,
+                 ptr & 0xffff,
                  cmd);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
-
-    device.onClock(cs.getAndNext());
-    device.onClock(cs.getAndNext());
-    device.onClock(cs.getAndNext());
+    for (int i = 0; i < 5; ++i) {
+      device.onClock(cs.getAndNext());
+    }
     if (rdVal != rdExpected) {
-      expectedChange.add(rd);
-    }
-    if (rdExpected != ramInit) {
-      expectedChange.add(ptr);
+      expectedChange.add(0);
     }
     device.onClock(cs.getAndNext());
-    assertEquals(ptr,
-                 expectedPtr,
+    assertEquals(sram.getByteAt(0),
+                 rdExpected,
                  cmd);
     assertEquals(sram.getByteAt(30),
-                 r30,
+                 ptrLo,
                  cmd);
     assertEquals(sram.getByteAt(31),
-                 r31,
+                 ptrHi,
                  cmd);
     if (rampz != null) {
       assertEquals(rampz.getValue(),
                    rampzInit,
                    cmd);
     }
-    assertEquals(sram.getByteAt(expectedPtr),
+    assertEquals(sram.getByteAt(ptr),
                  rdExpected,
                  cmd);
     assertEquals(cpu.getIP(),
-                 1,
+                 2,
                  cmd);
     assertTrue(expectedChange.isEmpty(),
                cmd);
+
   }
 
 }

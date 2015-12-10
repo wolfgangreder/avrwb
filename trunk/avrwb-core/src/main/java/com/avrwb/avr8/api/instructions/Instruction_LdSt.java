@@ -23,6 +23,7 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
@@ -33,6 +34,7 @@ import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
 
+// TODO timingfeinheiten bezüglich externes ram und intr. implementieren
 public abstract class Instruction_LdSt extends AbstractInstruction
 {
 
@@ -91,7 +93,9 @@ public abstract class Instruction_LdSt extends AbstractInstruction
   protected final String toStringValue;
   protected int rdVal;
   protected int ptrVal;
+  protected int originalPtrVal;
   protected int pointeeVal;
+  protected boolean smallPtr;
 
   protected static Pointer getPtr(int opcode,
                                   Mode mode)
@@ -200,18 +204,29 @@ public abstract class Instruction_LdSt extends AbstractInstruction
   {
     if (finishCycle == -1) {
       SRAM sram = device.getSRAM();
+      smallPtr = sram.getHexAddressStringWidth() < 3;
       rdVal = sram.getByteAt(rdAddress);
       ptrVal = sram.getPointer(ptr);
-      pointeeVal = sram.getByteAt(ptrVal);
+      if (smallPtr) {
+        ptrVal &= 0xff;
+      } else {
+        Register ramp = device.getCPU().getRAMP(ptr);
+        if (ramp != null) {
+          ptrVal += ramp.getValue() << 16;
+        }
+      }
       int finishDelta = 0;
+      originalPtrVal = ptrVal;
       if (mode == Mode.PRE_DECREMENT) {
-        ptrVal--;
+        ptrVal = (ptrVal - 1) & 0xffffff;
       } else if (displacement != 0) {
         ptrVal += displacement;
+        originalPtrVal = ptrVal;
       }
+      pointeeVal = sram.getByteAt(ptrVal);
       final boolean external = sram.isAddressExternal(ptrVal);
       if (mode == Mode.DISPLACEMENT) {
-        finishDelta = external ? 1 : 2;
+        finishDelta = 1;
       } else if (device.getDeviceKey().getFamily() == AvrFamily.XMEGA) {
         if (mode != Mode.PRE_DECREMENT) {
           finishDelta = external ? 0 : 1;

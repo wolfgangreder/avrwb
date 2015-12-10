@@ -248,9 +248,10 @@ dec: DEC exp;
 des: DES exp;
 eicall: EICALL ;
 eijmp: EIJMP ;
-elpm: ELPM  # Elpm_naked
+elpm:
+   ELPM exp ',' Z_PTR '+' # Elpm_ZP
   | ELPM exp ',' Z_PTR # Elpm_Z
-  | ELPM exp ',''Z+' # Elpm_ZP
+  | ELPM # Elpm_naked
   ;
 eor: EOR exp ',' exp ;
 fmul: FMUL exp ',' exp ;
@@ -264,14 +265,15 @@ jmp: JMP exp ;
 lac: LAC  Z_PTR ',' exp;
 las: LAS  Z_PTR ',' exp;
 lat: LAT Z_PTR ',' exp;
-ld: LD exp ',' ALL_PTR  # Ld_ALL
-  | LD exp ',' M_ALL_PTR # Ld_M_ALL
-  | LD exp ',' ALL_P_PTR # Ld_ALL_P
-  ;
-ldd: LDD exp ',' YZ_P_PTR exp; 
+ld: 
+   LD exp ',' ptr_naked # Ld_naked
+ | LD exp ',' ptr_minus # Ld_minus
+ | LD exp ',' ptr_plus # Ld_plus
+ ;
+ldd: LDD exp ',' ptr_q; 
 ldi: LDI exp ',' exp;
 lds: LDS exp ',' exp;
-lpm: LPM exp ',' Z_P_PTR # Lpm_ZP
+lpm: LPM exp ',' Z_PTR '+' # Lpm_ZP
   | LPM exp ',' Z_PTR  # Lpm_Z
   | LPM # Lpm_naked
   ;
@@ -314,14 +316,14 @@ set: SET;
 sev: SEV;
 sez: SEZ;
 sleep: SLEEP;
-spm: SPM  Z_P_PTR # Spm_ZP
+spm: SPM  Z_PTR '+' # Spm_ZP
   | SPM # Spm_naked
   ;
-st: ST  ALL_PTR ',' exp # St_ALL
-  | ST ALL_P_PTR ',' exp # St_ALL_P
-  | ST M_ALL_PTR ',' exp # St_M_ALL
+st: ST ptr_naked ',' exp # St_ALL
+  | ST ptr_plus ',' exp # St_ALL_P
+  | ST ptr_minus ',' exp # St_M_ALL
   ;
-std: STD YZ_P_PTR exp ',' exp;
+std: STD ptr_q exp ',' exp;
 sts: STS exp ',' exp;
 sub: SUB exp ',' exp;
 subi: SUBI exp ',' exp;
@@ -329,6 +331,31 @@ swap: SWAP exp;
 tst: TST exp;
 wdr: WDR;
 xch: XCH Z_PTR ',' exp;
+
+
+ptr_q:
+   Z_PTR '+' exp
+  |Y_PTR '+' exp
+  ;
+
+ptr_minus:
+   '-' Z_PTR
+  |'-' Y_PTR
+  |'-' X_PTR
+  ;
+
+ptr_plus:
+   Z_PTR '+'
+  |Y_PTR '+'
+  |X_PTR '+'
+  ;
+
+ptr_naked:
+    Z_PTR
+   |Y_PTR
+   |X_PTR
+   ;
+
 
 explist: exp (',' exp)* ;
 
@@ -361,6 +388,8 @@ exp: '(' exp ')' # Group
    | CHAR # Char
    | INT # Int   
    ;
+
+
 
 label: NAME ':' ;
 
@@ -496,13 +525,6 @@ XCH: [Xx][Cc][Hh] ;
 X_PTR: [Xx] ;
 Y_PTR: [Yy] ;
 Z_PTR: [Zz] ;
-
-ALL_PTR: X_PTR|Z_PTR|Y_PTR;
-ALL_P_PTR : ALL_PTR'+';
-M_ALL_PTR: '-'ALL_PTR;
-YZ_PTR: Y_PTR|Z_PTR;
-YZ_P_PTR: (Y_PTR|Z_PTR)'+';
-Z_P_PTR: Z_PTR'+';
 
 DIR_BYTE: '.'[Bb][Yy][Tt][Ee];
 DIR_CSEG: '.'[Cc][Ss][Ee][Gg];
