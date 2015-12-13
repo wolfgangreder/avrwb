@@ -23,6 +23,7 @@ package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AvrDeviceKey;
@@ -60,7 +61,28 @@ public final class Lsr extends Instruction_Rd
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (finishCycle == clockState.getCycleCount()) {
+      boolean c = (rdVal & 0x01) != 0;
+      final int oldVal = rdVal;
+      rdVal = (rdVal >> 1) & 0xff;
+      if (rdVal != oldVal) {
+        resultBuilder.addModifiedDataAddresses(getRdAddress());
+        device.getSRAM().setByteAt(getRdAddress(),
+                                   rdVal);
+      }
+      final SREG sreg = device.getCPU().getSREG();
+      final int oldSREG = sreg.getValue();
+      sreg.setC(c);
+      sreg.setZ(rdVal == 0);
+      sreg.setN(false);
+      sreg.setV(c);
+      sreg.fixSignBit();
+      if (sreg.getValue() != oldSREG) {
+        resultBuilder.addModifiedRegister(sreg);
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
+    }
   }
 
 }

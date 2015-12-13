@@ -907,16 +907,53 @@ public class BaseInstructionDecoderNGTest
     }
   }
 
-  protected void testRdhRrh(int baseOpcode,
-                            Class<? extends Instruction_Rdh_Rrh> clazz,
-                            String mnemonic,
-                            boolean expectToFind)
+  protected void testMuls(int baseOpcode,
+                          Class<? extends Instruction_Rdh_Rrh> clazz,
+                          String mnemonic,
+                          boolean expectToFind)
   {
     for (int rd = 16; rd < 33; ++rd) {
       for (int rr = 16; rr < 33; ++rr) {
-        int opcode = InstructionComposer.composeOpcode_Rdh_Rrh(baseOpcode,
-                                                               rd,
-                                                               rr);
+        int opcode = InstructionComposer.composeOpcode_Muls(baseOpcode,
+                                                            rd,
+                                                            rr);
+        Instruction i = decoder.decodeInstruction(deviceKey,
+                                                  opcode,
+                                                  -1);
+        String context = mnemonic + " r" + rd + ", r" + rr + " | ";
+        if (expectToFind) {
+          assertNotNull(i,
+                        context + "nulltest");
+          assertTrue(clazz.isInstance(i),
+                     context + "class");
+          Instruction_Rdh_Rrh inst = clazz.cast(i);
+          assertEquals(inst.getRdhAddress(),
+                       rd,
+                       context + "rd");
+          assertEquals(inst.getRrhAddress(),
+                       rr,
+                       context + "rr");
+          assertEquals(inst.getMnemonic(),
+                       mnemonic,
+                       context + "mnemonic");
+        } else {
+          assertFalse(clazz.isInstance(i),
+                      context + "class");
+        }
+      }
+    }
+  }
+
+  protected void testMovw(int baseOpcode,
+                          Class<? extends Instruction_Rdh_Rrh> clazz,
+                          String mnemonic,
+                          boolean expectToFind)
+  {
+    for (int rd = 0; rd < 31; rd += 2) {
+      for (int rr = 0; rr < 31; rr += 2) {
+        int opcode = InstructionComposer.composeOpcode_Movw(baseOpcode,
+                                                            rd,
+                                                            rr);
         Instruction i = decoder.decodeInstruction(deviceKey,
                                                   opcode,
                                                   -1);
