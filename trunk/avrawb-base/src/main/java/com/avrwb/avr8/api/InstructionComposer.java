@@ -221,9 +221,9 @@ public final class InstructionComposer
     return (baseOpcode << 16) | ((rdAddress) << 20) | k16;
   }
 
-  public static int composeOpcode_Rdh_Rrh(int baseOpcode,
-                                          int rdh,
-                                          int rrh)
+  public static int composeOpcode_Muls(int baseOpcode,
+                                       int rdh,
+                                       int rrh)
   {
     if ((baseOpcode & ~0xff00) != 0) {
       throw new IllegalArgumentException("invalid base opcode");
@@ -235,6 +235,22 @@ public final class InstructionComposer
       throw new IllegalArgumentException("invalid rrh");
     }
     return baseOpcode | ((rdh & 0xf) << 4) | (rrh & 0xf);
+  }
+
+  public static int composeOpcode_Movw(int baseOpcode,
+                                       int rdl,
+                                       int rrl)
+  {
+    if ((baseOpcode & ~0xff00) != 0) {
+      throw new IllegalArgumentException("invalid base opcode");
+    }
+    if ((rdl % 2) != 0) {
+      throw new IllegalArgumentException("invalid rdl");
+    }
+    if ((rrl % 2) != 0) {
+      throw new IllegalArgumentException("invalid rrl");
+    }
+    return baseOpcode | ((rdl << 3) & 0xf0) | ((rrl >> 1) & 0xf);
   }
 
   public static int composeOpcode_k12(int baseOpcode,

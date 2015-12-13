@@ -61,11 +61,18 @@ public class LpmNGTest extends AbstractInstructionTest
   public Object[][] getDataNaked()
   {
     return new Object[][]{
-      {part, 0x00, 0x00, 0x00, -1, true, 0x95},
-      {part, 0x00, 0x01, 0x00, -1, true, 0xc8},
-      {part, 0x00, 0x02, 0x00, -1, true, 0xff},
-      {part, 0x00, 0x03, 0x00, -1, true, 0xff}
-    };
+      {part, 0x00, 0x00, 0x00, -1, false, 0xc8},
+      {part, 0x00, 0x01, 0x00, -1, false, 0x95},
+      {part, 0x00, 0x02, 0x00, -1, false, 0x00},
+      {part, 0x00, 0x03, 0x00, -1, false, 0x00},
+      {part, 0x00, 0x00, 0x10, -1, false, 0x12},
+      {part, 0x00, 0x04, 0x10, -1, false, 0x34},
+      {part22bit, 0x00, 0x00, 0x00, 0x00, false, 0xc8},
+      {part22bit, 0x00, 0x01, 0x00, 0x00, false, 0x95},
+      {part22bit, 0x00, 0x02, 0x00, 0x00, false, 0x00},
+      {part22bit, 0x00, 0x03, 0x00, 0x00, false, 0x00},
+      {part22bit, 0x00, 0x00, 0x10, 0x01, false, 0x12},
+      {part22bit, 0x00, 0x04, 0x10, 0x02, false, 0x34}};
   }
 
   @Test(dataProvider = "ProviderNaked")
@@ -104,8 +111,6 @@ public class LpmNGTest extends AbstractInstructionTest
     }
     sram.setByteAt(0,
                    rdVal);
-    sram.setByteAt(ptr,
-                   rdExpected);
     sram.setByteAt(30,
                    ptrLo);
     sram.setByteAt(31,
@@ -137,11 +142,11 @@ public class LpmNGTest extends AbstractInstructionTest
                    rampzInit,
                    cmd);
     }
-    assertEquals(sram.getByteAt(ptr),
+    assertEquals(sram.getByteAt(0),
                  rdExpected,
                  cmd);
     assertEquals(cpu.getIP(),
-                 2,
+                 1,
                  cmd);
     assertTrue(expectedChange.isEmpty(),
                cmd);

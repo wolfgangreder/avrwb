@@ -918,12 +918,12 @@ public class ContextListener extends AtmelAsmBaseListener
                                right);
   }
 
-  private final class Composer_Rdh_Rrh extends Composer2
+  private final class Composer_Movw extends Composer2
   {
 
-    public Composer_Rdh_Rrh(int baseOpcode,
-                            Expression left,
-                            Expression right)
+    public Composer_Movw(int baseOpcode,
+                         Expression left,
+                         Expression right)
     {
       super(baseOpcode,
             left,
@@ -933,29 +933,73 @@ public class ContextListener extends AtmelAsmBaseListener
     @Override
     public Integer get()
     {
-      return InstructionComposer.composeOpcode_Rdh_Rrh(baseOpcode,
-                                                       left.evaluate(context),
-                                                       right.evaluate(context));
+      return InstructionComposer.composeOpcode_Movw(baseOpcode,
+                                                    left.evaluate(context),
+                                                    right.evaluate(context));
     }
 
   }
 
-  private Supplier<Integer> composeOpcode_Rdh_Rrh(int baseOpcode,
-                                                  SourceContext sctx)
+  private final class Composer_Muls extends Composer2
   {
-    Expression right = context.popExpression(sctx);
-    Expression left = context.popExpression(sctx);
-    if (right.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(right.toString() + " is no register",
+
+    public Composer_Muls(int baseOpcode,
+                         Expression left,
+                         Expression right)
+    {
+      super(baseOpcode,
+            left,
+            right);
+    }
+
+    @Override
+    public Integer get()
+    {
+      return InstructionComposer.composeOpcode_Muls(baseOpcode,
+                                                    left.evaluate(context),
+                                                    right.evaluate(context));
+    }
+
+  }
+
+  private Supplier<Integer> composeOpcode_Movw(int baseOpcode,
+                                               SourceContext sctx)
+  {
+    Expression rightLo = context.popExpression(sctx);
+    Expression rightHi = context.popExpression(sctx);
+    Expression leftLo = context.popExpression(sctx);
+    Expression leftHi = context.popExpression(sctx);
+    if (rightLo.getType() != ExpressionType.REGISTER) {
+      throw new InvalidTypeException(rightLo.toString() + " is no register",
                                      sctx).toWrapper();
     }
-    if (left.getType() != ExpressionType.REGISTER) {
-      throw new InvalidTypeException(left.toString() + " is no register",
+    if (leftLo.getType() != ExpressionType.REGISTER) {
+      throw new InvalidTypeException(leftLo.toString() + " is no register",
                                      sctx).toWrapper();
     }
-    return new Composer_Rdh_Rrh(baseOpcode,
-                                left,
-                                right);
+    return new Composer_Movw(baseOpcode,
+                             leftLo,
+                             rightLo);
+  }
+
+  private Supplier<Integer> composeOpcode_Muls(int baseOpcode,
+                                               SourceContext sctx)
+  {
+    Expression rightLo = context.popExpression(sctx);
+    Expression rightHi = context.popExpression(sctx);
+    Expression leftLo = context.popExpression(sctx);
+    Expression leftHi = context.popExpression(sctx);
+    if (rightLo.getType() != ExpressionType.REGISTER) {
+      throw new InvalidTypeException(rightLo.toString() + " is no register",
+                                     sctx).toWrapper();
+    }
+    if (leftLo.getType() != ExpressionType.REGISTER) {
+      throw new InvalidTypeException(leftLo.toString() + " is no register",
+                                     sctx).toWrapper();
+    }
+    return new Composer_Muls(baseOpcode,
+                             leftLo,
+                             rightLo);
   }
 
   private final class Composer_k12 extends Composer1
@@ -1658,8 +1702,8 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitMulsu(AtmelAsmParser.MulsuContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0300,
-                                                     sctx);
+    Supplier<Integer> opcode = composeOpcode_Muls(0x0300,
+                                                  sctx);
     addOpcodeToSegment(opcode,
                        false,
                        sctx);
@@ -1669,8 +1713,8 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitMuls(AtmelAsmParser.MulsContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0200,
-                                                     sctx);
+    Supplier<Integer> opcode = composeOpcode_Muls(0x0200,
+                                                  sctx);
     addOpcodeToSegment(opcode,
                        false,
                        sctx);
@@ -1691,8 +1735,8 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitMovw(AtmelAsmParser.MovwContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    Supplier<Integer> opcode = composeOpcode_Rdh_Rrh(0x0100,
-                                                     sctx);
+    Supplier<Integer> opcode = composeOpcode_Movw(0x0100,
+                                                  sctx);
     addOpcodeToSegment(opcode,
                        false,
                        sctx);

@@ -47,12 +47,31 @@ public final class Movw extends Instruction_Rdh_Rrh
                     nextOpcode);
   }
 
+  private final int rdlAddress;
+  private final int rrlAddress;
+  private int rrVal;
+  private int rdVal;
+
   private Movw(AvrDeviceKey deviceKey,
                int opcode,
                int nextOpcode)
   {
     super(opcode,
           "movw");
+    rdlAddress = (opcode & 0x0f0) >> 3;
+    rrlAddress = (opcode & 0xf) << 1;
+  }
+
+  @Override
+  protected void doPrepare(ClockState clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder) throws SimulationException
+  {
+    if (finishCycle == -1) {
+      rdVal = device.getSRAM().getWordAt(rdlAddress);
+      rrVal = device.getSRAM().getWordAt(rrlAddress);
+      finishCycle = clockState.getCycleCount();
+    }
   }
 
   @Override
@@ -60,7 +79,16 @@ public final class Movw extends Instruction_Rdh_Rrh
                            Device device,
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    if (finishCycle == clockState.getCycleCount()) {
+      if (rdVal != rrVal) {
+        resultBuilder.addModifiedDataAddresses(rdlAddress);
+        resultBuilder.addModifiedDataAddresses(rdlAddress + 1);
+        device.getSRAM().setWordAt(rdlAddress,
+                                   rrVal);
+      }
+      resultBuilder.finished(true,
+                             device.getCPU().getIP() + 1);
+    }
   }
 
 }

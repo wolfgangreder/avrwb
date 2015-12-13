@@ -37,31 +37,30 @@ import org.testng.annotations.Test;
  *
  * @author wolfi
  */
-public class MovwNGTest extends AbstractInstructionTest
+public class LsrNGTest extends AbstractInstructionTest
 {
 
   @DataProvider(name = "Provider")
   public Object[][] getData()
   {
     return new Object[][]{
-      {0, 0xffff, 30, 0x1234, false},
-      {2, 0xffff, 28, 0x5678, false},
-      {4, 0x0000, 26, 0x9abc, false},
-      {6, 0x0000, 24, 0x9abc, false},
-      {8, 0x0000, 22, 0x0000, false}
+      {1, 0x00, SREG.MASK_C, false, 0, SREG.MASK_Z},
+      {2, 0xff, SREG.MASK_I | SREG.MASK_T | SREG.MASK_V, false, 0x7f, SREG.MASK_C | SREG.MASK_V | SREG.MASK_S | SREG.MASK_I
+                                                                      | SREG.MASK_T},
+      {3, 0x01, 0, false, 0x00, SREG.MASK_C | SREG.MASK_V | SREG.MASK_S | SREG.MASK_Z},
+      {4, 0x80, SREG.MASK_V, false, 0x40, 0}
     };
   }
 
   @Test(dataProvider = "Provider")
-  public void testMovw(int rd,
-                       int rdVal,
-                       int rr,
-                       int rrVal,
-                       boolean list) throws Exception
+  public void testLsr(int rd,
+                      int rdVal,
+                      int sregInit,
+                      boolean list,
+                      int rdExpected,
+                      int sregExpected) throws Exception
   {
-    final String cmd = "movw r" + (rd + 1) + ":r" + rd + ",r" + (rr + 1) + ":r" + rr + "; r" + rd + "=0x" + Integer.toHexString(
-            rdVal) + ", r" + rr + "=0x" + Integer.
-            toHexString(rrVal);
+    final String cmd = "lsr r" + rd + "; r" + rd + "=0x" + Integer.toHexString(rdVal);
     final Device device = getDevice(cmd,
                                     list);
     final CPU cpu = device.getCPU();
@@ -69,30 +68,27 @@ public class MovwNGTest extends AbstractInstructionTest
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
     final ClockStateTestImpl cs = new ClockStateTestImpl();
-    final int sregVal = sreg.getValue();
 
-    sram.setWordAt(rd,
+    sreg.setValue(sregInit);
+    sram.setByteAt(rd,
                    rdVal);
-    sram.setWordAt(rr,
-                   rrVal);
-    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
-                                                         expectedChange,
-                                                         cmd)::onMemoryChanged);
+    sram.addMemoryChangeListener(new AbstractInstructionTest.MemoryChangeHandler(sram,
+                                                                                 expectedChange,
+                                                                                 cmd)::onMemoryChanged);
 
     device.onClock(cs.getAndNext());
-    if (rdVal != rrVal) {
+    if (rdVal != rdExpected) {
       expectedChange.add(rd);
-      expectedChange.add(rd + 1);
+    }
+    if (sregExpected != sregInit) {
+      expectedChange.add(sreg.getMemoryAddress());
     }
     device.onClock(cs.getAndNext());
     assertSREG(sreg.getValue(),
-               sregVal,
+               sregExpected,
                cmd);
-    assertEquals(sram.getWordAt(rd),
-                 rrVal,
-                 cmd);
-    assertEquals(sram.getWordAt(rr),
-                 rrVal,
+    assertEquals(sram.getByteAt(rd),
+                 rdExpected,
                  cmd);
     assertEquals(cpu.getIP(),
                  1,

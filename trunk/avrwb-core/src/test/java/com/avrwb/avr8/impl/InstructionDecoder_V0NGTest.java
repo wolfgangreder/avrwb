@@ -639,26 +639,46 @@ public class InstructionDecoder_V0NGTest extends BaseInstructionDecoderNGTest
                      expectToFind);
   }
 
-  @DataProvider(name = "rdhrrhProvider")
-  public Object[][] rdhrrhProvider()
+  @DataProvider(name = "mulsProvider")
+  public Object[][] mulsProvider()
   {
     return new Object[][]{
-      {Movw.OPCODE, Movw.class, "movw", false},
       {Muls.OPCODE, Muls.class, "muls", false}
     };
   }
 
-  @Test(dataProvider = "rdhrrhProvider")
+  @Test(dataProvider = "mulsProvider")
   @Override
-  public void testRdhRrh(int baseOpcode,
-                         Class<? extends Instruction_Rdh_Rrh> clazz,
-                         String mnemonic,
-                         boolean expectToFind)
+  public void testMuls(int baseOpcode,
+                       Class<? extends Instruction_Rdh_Rrh> clazz,
+                       String mnemonic,
+                       boolean expectToFind)
   {
-    super.testRdhRrh(baseOpcode,
-                     clazz,
-                     mnemonic,
-                     expectToFind);
+    super.testMuls(baseOpcode,
+                   clazz,
+                   mnemonic,
+                   expectToFind);
+  }
+
+  @DataProvider(name = "movwProvider")
+  public Object[][] movwProvider()
+  {
+    return new Object[][]{
+      {Movw.OPCODE, Movw.class, "movw", false}
+    };
+  }
+
+  @Test(dataProvider = "movwProvider")
+  @Override
+  public void testMovw(int baseOpcode,
+                       Class<? extends Instruction_Rdh_Rrh> clazz,
+                       String mnemonic,
+                       boolean expectToFind)
+  {
+    super.testMovw(baseOpcode,
+                   clazz,
+                   mnemonic,
+                   expectToFind);
   }
 
 }
