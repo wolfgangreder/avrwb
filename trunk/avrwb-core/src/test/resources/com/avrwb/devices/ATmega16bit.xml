@@ -161,6 +161,14 @@ MA 02110-1301  USA
           <avr:bitmask>0x1ff</avr:bitmask>
           <avr:size>2</avr:size>
         </avr:register>
+        <avr:register>
+          <avr:name>GPIO</avr:name>
+          <avr:caption>GPIO</avr:caption>
+          <avr:io-address>0x10</avr:io-address>
+          <avr:ram-address>0x30</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
     
         <avr:interrupt>
           <avr:name>RESET</avr:name>

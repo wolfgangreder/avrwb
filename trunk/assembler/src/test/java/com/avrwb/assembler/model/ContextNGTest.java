@@ -382,4 +382,28 @@ public class ContextNGTest
     assertTrue(asr.isCSEGAvailable());
   }
 
+  @DataProvider(name = "RCallProvider")
+  public Object[][] getDataRcall()
+  {
+    return new Object[][]{
+      {"/asm/rcall1.asm"}
+    };
+  }
+
+  @Test(dataProvider = "RCallProvider")
+  public void testRcall(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
 }

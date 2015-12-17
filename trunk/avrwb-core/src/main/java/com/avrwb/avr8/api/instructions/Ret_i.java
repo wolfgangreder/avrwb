@@ -24,6 +24,7 @@ package com.avrwb.avr8.api.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
@@ -92,10 +93,22 @@ public final class Ret_i extends AbstractInstruction
       final CPU cpu = device.getCPU();
       final SREG sreg = cpu.getSREG();
       final Stack stack = device.getStack();
-      resultBuilder.addModifiedRegister(cpu.getStackPointer());
+      final Register sp = cpu.getStackPointer();
+      final int spOld = stack.getSP();
       int tmpIP = (stack.pop() << 8) + stack.pop();
       if (longRet) {
         tmpIP = (tmpIP << 8) + stack.pop();
+      }
+      final int spNew = stack.getSP();
+      resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress());
+      if (sp.getSize() > 1 && (spNew & 0xff00) != (spOld & 0xff00)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 1);
+      }
+      if (sp.getSize() > 2 && (spNew & 0xff0000) != (spOld & 0xff0000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 2);
+      }
+      if (sp.getSize() > 3 && (spNew & 0xff000000) != (spOld & 0xff000000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 3);
       }
       final int targetIP = tmpIP;
       if (isReti(getOpcode()) && !sreg.getI()) {

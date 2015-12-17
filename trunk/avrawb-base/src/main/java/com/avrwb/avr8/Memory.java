@@ -77,9 +77,27 @@ public interface Memory extends Resetable
   public void setFloatAt(int address,
                          float f);
 
+  @NotNull
+  public Fract8 getFract8At(int address);
+
+  public void setFract8At(int address,
+                          @NotNull Fract8 f);
+
+  @NotNull
+  public Fract16 getFract16At(int address);
+
+  public void setFract16At(int address,
+                           @NotNull Fract16 f);
+
+  @NotNull
+  public Fract32 getFract32At(int address);
+
+  public void setFract32At(int address,
+                           @NotNull Fract32 f);
 //  public double getDoubleAt(int address);
 //
 //  public void setDoubleAt(int address, double d);
+
   /**
    * Liest Characters vom Speicher. Bei einem Addressüberlauf (sowohl beim Speicher, als auch dem Buffer) wird das Lesen
    * abgebrochen.

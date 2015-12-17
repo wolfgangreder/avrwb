@@ -48,15 +48,15 @@ public class CpcNGTest extends AbstractInstructionTest
   public Object[][] getData()
   {
     return new Object[][]{
-      {0, 0, 0, 0, 0, false, SREG.MASK_Z},
-      {0, 0x55, 1, 0x55, 0, false, SREG.MASK_Z},
+      {0, 0, 0, 0, 0, false, 0},
+      {0, 0x55, 1, 0x55, 0, false, 0},
       {0, 1, 2, 2, SREG.MASK_I | SREG.MASK_T, false, SREG.MASK_S | SREG.MASK_I | SREG.MASK_T | SREG.MASK_N | SREG.MASK_H
                                                      | SREG.MASK_C},
       {0, 0x0b, 3, 0x80, 0, false, SREG.MASK_C | SREG.MASK_V | SREG.MASK_N},
       {0, 0xc0, 4, 0x7f, 0, false, SREG.MASK_V | SREG.MASK_H | SREG.MASK_S},
       {0, 0xc7, 5, 0x7f, SREG.MASK_C | SREG.MASK_N, false, SREG.MASK_V | SREG.MASK_H | SREG.MASK_S},
-      {0, 1, 6, 0, SREG.MASK_C, false, SREG.MASK_Z},
-      {0, 0x55, 7, 0x54, SREG.MASK_C, false, SREG.MASK_Z},
+      {0, 1, 6, 0, SREG.MASK_C, false, 0},
+      {0, 0x55, 7, 0x54, SREG.MASK_C, false, 0},
       {0, 1, 8, 1, SREG.MASK_C | SREG.MASK_I | SREG.MASK_T, false, SREG.MASK_S | SREG.MASK_I | SREG.MASK_T | SREG.MASK_N
                                                                    | SREG.MASK_H
                                                                    | SREG.MASK_C},

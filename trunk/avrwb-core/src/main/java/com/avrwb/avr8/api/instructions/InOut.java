@@ -139,6 +139,8 @@ public final class InOut extends AbstractInstruction
       }
       pattern = "{0} writing 0x{1} to io 0x{3}";
     }
+    resultBuilder.finished(true,
+                           device.getCPU().getIP() + 1);
     if (AVRWBDefaults.isDebugLoggingActive()) {
       device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              () -> MessageFormat.format(pattern,
