@@ -22,9 +22,7 @@
 package com.avrwb.avr8.api.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
-import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 import com.avrwb.avr8.helper.AVRWBDefaults;
@@ -67,12 +65,7 @@ public final class Rjmp extends Instruction_k12
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
     if (finishCycle == -1) {
-      longCall = device.getFlash().getHexAddressStringWidth() > 4;
-      if (longCall) {
-        finishCycle = clockState.getCycleCount() + 3;
-      } else {
-        finishCycle = clockState.getCycleCount() + 2;
-      }
+      finishCycle = clockState.getCycleCount() + 1;
     }
   }
 
@@ -82,28 +75,7 @@ public final class Rjmp extends Instruction_k12
                            InstructionResultBuilder resultBuilder) throws SimulationException
   {
     if (finishCycle == clockState.getCycleCount()) {
-      final Stack stack = device.getStack();
-      final CPU cpu = device.getCPU();
-      final int ipToPush = cpu.getIP() + 1;
-      int toPush = ipToPush & 0xff;
-      int oldByte = stack.push(toPush);
-      resultBuilder.addModifiedRegister(cpu.getStackPointer());
-      if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
-      }
-      toPush = (ipToPush & 0xff00) >> 8;
-      oldByte = stack.push(toPush);
-      if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
-      }
-      if (longCall) {
-        toPush = (ipToPush & 0x3f0000) >> 16;
-        oldByte = stack.push(toPush);
-        if (oldByte != toPush) {
-          resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
-        }
-      }
-      final int targetIP = device.getCPU().getIP() + k12;
+      final int targetIP = device.getCPU().getIP() + k12 + 1;
       resultBuilder.finished(true,
                              targetIP);
       if (AVRWBDefaults.isDebugLoggingActive()) {

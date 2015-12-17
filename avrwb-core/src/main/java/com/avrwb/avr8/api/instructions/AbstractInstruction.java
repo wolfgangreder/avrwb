@@ -111,7 +111,11 @@ public abstract class AbstractInstruction implements Instruction
   {
     int v = (rd - rr - (withCarry && sreg.getC() ? 1 : 0)) & 0xff;
     sreg.setC(((~rd & rr & 0x80) != 0) || ((rr & v & 0x80) != 0) || ((~rd & v & 0x80) != 0));
-    sreg.setZ(v == 0);
+    if (withCarry) {
+      sreg.setZ(v == 0 && sreg.getZ());
+    } else {
+      sreg.setZ(v == 0);
+    }
     sreg.setN((v & 0x80) != 0);
     sreg.setV(((rd & ~rr & ~v & 0x80) != 0) || ((~rd & rr & v & 0x80) != 0));
     sreg.fixSignBit();

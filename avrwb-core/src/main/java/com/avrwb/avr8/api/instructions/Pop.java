@@ -58,16 +58,9 @@ public final class Pop extends Instruction_Rd
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
-                           Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+  public int getCycleCount()
   {
-    if (finishCycle == -1) {
-      super.doPrepare(clockState,
-                      device,
-                      resultBuilder);
-      finishCycle = clockState.getCycleCount() + 1;
-    }
+    return 2;
   }
 
   @Override
@@ -78,9 +71,19 @@ public final class Pop extends Instruction_Rd
     if (finishCycle == clockState.getCycleCount()) {
       final Stack stack = device.getStack();
       final Register sp = device.getCPU().getStackPointer();
+      final int spOld = sp.getValue();
       int popped = stack.pop();
-
-      resultBuilder.addModifiedRegister(sp);
+      final int spNew = sp.getValue();
+      resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress());
+      if (sp.getSize() > 1 && (spOld & 0xff00) != (spNew & 0xff00)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 1);
+      }
+      if (sp.getSize() > 2 && (spOld & 0xff0000) != (spNew & 0xff0000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 2);
+      }
+      if (sp.getSize() > 3 && (spOld & 0xff000000) != (spNew & 0xff000000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 3);
+      }
       if (popped != rdVal) {
         resultBuilder.addModifiedDataAddresses(getRdAddress());
         device.getSRAM().setByteAt(getRdAddress(),

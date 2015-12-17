@@ -24,6 +24,7 @@ package com.avrwb.avr8.api.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Register;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
@@ -85,25 +86,37 @@ public final class Rcall extends Instruction_k12
       final Stack stack = device.getStack();
       final CPU cpu = device.getCPU();
       final int ipToPush = cpu.getIP() + 1;
+      final Register sp = cpu.getStackPointer();
+      final int spOld = sp.getValue();
       int toPush = ipToPush & 0xff;
       int oldByte = stack.push(toPush);
-      resultBuilder.addModifiedRegister(cpu.getStackPointer());
       if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
       }
       toPush = (ipToPush & 0xff00) >> 8;
       oldByte = stack.push(toPush);
       if (oldByte != toPush) {
-        resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+        resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
       }
       if (longCall) {
         toPush = (ipToPush & 0x3f0000) >> 16;
         oldByte = stack.push(toPush);
         if (oldByte != toPush) {
-          resultBuilder.addModifiedDataAddresses(stack.getSP() - 1);
+          resultBuilder.addModifiedDataAddresses(stack.getSP() + 1);
         }
       }
-      final int targetIP = device.getCPU().getIP() + k12;
+      final int spNew = sp.getValue();
+      resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress());
+      if (sp.getSize() > 1 && (spNew & 0xff00) != (spOld & 0xff00)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 1);
+      }
+      if (sp.getSize() > 2 && (spNew & 0xff0000) != (spOld & 0xff0000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 2);
+      }
+      if (sp.getSize() > 3 && (spNew & 0xff000000) != (spOld & 0xff000000)) {
+        resultBuilder.addModifiedDataAddresses(sp.getMemoryAddress() + 3);
+      }
+      final int targetIP = device.getCPU().getIP() + k12 + 1;
       resultBuilder.finished(true,
                              targetIP);
       if (AVRWBDefaults.isDebugLoggingActive()) {

@@ -21,7 +21,17 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import org.testng.annotations.BeforeClass;
+import com.avrwb.avr8.CPU;
+import com.avrwb.avr8.Device;
+import com.avrwb.avr8.SRAM;
+import com.avrwb.avr8.SREG;
+import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
+import java.util.HashSet;
+import java.util.Set;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -34,9 +44,64 @@ public class SbciNGTest extends AbstractInstructionTest
   {
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @DataProvider(name = "Provider")
+  public Object[][] getData()
   {
+    return new Object[][]{
+      {16, 0x00, 0x00, 0, false, 0, 0},
+      {17, 0x00, 0x00, SREG.MASK_C, false, SREG.MASK_C | SREG.MASK_N | SREG.MASK_S | SREG.MASK_H, 0xff},
+      {18, 0x00, 0x00, SREG.MASK_C | SREG.MASK_Z, false, SREG.MASK_C | SREG.MASK_N | SREG.MASK_S | SREG.MASK_H, 0xff},
+      {19, 0xff, 0x00, 0, false, SREG.MASK_N | SREG.MASK_S, 0xff},
+      {20, 0x01, 0x01, SREG.MASK_Z, false, SREG.MASK_Z, 0x00},
+      {21, 0x0e, 1, SREG.MASK_C | SREG.MASK_Z, false, 0, 0x0c},
+      {22, 0x80, 1, 0, false, SREG.MASK_H | SREG.MASK_V | SREG.MASK_S, 0x7f}
+    };
+  }
+
+  @Test(dataProvider = "Provider")
+  public void testSbci(int rd,
+                       int rdVal,
+                       int k8,
+                       int sregInit,
+                       boolean list,
+                       int sregExpected,
+                       int rdExpected) throws Exception
+  {
+    final String cmd = "sbci r" + rd + ",0x" + Integer.toHexString(k8);
+    final Device device = getDevice(cmd,
+                                    list);
+    final SRAM sram = device.getSRAM();
+    final CPU cpu = device.getCPU();
+    final SREG sreg = cpu.getSREG();
+    final Set<Integer> expectedChange = new HashSet<>();
+    final ClockStateTestImpl cs = new ClockStateTestImpl();
+
+    sreg.setValue(sregInit);
+    sram.setByteAt(rd,
+                   rdVal);
+    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
+                                                         expectedChange,
+                                                         cmd)::onMemoryChanged);
+
+    device.onClock(cs.getAndNext());
+    if (rdVal != rdExpected) {
+      expectedChange.add(rd);
+    }
+    if (sregInit != sregExpected) {
+      expectedChange.add(sreg.getMemoryAddress());
+    }
+    device.onClock(cs.getAndNext());
+    assertEquals(sram.getByteAt(rd),
+                 rdExpected,
+                 cmd);
+    assertSREG(sreg.getValue(),
+               sregExpected,
+               cmd);
+    assertTrue(expectedChange.isEmpty(),
+               cmd);
+    assertEquals(cpu.getIP(),
+                 1,
+                 cmd);
   }
 
 }

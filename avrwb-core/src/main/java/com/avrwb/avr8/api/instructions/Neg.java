@@ -65,13 +65,13 @@ public final class Neg extends Instruction_Rd
     final int rdAddress = getRdAddress();
     final int oldRd = rdVal;
     final int oldSREG = sreg.getValue();
-    rdVal = (-rdVal) & 0xff;
+    rdVal = (~rdVal) & 0xff;
     sreg.setZ(rdVal == 0);
     sreg.setC(rdVal != 0);
     sreg.setN((rdVal & 0x80) != 0);
     sreg.setV(rdVal == 0x80);
-    sreg.setS(sreg.getN() ^ sreg.getV());
-    sreg.setH(((rdVal & 0x8) | (oldRd & 0x8)) != 0);
+    sreg.fixSignBit();
+    sreg.setH((rdVal & 0x8) != 0 || (oldRd & 0x8) == 0);
     if (oldSREG != sreg.getValue()) {
       resultBuilder.addModifiedDataAddresses(sreg.getMemoryAddress());
     }

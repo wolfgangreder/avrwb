@@ -52,7 +52,7 @@ public class NopNGTest extends AbstractInstructionTest
   }
 
   @Test(dataProvider = "Provider")
-  public void testBreak(int sregInit) throws Exception
+  public void testNop(int sregInit) throws Exception
   {
     final String cmd = "nop";
     final Device device = getDevice(cmd);

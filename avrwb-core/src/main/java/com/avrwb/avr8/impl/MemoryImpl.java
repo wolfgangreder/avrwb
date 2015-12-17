@@ -22,6 +22,9 @@
 package com.avrwb.avr8.impl;
 
 import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Fract16;
+import com.avrwb.avr8.Fract32;
+import com.avrwb.avr8.Fract8;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.api.MemoryChangeListener;
@@ -232,6 +235,54 @@ class MemoryImpl implements Memory
   {
     data.putFloat(checkAddress(address),
                   f);
+  }
+
+  @Override
+  public Fract8 getFract8At(int address)
+  {
+    return Fract8.valueOfByte(getByteAt(address));
+  }
+
+  @Override
+  public void setFract8At(int address,
+                          Fract8 f)
+  {
+    Objects.requireNonNull(f,
+                           "f==null");
+    setByteAt(address,
+              f.getByte());
+  }
+
+  @Override
+  public Fract16 getFract16At(int address)
+  {
+    return Fract16.valueOfInt(getWordAt(address));
+  }
+
+  @Override
+  public void setFract16At(int address,
+                           Fract16 f)
+  {
+    Objects.requireNonNull(f,
+                           "f==null");
+    setWordAt(address,
+              f.getInt());
+  }
+
+  @Override
+  public Fract32 getFract32At(int address)
+  {
+    return Fract32.valueOfInt(getDWordAt(address));
+  }
+
+  @Override
+  public void setFract32At(int address,
+                           Fract32 f)
+  {
+    Objects.requireNonNull(f,
+                           "f==null");
+    setDWordAt(address,
+               f.getInt());
   }
 
   private int readCharacters(char[] buffer,

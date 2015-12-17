@@ -21,7 +21,17 @@
  */
 package com.avrwb.avr8.api.instructions;
 
-import org.testng.annotations.BeforeClass;
+import com.avrwb.avr8.CPU;
+import com.avrwb.avr8.Device;
+import com.avrwb.avr8.Register;
+import com.avrwb.avr8.SRAM;
+import com.avrwb.avr8.api.instructions.helper.ClockStateTestImpl;
+import java.util.HashSet;
+import java.util.Set;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  *
@@ -34,9 +44,71 @@ public class PopNGTest extends AbstractInstructionTest
   {
   }
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
+  @DataProvider(name = "Provider")
+  public Object[][] getData()
   {
+    return new Object[][]{
+      {0x00, 0xff, 0x100, 0x20, false},
+      {0x01, 0xff, 0x0ff, 0x3f, false},
+      {0x02, 0xff, 0x070, 0x4f, false},
+      {0x03, 0xff, 0x110, 0x5f, false}
+    };
+  }
+
+  @Test(dataProvider = "Provider")
+  public void testPop(int rd,
+                      int rdVal,
+                      int spPtrInit,
+                      int spVal,
+                      boolean list) throws Exception
+  {
+    final String cmd = "pop  r" + rd;
+    final Device device = getDevice(cmd,
+                                    list);
+    final CPU cpu = device.getCPU();
+    final SRAM sram = device.getSRAM();
+    final Register sp = cpu.getStackPointer();
+    final Set<Integer> expectedChange = new HashSet<>();
+    final ClockStateTestImpl cs = new ClockStateTestImpl();
+    final int newSp = spPtrInit + 1;
+
+    sp.setValue(spPtrInit);
+    sram.setByteAt(spPtrInit + 1,
+                   spVal);
+    sram.setByteAt(rd,
+                   rdVal);
+    sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
+                                                         expectedChange,
+                                                         cmd)::onMemoryChanged);
+    for (int i = 0; i < 3; ++i) {
+      device.onClock(cs.getAndNext());
+    }
+    if (rdVal != spVal) {
+      expectedChange.add(rd);
+    }
+    expectedChange.add(sp.getMemoryAddress());
+    if (sp.getSize() > 1 && (spPtrInit & 0xff00) != (newSp & 0xff00)) {
+      expectedChange.add(sp.getMemoryAddress() + 1);
+    }
+    if (sp.getSize() > 2 && (spPtrInit & 0xff0000) != (newSp & 0xff0000)) {
+      expectedChange.add(sp.getMemoryAddress() + 2);
+    }
+    if (sp.getSize() > 3 && (spPtrInit & 0xff000000) != (newSp & 0xff000000)) {
+      expectedChange.add(sp.getMemoryAddress() + 3);
+    }
+    device.onClock(cs.getAndNext());
+    assertEquals(sram.getByteAt(rd),
+                 spVal,
+                 cmd);
+    assertEquals(sp.getValue(),
+                 newSp);
+    assertEquals(sram.getByteAt(spPtrInit + 1),
+                 spVal);
+    assertEquals(cpu.getIP(),
+                 1,
+                 cmd);
+    assertTrue(expectedChange.isEmpty(),
+               cmd);
   }
 
 }

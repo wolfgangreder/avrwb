@@ -21,6 +21,7 @@
  */
 package com.avrwb.avr8.api.instructions;
 
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 
 /**
@@ -37,6 +38,7 @@ public class MulNGTest extends AbstractInstructionTest
   @BeforeClass
   public static void setUpClass() throws Exception
   {
+    fail("hier gehts weiter");
   }
 
 }
