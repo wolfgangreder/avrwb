@@ -406,4 +406,83 @@ public class ContextNGTest
     assertTrue(asr.isCSEGAvailable());
   }
 
+  @DataProvider(name = "SbrProvider")
+  public Object[][] getDataSbr()
+  {
+    return new Object[][]{
+      {"/asm/sbr1.asm"}
+    };
+  }
+
+  @Test(dataProvider = "SbrProvider")
+  public void testSbr(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @DataProvider(name = "STNakedProvider")
+  public Object[][] getDataST()
+  {
+    return new Object[][]{
+      {"/asm/st_X.asm"},
+      {"/asm/st_Y.asm"},
+      {"/asm/st_Z.asm"}
+    };
+  }
+
+  @Test(dataProvider = "STNakedProvider")
+  public void testStNaked(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
+  @DataProvider(name = "STMinusProvider")
+  public Object[][] getDataSTM()
+  {
+    return new Object[][]{
+      {"/asm/st_MX.asm"},
+      {"/asm/st_MY.asm"},
+      {"/asm/st_MZ.asm"},
+      {"/asm/st_XP.asm"},
+      {"/asm/st_YP.asm"},
+      {"/asm/st_ZP.asm"}
+    };
+  }
+
+  @Test(dataProvider = "STMinusProvider")
+  public void testStMinus(String file) throws Exception
+  {
+    URL u = getClass().getResource(file);
+    AssemblerSource source = new StandardAssemblerSource(Paths.get(u.toURI()));
+    AssemblerResult asr = assembler.compile(source,
+                                            null);
+    try (Writer writer = new PrintWriter(System.out)) {
+      asr.getList(writer);
+    }
+    try (MemoryChunkOutputStream os = new IntelHexOutputStream(System.out)) {
+      asr.getCSEG(os);
+    }
+    assertTrue(asr.isCSEGAvailable());
+  }
+
 }

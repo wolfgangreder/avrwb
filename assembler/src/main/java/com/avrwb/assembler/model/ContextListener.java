@@ -1259,7 +1259,7 @@ public class ContextListener extends AtmelAsmBaseListener
   {
     final SourceContext sctx = getSourceContext(ctx);
     final AtmelAsmParser.Ptr_minusContext ptrCtx = ctx.ptr_minus();
-    final int ptr = ptrCtx.getStart().getType();
+    final int ptr = ptrCtx.getStop().getType();
     final int baseOpcode;
     switch (ptr) {
       case AtmelAsmParser.X_PTR:
@@ -1283,7 +1283,7 @@ public class ContextListener extends AtmelAsmBaseListener
   public void exitSt_ALL_P(AtmelAsmParser.St_ALL_PContext ctx)
   {
     final SourceContext sctx = getSourceContext(ctx);
-    int ptr = ctx.ptr_plus().getRuleIndex();
+    int ptr = ctx.ptr_plus().getStart().getType();
     int baseOpcode;
     switch (ptr) {
       case AtmelAsmParser.X_PTR:
