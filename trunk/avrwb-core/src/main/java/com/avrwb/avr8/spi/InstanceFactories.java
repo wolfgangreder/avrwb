@@ -31,7 +31,7 @@ import com.avrwb.avr8.RegisterBitGrpValueBuilder;
 import com.avrwb.avr8.RegisterBuilder;
 import com.avrwb.avr8.VariantBuilder;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.api.instructions.InstructionResultBuilderImpl;
+import com.avrwb.avr8.impl.instructions.InstructionResultBuilderImpl;
 import com.avrwb.avr8.impl.DeviceBuilderImpl;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;
 import com.avrwb.avr8.impl.RegisterBitBuilderImpl;
