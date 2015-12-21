@@ -24,8 +24,6 @@ package com.avrwb.avr8.api;
 import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
 
 /**
  *

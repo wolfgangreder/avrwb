@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
 
 import com.avrwb.schema.AvrCore;
 import com.avrwb.schema.AvrFamily;

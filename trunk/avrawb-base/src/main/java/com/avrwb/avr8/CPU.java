@@ -25,11 +25,18 @@ import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.avr8.api.SimulationContext;
 import com.avrwb.schema.AvrCore;
 
 public interface CPU extends Module
 {
+
+  /**
+   * Liefert die Anzahl der ausgeführten Befehle seit dem letzten Reset
+   *
+   * @return executionCtr
+   */
+  public long getExecutionCounter();
 
   /**
    * Aktueller Instruction Pointer.
@@ -41,13 +48,11 @@ public interface CPU extends Module
   /**
    * Setzt den Instruction Pointer.
    *
-   * @param device device
+   * @param ctx ctx
    * @param newIP newIP
-   * @throws com.avrwb.avr8.helper.InstructionNotAvailableException wenn der Befehl in dieser CPU nicht implementiert ist.
    */
-  public void setIP(@NotNull Device device,
-                    @Invariants(minValue = "0") int newIP) throws IllegalArgumentException, NullPointerException,
-                                                                  InstructionNotAvailableException;
+  public void setIP(@NotNull SimulationContext ctx,
+                    @Invariants(minValue = "0") int newIP) throws IllegalArgumentException, NullPointerException;
 
   /**
    * Das Statusregister

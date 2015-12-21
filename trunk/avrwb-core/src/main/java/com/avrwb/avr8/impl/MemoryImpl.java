@@ -21,14 +21,11 @@
  */
 package com.avrwb.avr8.impl;
 
-import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Fract16;
 import com.avrwb.avr8.Fract32;
 import com.avrwb.avr8.Fract8;
 import com.avrwb.avr8.Memory;
-import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.api.MemoryChangeListener;
-import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.io.MemoryChunk;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -72,12 +69,6 @@ class MemoryImpl implements Memory
     this.start = start;
     this.data = ByteBuffer.allocate(size).order(byteOrder);
     hexStringLen = calculateHexStringLen();
-  }
-
-  @Override
-  public void reset(Device device,
-                    ResetSource source) throws SimulationException
-  {
   }
 
   @Override

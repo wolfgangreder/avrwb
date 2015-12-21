@@ -24,7 +24,6 @@ package com.avrwb.avr8.api;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.helper.SimulationException;
 
 /**
  * Basisinterface zur Abbildung von Befehlen.
@@ -70,10 +69,9 @@ public interface Instruction
    * @param clockState aktueller Taktzustand.
    * @param device controller
    * @return Das Ergebnis des Befehls
-   * @throws com.avrwb.avr8.helper.SimulationException wenn bei der ausführung ein fehler auftritt.
    */
   @NotNull
-  public InstructionResult execute(@NotNull ClockState clockState,
-                                   @NotNull Device device) throws SimulationException;
+  public InstructionResult execute(@NotNull ClockDomain clockState,
+                                   @NotNull Device device);
 
 }

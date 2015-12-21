@@ -49,6 +49,9 @@ public interface InstructionResultBuilder
           throws IllegalArgumentException;
 
   @NotNull
+  public InstructionResultBuilder addSimulationEvent(@NotNull SimulationEvent event) throws NullPointerException;
+
+  @NotNull
   public InstructionResult build() throws IllegalStateException;
 
 }

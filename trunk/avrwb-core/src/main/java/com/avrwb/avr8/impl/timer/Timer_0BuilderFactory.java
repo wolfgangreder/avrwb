@@ -19,18 +19,35 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.impl.timer;
+
+import com.avrwb.annotations.ProvidedModule;
+import com.avrwb.annotations.ProvidedModules;
+import com.avrwb.avr8.ModuleBuilder;
+import com.avrwb.avr8.ModuleBuilderFactory;
+import com.avrwb.schema.AvrFamily;
+import com.avrwb.schema.ModuleClass;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author wolfi
  */
-public class OperationNotSupportedException extends SimulationException
+@ServiceProvider(service = ModuleBuilderFactory.class, path = "avrwb")
+@ProvidedModules({
+  @ProvidedModule(moduleClass = ModuleClass.TIMER,
+                  family = AvrFamily.TINY,
+                  core = "ANY",
+                  value = "TC0",
+                  implementationId = "0-TIMER-0")
+})
+public final class Timer_0BuilderFactory implements ModuleBuilderFactory
 {
 
-  public OperationNotSupportedException(String msg)
+  @Override
+  public ModuleBuilder createBuilder()
   {
-    super(msg);
+    return new Timer_0Builder();
   }
 
 }

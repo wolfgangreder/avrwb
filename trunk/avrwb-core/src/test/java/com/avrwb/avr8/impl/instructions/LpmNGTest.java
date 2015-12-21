@@ -26,7 +26,6 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
@@ -104,8 +103,8 @@ public class LpmNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
+
     if (rampz != null) {
       rampz.setValue(rampzInit);
     }
@@ -122,12 +121,12 @@ public class LpmNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < 5; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != rdExpected) {
       expectedChange.add(0);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(0),
                  rdExpected,
                  cmd);

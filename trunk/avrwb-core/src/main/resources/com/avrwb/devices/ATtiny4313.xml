@@ -22,7 +22,9 @@ MA 02110-1301  USA
 -->
 
 
-<avr:part xmlns:avr='http://www.avrwb.com/schema/avr/partdescriptor-1.0'>
+<avr:part   xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+  xmlns:avr='http://www.avrwb.com/schema/avr/partdescriptor-1.0'
+          xsi:schemaLocation='http://www.avrwb.com/schema/avr/partdescriptor-1.0 ../../../../../../../avrawb-base/src/main/resources/com/avrwb/schema/partdescriptor-1.0.xsd'>
   
   <avr:device avr:datasheet="http://www.atmel.com/Images/doc8246.pdf" 
               avr:uri="http://www.atmel.com/devices/attiny4313.aspx">
@@ -471,6 +473,192 @@ MA 02110-1301  USA
           <avr:vector>0</avr:vector>
         </avr:interrupt>
       </avr:module>
+      
+      <avr:module xml:id="tc0">
+        <avr:name>TIMER_COUNTER_0</avr:name>
+        <avr:class>timer</avr:class>
+        <avr:register>
+          <avr:name>TIMSK</avr:name>
+          <avr:caption>Timer/Counter Interrupt Mask Register</avr:caption>
+          <avr:io-address>0x39</avr:io-address>
+          <avr:ram-address>0x59</avr:ram-address>
+          <avr:bitmask>0x07</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>OCIE0B</avr:name>
+            <avr:caption>Timer/Counter0 Output Compare Match B Interrupt Enable</avr:caption>
+            <avr:bitmask>0x04</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>OCIE0A</avr:name>
+            <avr:caption>Timer/Counter0 Output Compare Match A Interrupt Enable</avr:caption>
+            <avr:bitmask>0x01</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>TOIE0</avr:name>            
+            <avr:caption>Timer/Counter0 Overflow Interrupt Enable</avr:caption>
+            <avr:bitmask>0x02</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>TIFR</avr:name>
+          <avr:caption>Timer/Counter Interrupt Flag register</avr:caption>
+          <avr:io-address>0x38</avr:io-address>
+          <avr:ram-address>0x58</avr:ram-address>
+          <avr:bitmask>0x07</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>OCF0B</avr:name>
+            <avr:caption>Timer/Counter0 Output Compare Flag 0B</avr:caption>
+            <avr:bitmask>0x04</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>OCF0A</avr:name>
+            <avr:caption>Timer/Counter0 Output Compare Flag 0A</avr:caption>
+            <avr:bitmask>0x01</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>TOV0</avr:name>
+            <avr:caption>Timer/Counter0 Overflow Flag</avr:caption>
+            <avr:bitmask>0x02</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>OCR0B</avr:name>
+          <avr:caption>Timer/Counter0 Output Compare Register B</avr:caption>
+          <avr:io-address>0x3c</avr:io-address>
+          <avr:ram-address>0x5c</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>OCR0A</avr:name>
+          <avr:caption>Timer/Counter0 Output Compare Register A</avr:caption>
+          <avr:io-address>0x36</avr:io-address>
+          <avr:ram-address>0x56</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>TCCR0A</avr:name>
+          <avr:caption>Timer/Counter  Control Register A</avr:caption>
+          <avr:io-address>0x30</avr:io-address>
+          <avr:ram-address>0x50</avr:ram-address>
+          <avr:bitmask>0xf3</avr:bitmask>
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>COM0A</avr:name>
+            <avr:caption>Compare Match Output A Mode</avr:caption>
+            <avr:bitmask>0xc0</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>COM0B</avr:name>
+            <avr:caption>Compare Match Output B Mode</avr:caption>
+            <avr:bitmask>0x30</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>WGM0</avr:name>
+            <avr:caption>Waveform Generation Mode</avr:caption>
+            <avr:bitmask>0x03</avr:bitmask>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:register>
+          <avr:name>TCNT0</avr:name>
+          <avr:caption>Timer/Counter0</avr:caption>
+          <avr:io-address>0x32</avr:io-address>
+          <avr:ram-address>0x52</avr:ram-address>
+          <avr:bitmask>0xff</avr:bitmask>
+          <avr:size>1</avr:size>
+        </avr:register>
+        <avr:register>
+          <avr:name>TCCR0B</avr:name>
+          <avr:caption>Timer/Counter Control Register B</avr:caption>
+          <avr:io-address>0x33</avr:io-address>
+          <avr:ram-address>0x53</avr:ram-address>
+          <avr:bitmask>0xcf</avr:bitmask>          
+          <avr:size>1</avr:size>
+          <avr:bitgroup>
+            <avr:name>FOC0A</avr:name>
+            <avr:caption>Force Output Compare A</avr:caption>
+            <avr:bitmask>0x80</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>FOC0B</avr:name>
+            <avr:caption>Force Output Compare B</avr:caption>
+            <avr:bitmask>0x40</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>WGM02</avr:name>
+            <avr:caption>Waveform Generation Mode</avr:caption>
+            <avr:bitmask>0x08</avr:bitmask>
+          </avr:bitgroup>
+          <avr:bitgroup>
+            <avr:name>CS0</avr:name>
+            <avr:caption>Clock Select</avr:caption>
+            <avr:bitmask>0x07</avr:bitmask>
+            <avr:bitvalues>
+              <avr:bitvalue>
+                <avr:name>No Clock Source (Stopped)</avr:name>
+                <avr:bit-value>0x00</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, No Prescaling</avr:name>
+                <avr:bit-value>0x01</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, CLK/8</avr:name>
+                <avr:bit-value>0x02</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, CLK/64</avr:name>
+                <avr:bit-value>0x03</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, CLK/256</avr:name>
+                <avr:bit-value>0x04</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, CLK/1024</avr:name>
+                <avr:bit-value>0x05</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, ExtClk Tx Falling Edge</avr:name>
+                <avr:bit-value>0x06</avr:bit-value>
+              </avr:bitvalue>
+              <avr:bitvalue>
+                <avr:name>Running, ExtClk Tx Rising Edge</avr:name>
+                <avr:bit-value>0x07</avr:bit-value>
+              </avr:bitvalue>
+            </avr:bitvalues>
+          </avr:bitgroup>
+        </avr:register>
+        <avr:interrupt>
+          <avr:name>TIMER0 OVF</avr:name>
+          <avr:caption>Timer/Counter0 Overflow</avr:caption>
+          <avr:vector>0x6</avr:vector>
+        </avr:interrupt>
+        <avr:interrupt>
+          <avr:name>TIMER0 COMPA</avr:name>
+          <avr:caption>Timer/Counter0 Compare Match A</avr:caption>
+          <avr:vector>0xd</avr:vector>
+        </avr:interrupt>
+        <avr:interrupt>
+          <avr:name>TIMER0 COMPB</avr:name>
+          <avr:caption>Timer/Counter0 Compare Match B</avr:caption>
+          <avr:vector>0xe</avr:vector>
+        </avr:interrupt>
+        <avr:properties>
+          <avr:property>
+            <avr:name>prescaler</avr:name>
+            <avr:value>TIMER_PRESCALER</avr:value>
+          </avr:property>
+        </avr:properties>
+      </avr:module>
+      <avr:module xml:id="TIMER_PRESCALER">
+        <avr:name>TIMER_PRESCALER</avr:name>
+        <avr:class>other</avr:class>
+        <avr:implementation>TIMER_PRESCALER</avr:implementation>
+      </avr:module>
     </avr:modules>
 
     <avr:instructions>
@@ -480,7 +668,22 @@ MA 02110-1301  USA
       neg nop or ori out pop push rcall ret reti rjmp rol ror sbc sbci sbi sbic sbis sbiw sbr sbrc sbrs sec seh sei sen ser ses
       set sev sez sleep spm st std sts sub subi swap tst wdr      
     </avr:instructions>
-
+    <avr:clock-domains>
+      <avr:clock-domain xml:id="WD">
+        <avr:name>Watchdog</avr:name>
+        <avr:implementation>CLOCKDOMAIN_WATCHDOG</avr:implementation>
+        <avr:speed-max>128000</avr:speed-max>
+        <avr:speed-min>128000</avr:speed-min>
+        <avr:speed-default>128000</avr:speed-default>
+      </avr:clock-domain>
+      <avr:clock-domain xml:id="EXT">
+        <avr:name>External</avr:name>
+        <avr:implementation>CLOCKDOMAIN_DEFAULT</avr:implementation>
+        <avr:speed-max>20000000</avr:speed-max>
+        <avr:speed-min>1</avr:speed-min>
+        <avr:speed-default>20000000</avr:speed-default>
+      </avr:clock-domain>      
+    </avr:clock-domains>
 
   </avr:device>
 </avr:part>

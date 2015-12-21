@@ -19,13 +19,19 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.api;
+
+import com.avrwb.avr8.ModuleBuilder;
 
 /**
  *
  * @author wolfi
+ * @param <B> builder implementation
  */
-public class CPU_2EInstructionDecoder extends BaseInstructionDecoder
+public interface TimerPrescalerBuilder<B extends TimerPrescalerBuilder> extends ModuleBuilder<B>
 {
+
+  @Override
+  public TimerPrescaler build() throws IllegalStateException, ItemNotFoundException, NullPointerException;
 
 }

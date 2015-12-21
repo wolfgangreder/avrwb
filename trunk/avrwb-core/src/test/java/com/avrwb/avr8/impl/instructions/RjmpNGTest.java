@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.part;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
@@ -112,17 +111,16 @@ public class RjmpNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
-    cpu.setIP(device,
-              ip);
 
+    cpu.setIP(context,
+              ip);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(cpu.getIP(),
                  expectedIp,
                  cmd);

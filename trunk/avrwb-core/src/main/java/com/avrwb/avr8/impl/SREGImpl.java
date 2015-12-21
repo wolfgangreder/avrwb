@@ -26,7 +26,7 @@ import com.avrwb.avr8.RegisterBitGrp;
 import com.avrwb.avr8.RegisterBitGrpValue;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.api.ItemNotFoundException;
 import java.util.Collection;
 import java.util.function.Function;
 

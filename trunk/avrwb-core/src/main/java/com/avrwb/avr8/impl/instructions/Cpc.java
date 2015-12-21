@@ -22,7 +22,7 @@
 package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
-import com.avrwb.avr8.helper.AvrDeviceKey;
+import com.avrwb.avr8.api.AvrDeviceKey;
 
 /**
  *

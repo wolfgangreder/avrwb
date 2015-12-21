@@ -23,10 +23,9 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
@@ -36,15 +35,16 @@ import com.avrwb.avr8.helper.SimulationException;
 public final class Sleep extends AbstractInstruction
 {
 
+  public static final Sleep INSTANCE = new Sleep(null,
+                                                 0,
+                                                 0);
   public static final int OPCODE = 0x9588;
 
   public static Sleep getInstance(AvrDeviceKey deviceKey,
                                   int opcode,
                                   int nextOpcode)
   {
-    return new Sleep(deviceKey,
-                     opcode,
-                     nextOpcode);
+    return INSTANCE;
   }
 
   private Sleep(AvrDeviceKey deviceKey,
@@ -56,9 +56,9 @@ public final class Sleep extends AbstractInstruction
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     resultBuilder.finished(true,
                            device.getCPU().getIP() + 1);

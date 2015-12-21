@@ -24,7 +24,7 @@ package com.avrwb.annotations.processor;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.annotations.InstructionImplementations;
 import com.avrwb.avr8.api.Instruction;
-import com.avrwb.avr8.helper.AvrDeviceKey;
+import com.avrwb.avr8.api.AvrDeviceKey;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;

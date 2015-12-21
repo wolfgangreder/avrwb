@@ -28,7 +28,6 @@ import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.assembler;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
 import java.util.Set;
@@ -91,7 +90,6 @@ public class ElpmNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final CPU cpu = device.getCPU();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
 
     sram.setByteAt(0,
@@ -109,12 +107,12 @@ public class ElpmNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (r0 != expectedR0) {
       expectedChange.add(0);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(0),
                  expectedR0,
                  cmd);
@@ -164,7 +162,6 @@ public class ElpmNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final CPU cpu = device.getCPU();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
 
     sram.setByteAt(rd,
@@ -182,12 +179,12 @@ public class ElpmNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (sram.getByteAt(rd) != expectedR0) {
       expectedChange.add(rd);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  expectedR0,
                  cmd);
@@ -241,7 +238,6 @@ public class ElpmNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final CPU cpu = device.getCPU();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
 
     sram.setByteAt(rd,
@@ -259,7 +255,7 @@ public class ElpmNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (sram.getByteAt(rd) != expectedR0) {
       expectedChange.add(rd);
@@ -271,7 +267,7 @@ public class ElpmNGTest extends AbstractInstructionTest
     if (rampExp != rampzInit) {
       expectedChange.add(rampz.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  expectedR0,
                  cmd);

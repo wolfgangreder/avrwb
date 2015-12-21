@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
 import com.avrwb.annotations.InOut;
 import com.avrwb.annotations.InstructionImplementation;
@@ -29,10 +29,9 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
-import com.avrwb.schema.util.Converter;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.InstructionNotAvailableException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -272,8 +271,7 @@ public class BaseInstructionDecoder implements InstructionDecoder
     if (result == null) {
       Memory flash = device.getFlash();
       int word = flash.getWordAt(address);
-      throw new InstructionNotAvailableException("Unknown opcode " + Converter.printHexString(word,
-                                                                                              flash.getHexAddressStringWidth()));
+      throw new InstructionNotAvailableException(word);
     }
     return result;
   }

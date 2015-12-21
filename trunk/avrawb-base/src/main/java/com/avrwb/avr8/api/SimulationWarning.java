@@ -19,18 +19,24 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
+
+import java.util.function.Supplier;
 
 /**
  *
  * @author wolfi
  */
-public class SimulationException extends Exception
+public class SimulationWarning extends AbstractSimulationEvent
 {
 
-  public SimulationException(String message)
+  public SimulationWarning(ClockDomain clockDomain,
+                           Supplier<String> msgFunc)
   {
-    super(message);
+    super(clockDomain,
+          SimulationEventSeverity.WARNING,
+          null,
+          msgFunc);
   }
 
 }

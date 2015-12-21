@@ -21,10 +21,9 @@
  */
 package com.avrwb.avr8;
 
-import com.avrwb.annotations.NotNull;
-import com.avrwb.avr8.api.ClockState;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
+import com.avrwb.avr8.api.Resetable;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
  *
  * @author Wolfgang Reder
  */
-public interface Device
+public interface Device extends Resetable
 {
 
   public Logger getLogger();
@@ -62,8 +61,8 @@ public interface Device
 
   public Map<Integer, Register> getIOSpace();
 
-  public void reset(ResetSource source) throws SimulationException;
+  public ClockDomain getCPUDomain();
 
-  public void onClock(@NotNull ClockState clockState) throws SimulationException;
+  public List<ClockDomain> getClockDomains();
 
 }

@@ -25,11 +25,9 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -73,7 +71,6 @@ public class SetClearIOBitNGTest extends AbstractInstructionTest
     final Register reg = device.getIOSpace().get(io);
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     reg.setValue(ioInit);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
@@ -81,12 +78,12 @@ public class SetClearIOBitNGTest extends AbstractInstructionTest
                                                          cmd)::onMemoryChanged);
 
     for (int i = 0; i < 3; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (ioExpected != ioInit) {
       expectedChange.add(reg.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(reg.getValue(),
                  ioExpected,
                  cmd);
@@ -126,7 +123,6 @@ public class SetClearIOBitNGTest extends AbstractInstructionTest
     final Register reg = device.getIOSpace().get(io);
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     reg.setValue(ioInit);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
@@ -134,12 +130,12 @@ public class SetClearIOBitNGTest extends AbstractInstructionTest
                                                          cmd)::onMemoryChanged);
 
     for (int i = 0; i < 3; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (ioExpected != ioInit) {
       expectedChange.add(reg.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(reg.getValue(),
                  ioExpected,
                  cmd);

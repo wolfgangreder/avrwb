@@ -24,7 +24,7 @@ package com.avrwb.avr8;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.ClockSink;
 import com.avrwb.avr8.api.Resetable;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Basiseigenschaften und funktionalität für Untermodule.
@@ -43,11 +43,11 @@ public interface Module extends Resetable, ClockSink
   public String getName();
 
   /**
-   * Liste der Register des Moduls.
+   * IO Map der Register des Moduls.
    *
    * @return register
    */
   @NotNull
-  public List<Register> getRegister();
+  public Map<Integer, Register> getRegister();
 
 }

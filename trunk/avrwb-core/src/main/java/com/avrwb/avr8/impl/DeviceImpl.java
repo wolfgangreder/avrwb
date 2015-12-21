@@ -27,33 +27,37 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
-import com.avrwb.avr8.Module;
 import com.avrwb.avr8.ModuleBuilderFactory;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
 import com.avrwb.avr8.Variant;
-import com.avrwb.avr8.api.ClockState;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
+import com.avrwb.avr8.api.ClockDomainFactory;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.api.NotFoundStrategy;
+import com.avrwb.avr8.api.SimulationContext;
 import com.avrwb.avr8.helper.ModuleKey;
-import com.avrwb.avr8.helper.NotFoundStrategy;
-import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.ModuleClass;
 import com.avrwb.schema.XmlAddressSpace;
+import com.avrwb.schema.XmlClockDomain;
 import com.avrwb.schema.XmlDevice;
 import com.avrwb.schema.XmlModule;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.lookup.Lookups;
+import com.avrwb.avr8.Module;
 
 /**
  *
@@ -76,6 +80,8 @@ final class DeviceImpl implements Device
   private final SRAM sram;
   private final Stack stack;
   private final Map<Integer, Register> ioSpace;
+  private final List<ClockDomain> clockDomains;
+  private final ClockDomain cpuDomain;
 
   DeviceImpl(@NotNull XmlDevice device,
              Variant variant,
@@ -124,28 +130,75 @@ final class DeviceImpl implements Device
       cpu = null;
       ioSpace = Collections.emptyMap();
     } else {
-      Map<Integer, Register> tmpIOSpace = new HashMap<>();
+      Map<Integer, List<Register>> tmpIOSpace = new HashMap<>();
       CPU tmpCpu = null;
       modules = Collections.unmodifiableList(tmpModules);
       for (Module m : modules) {
         if (AVRWBDefaults.MODULENAME_CPU.equals(m.getName()) && m instanceof CPU) {
           tmpCpu = (CPU) m;
         }
-        for (Register r : m.getRegister()) {
+        for (Register r : m.getRegister().values()) {
           if (r.getIOAddress() != -1) {
-            tmpIOSpace.put(r.getIOAddress(),
-                           r);
+            tmpIOSpace.computeIfAbsent(r.getIOAddress(),
+                                       (Integer ioa) -> new LinkedList<>()).add(r);
           }
         }
       }
       cpu = tmpCpu;
-      ioSpace = Collections.unmodifiableMap(tmpIOSpace);
+      Map<Integer, Register> tmpIORegister = new HashMap<>();
+      for (Map.Entry<Integer, List<Register>> e : tmpIOSpace.entrySet()) {
+        if (e.getValue() != null && e.getKey() != null && !e.getValue().isEmpty()) {
+          if (e.getValue().size() == 1) {
+            tmpIORegister.put(e.getKey(),
+                              e.getValue().get(0));
+          } else {
+            tmpIORegister.put(e.getKey(),
+                              new ProxyRegister(e.getValue()));
+          }
+        }
+      }
+      ioSpace = Collections.unmodifiableMap(tmpIORegister);
     }
     stack = new MemoryStack(cpu.getStackPointer(),
                             sram);
     deviceKey = new AvrDeviceKey(device.getFamily(),
                                  device.getAvrCore(),
                                  device.getName());
+    this.clockDomains = createClockDomains(device,
+                                           nfStrategy);
+    ClockDomain cd = null;
+    for (ClockDomain c : clockDomains) {
+      if (!"WD".equals(c.getId())) {
+        cd = c;
+        break;
+      }
+    }
+    cpuDomain = cd;
+    for (Module m : modules) {
+      cpuDomain.addClockSink(m);
+    }
+  }
+
+  private List<ClockDomain> createClockDomains(XmlDevice device,
+                                               NotFoundStrategy nfs) throws ItemNotFoundException
+  {
+    List<ClockDomain> tmpResult = new LinkedList<>();
+    Map<String, ClockDomainFactory> domainFactories = new HashMap<>();
+    for (ClockDomainFactory cdf : Lookups.forPath("avrwb").lookupAll(ClockDomainFactory.class)) {
+      domainFactories.put(cdf.getImplementationId(),
+                          cdf);
+    }
+    for (XmlClockDomain xcd : device.getClockDomains().getClockDomain()) {
+      ClockDomainFactory cdf = domainFactories.get(xcd.getImplementation());
+      if (cdf == null) {
+        ItemNotFoundException.processItemNotFound(name,
+                                                  xcd.getImplementation(),
+                                                  nfs);
+        continue;
+      }
+      tmpResult.add(cdf.createDomain(xcd));
+    }
+    return tmpResult;
   }
 
   private Logger createDeviceLogger(String deviceName)
@@ -210,6 +263,18 @@ final class DeviceImpl implements Device
   }
 
   @Override
+  public ClockDomain getCPUDomain()
+  {
+    return cpuDomain;
+  }
+
+  @Override
+  public List<ClockDomain> getClockDomains()
+  {
+    return clockDomains;
+  }
+
+  @Override
   public String getName()
   {
     return name;
@@ -270,19 +335,6 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public void reset(ResetSource source) throws SimulationException
-  {
-    for (Memory mem : memories) {
-      mem.reset(this,
-                source);
-    }
-    for (Module mod : modules) {
-      mod.reset(this,
-                source);
-    }
-  }
-
-  @Override
   public Stack getStack()
   {
     return stack;
@@ -295,11 +347,12 @@ final class DeviceImpl implements Device
   }
 
   @Override
-  public void onClock(ClockState clockState) throws SimulationException
+  public void reset(SimulationContext ctx,
+                    ResetSource source)
   {
-    for (Module mod : modules) {
-      mod.onClock(clockState,
-                  this);
+    for (Module m : modules) {
+      m.reset(ctx,
+              source);
     }
   }
 

@@ -19,18 +19,32 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
+
+import com.avrwb.annotations.NotNull;
+import com.avrwb.avr8.Device;
+import java.util.List;
 
 /**
  *
  * @author wolfi
  */
-public final class InstructionNotAvailableException extends SimulationException
+public interface SimulationContext
 {
 
-  public InstructionNotAvailableException(String msg)
-  {
-    super(msg);
-  }
+  @NotNull
+  public Device getDevice();
+
+  @NotNull
+  public ClockDomain getCPUDomain();
+
+  @NotNull
+  public List<SimulationEvent> getEvents();
+
+  public void addEvent(@NotNull SimulationEvent event);
+
+  public void resetEvents();
+
+  public SimulationController getController();
 
 }

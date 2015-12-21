@@ -24,9 +24,9 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
-import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 
 /**
  *
@@ -56,7 +56,7 @@ public final class Mov extends Instruction_Rd_Rr
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {

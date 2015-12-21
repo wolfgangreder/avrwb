@@ -19,61 +19,21 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl.instructions.helper;
+package com.avrwb.avr8.api;
 
-import com.avrwb.avr8.api.ClockPhase;
-import com.avrwb.avr8.api.ClockState;
-import com.avrwb.avr8.api.ClockStateImpl;
+import com.avrwb.annotations.NotNull;
+import com.avrwb.schema.XmlClockDomain;
 
 /**
  *
  * @author wolfi
  */
-public final class ClockStateTestImpl
+public interface ClockDomainFactory
 {
 
-  private ClockStateImpl state = new ClockStateImpl(1_000_000);
+  public String getImplementationId();
 
-  public ClockStateTestImpl()
-  {
-  }
-
-  public ClockPhase getPhase()
-  {
-    return state.getPhase();
-  }
-
-  public long getCycleCount()
-  {
-    return state.getCycleCount();
-  }
-
-  public long getClockFrequency()
-  {
-    return state.getClockFrequency();
-  }
-
-  public long getCurrentNanos()
-  {
-    return state.getCurrentNanos();
-  }
-
-  public ClockState getAndNext()
-  {
-    ClockState result = state;
-    state = state.next();
-    return result;
-  }
-
-  public void reset()
-  {
-    state = state.reset();
-  }
-
-  @Override
-  public String toString()
-  {
-    return state.toString();
-  }
+  @NotNull
+  public ClockDomain createDomain(@NotNull XmlClockDomain domainSettings) throws ItemNotFoundException;
 
 }

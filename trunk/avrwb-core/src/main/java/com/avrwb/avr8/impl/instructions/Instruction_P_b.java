@@ -23,10 +23,9 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import java.text.MessageFormat;
 
 /**
@@ -71,17 +70,17 @@ public abstract class Instruction_P_b extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       port = device.getIOSpace().get(portAddress);
-      finishCycle = clockState.getCycleCount() + 1;
+      finishCycle = clockDomain.getState().getCycleCount() + 1;
       if (AVRWBDefaults.isDebugLoggingActive()) {
         device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                                () -> MessageFormat.format("{0} reading 0x{2} from io 0x{1}",
-                                                          getCurrentDeviceMessage(clockState,
+                                                          getCurrentDeviceMessage(clockDomain,
                                                                                   device),
                                                           Integer.toHexString(portAddress),
                                                           Integer.toHexString(port.getValue())));

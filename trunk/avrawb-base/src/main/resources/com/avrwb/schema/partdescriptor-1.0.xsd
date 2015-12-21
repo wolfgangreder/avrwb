@@ -59,7 +59,7 @@ MA 02110-1301  USA
       <xs:enumeration value="signature"/>
       <xs:enumeration value="user-signature"/>
       <xs:enumeration value="pro-signature"/>
-      <xs:enumeration value="lockbit"/>      
+      <xs:enumeration value="lockbit"/>    
     </xs:restriction>
   </xs:simpleType>
   
@@ -279,6 +279,7 @@ MA 02110-1301  USA
       <xs:enumeration value="clk"/>
       <xs:enumeration value="osc"/>
       <xs:enumeration value="rtc"/>
+      <xs:enumeration value="x-prescaler"/>  
       <xs:enumeration value="other"/>
     </xs:restriction>
   </xs:simpleType>
@@ -291,6 +292,21 @@ MA 02110-1301  USA
             <xs:selector xpath="."/>
             <xs:field xpath="@lang"/>
           </xs:unique>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="properties">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element maxOccurs="unbounded" name="property">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="value" type="xs:string"/>
+            </xs:sequence>
+          </xs:complexType>
         </xs:element>
       </xs:sequence>
     </xs:complexType>
@@ -396,6 +412,8 @@ MA 02110-1301  USA
         <xs:element name="class" type="avr:module-class"/>
         <xs:element ref="avr:register" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="avr:interrupt" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element name="implementation" type="xs:string" minOccurs="0" maxOccurs="1"/>
+        <xs:element ref="avr:properties" minOccurs="0" maxOccurs="1"/>
       </xs:sequence>
       <xs:attribute ref="xml:id" use="required"/>
     </xs:complexType>
@@ -466,6 +484,54 @@ MA 02110-1301  USA
     </xs:complexType>
   </xs:element>
   
+  <xs:element name="clock-domain">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="avr:name"/>
+        <xs:element name="implementation" type="xs:string"/>
+        <xs:element name="speed-max">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="long"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:positiveInteger"/>
+          </xs:simpleType>          
+        </xs:element>
+        <xs:element name="speed-min">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="long"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:positiveInteger"/>
+          </xs:simpleType>          
+        </xs:element>
+        <xs:element name="speed-default">
+          <xs:simpleType>
+            <xs:annotation>
+              <xs:appinfo>
+                <jxb:javaType name="long"/>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:restriction base="xs:positiveInteger"/>
+          </xs:simpleType>          
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute ref="xml:id" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:element name="clock-domains">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="avr:clock-domain" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
   <xs:element name="device">
     <xs:complexType>
       <xs:sequence>
@@ -477,6 +543,7 @@ MA 02110-1301  USA
         <xs:element ref="avr:address-spaces"/>
         <xs:element ref="avr:modules"/>
         <xs:element ref="avr:instructions"/>
+        <xs:element ref="avr:clock-domains"/>
       </xs:sequence>
       <xs:attribute name="uri" type="xs:anyURI" use="optional"/>
       <xs:attribute name="datasheet" type="xs:anyURI" use="optional"/>    

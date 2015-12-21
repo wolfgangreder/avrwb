@@ -25,13 +25,12 @@ import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
+import com.avrwb.avr8.api.InstructionNotAvailableException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -163,9 +162,9 @@ public final class Brbs_Brbc extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       final CPU cpu = device.getCPU();
@@ -192,9 +191,9 @@ public final class Brbs_Brbc extends AbstractInstruction
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
-                           final Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+  protected void doExecute(ClockDomain clockState,
+                           Device device,
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == clockState.getCycleCount()) {
       final int nextIp;

@@ -23,8 +23,8 @@ package com.avrwb.avr8;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
-import com.avrwb.avr8.helper.ItemNotFoundException;
-import com.avrwb.avr8.helper.NotFoundStrategy;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.api.NotFoundStrategy;
 import com.avrwb.schema.XmlPart;
 import java.util.logging.Logger;
 

@@ -26,16 +26,12 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.part;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.SimulationException;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
 import java.util.Set;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -118,7 +114,7 @@ public class StNGTest extends AbstractInstructionTest
         ptrAddrLo = 30;
         break;
       default:
-        throw new SimulationException("unkown pointer " + ptr);
+        throw new SimulationException(() -> "unkown pointer " + ptr);
     }
     final Device device = getDevice(p,
                                     cmd,
@@ -127,7 +123,6 @@ public class StNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final Register ramp = cpu.getRAMP(ptr);
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final boolean smallRam = sram.getHexAddressStringWidth() < 3;
     final int ptrValue;
 
@@ -153,12 +148,12 @@ public class StNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != rdExpected) {
       expectedChange.add(ptrValue);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdExpected,
                  cmd);
@@ -226,7 +221,7 @@ public class StNGTest extends AbstractInstructionTest
         ptrAddrLo = 30;
         break;
       default:
-        throw new SimulationException("unkown pointer " + ptr);
+        throw new SimulationException(() -> "unkown pointer " + ptr);
     }
     final Device device = getDevice(p,
                                     cmd,
@@ -235,7 +230,6 @@ public class StNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final Register ramp = cpu.getRAMP(ptr);
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final boolean smallRam = sram.getHexAddressStringWidth() < 3;
     final int ptrValue;
 
@@ -262,7 +256,7 @@ public class StNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != rdExpected) {
       expectedChange.add(ptrValue);
@@ -276,7 +270,7 @@ public class StNGTest extends AbstractInstructionTest
     if (ramp != null && rampInit != getRampPart(exptectedPtr)) {
       expectedChange.add(ramp.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdExpected,
                  cmd);
@@ -344,7 +338,7 @@ public class StNGTest extends AbstractInstructionTest
         ptrAddrLo = 30;
         break;
       default:
-        throw new SimulationException("unkown pointer " + ptr);
+        throw new SimulationException(() -> "unkown pointer " + ptr);
     }
     final Device device = getDevice(p,
                                     cmd,
@@ -353,7 +347,6 @@ public class StNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final Register ramp = cpu.getRAMP(ptr);
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final boolean smallRam = sram.getHexAddressStringWidth() < 3;
     final int ptrValue;
 
@@ -380,7 +373,7 @@ public class StNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != rdExpected) {
       expectedChange.add(exptectedPtr);
@@ -394,7 +387,7 @@ public class StNGTest extends AbstractInstructionTest
     if (ramp != null && rampInit != getRampPart(exptectedPtr)) {
       expectedChange.add(ramp.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdExpected,
                  cmd);
@@ -455,7 +448,7 @@ public class StNGTest extends AbstractInstructionTest
         ptrAddrLo = 30;
         break;
       default:
-        throw new SimulationException("unkown pointer " + ptr);
+        throw new SimulationException(() -> "unkown pointer " + ptr);
     }
     final Device device = getDevice(p,
                                     cmd,
@@ -464,7 +457,6 @@ public class StNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final Register ramp = cpu.getRAMP(ptr);
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final boolean smallRam = sram.getHexAddressStringWidth() < 3;
     final int ptrValue;
 
@@ -490,12 +482,12 @@ public class StNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != rdExpected) {
       expectedChange.add(rd);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdExpected,
                  cmd);

@@ -26,7 +26,6 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.assertEquals;
@@ -77,9 +76,8 @@ public class IJumpNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final int spInit = sram.getSize() - 1;
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
-    cpu.setIP(device,
+    cpu.setIP(context,
               ip);
     sp.setValue(spInit);
 
@@ -96,9 +94,9 @@ public class IJumpNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(cpu.getIP(),
                  expectedIp,
                  cmd);

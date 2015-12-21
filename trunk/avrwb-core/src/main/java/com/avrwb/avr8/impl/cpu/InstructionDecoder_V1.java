@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
 import com.avrwb.avr8.impl.instructions.Des;
 import com.avrwb.avr8.impl.instructions.EICall;

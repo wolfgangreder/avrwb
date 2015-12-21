@@ -27,7 +27,6 @@ import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.part;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
@@ -100,7 +99,6 @@ public class LasNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Register rampz = cpu.getRAMP(Pointer.Z);
     final int zptr = r30 + (r31 << 8);
     final int ptr = zptr + (rampz != null ? (rampzInit << 16) : 0);
@@ -123,16 +121,16 @@ public class LasNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
 
-    device.onClock(cs.getAndNext());
-    device.onClock(cs.getAndNext());
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
+    controller.stepCPU();
+    controller.stepCPU();
     if (rdVal != rdExpected) {
       expectedChange.add(rd);
     }
     if (rdExpected != ramInit) {
       expectedChange.add(ptr);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(ptr,
                  expectedPtr,
                  cmd);

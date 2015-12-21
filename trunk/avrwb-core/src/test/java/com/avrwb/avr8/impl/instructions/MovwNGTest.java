@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.assertEquals;
@@ -68,7 +67,6 @@ public class MovwNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final int sregVal = sreg.getValue();
 
     sram.setWordAt(rd,
@@ -79,12 +77,12 @@ public class MovwNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
 
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     if (rdVal != rrVal) {
       expectedChange.add(rd);
       expectedChange.add(rd + 1);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertSREG(sreg.getValue(),
                sregVal,
                cmd);

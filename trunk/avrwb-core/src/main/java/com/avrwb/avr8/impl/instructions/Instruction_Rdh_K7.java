@@ -22,9 +22,8 @@
 package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.SimulationException;
 
 /**
  *
@@ -76,9 +75,9 @@ public abstract class Instruction_Rdh_K7 extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     throw new UnsupportedOperationException("not implemented yet");
   }

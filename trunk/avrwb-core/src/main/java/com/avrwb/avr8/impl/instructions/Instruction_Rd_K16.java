@@ -24,9 +24,8 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 
 /**
@@ -79,9 +78,9 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       SRAM sram = device.getSRAM();
@@ -93,7 +92,7 @@ public abstract class Instruction_Rd_K16 extends AbstractInstruction
         pointer = k16;
       }
       pointee = sram.getByteAt(pointer);
-      finishCycle = clockState.getCycleCount() + getCycleCount() - 1;
+      finishCycle = clockDomain.getState().getCycleCount() + getCycleCount() - 1;
     }
   }
 

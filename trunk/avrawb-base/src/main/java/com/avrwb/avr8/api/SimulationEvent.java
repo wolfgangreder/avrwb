@@ -19,15 +19,23 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
 
 /**
  *
- * @author Wolfgang Reder
+ * @author wolfi
  */
-public enum NotFoundStrategy
+public interface SimulationEvent
 {
-  ERROR,
-  WARNING,
-  IGNORE
+
+  public ClockDomain getClockDomain();
+
+  public ClockState getClockState();
+
+  public SimulationEventSeverity getSeverity();
+
+  public SimulationException getErrorObject();
+
+  public String getMessage();
+
 }

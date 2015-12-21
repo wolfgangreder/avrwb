@@ -22,14 +22,12 @@
 package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.NotNull;
-import com.avrwb.avr8.Device;
 import com.avrwb.avr8.ResetSource;
-import com.avrwb.avr8.helper.SimulationException;
 
 public interface Resetable
 {
 
-  public void reset(@NotNull Device device,
-                    @NotNull ResetSource source) throws SimulationException;
+  public void reset(@NotNull SimulationContext ctx,
+                    @NotNull ResetSource source);
 
 }

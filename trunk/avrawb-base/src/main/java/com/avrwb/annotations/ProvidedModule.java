@@ -45,4 +45,6 @@ public @interface ProvidedModule
 
   String[] value();
 
+  String implementationId();
+
 }

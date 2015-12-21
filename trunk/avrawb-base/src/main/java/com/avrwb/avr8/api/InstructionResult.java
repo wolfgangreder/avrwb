@@ -23,6 +23,7 @@ package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.Immutable;
 import com.avrwb.annotations.NotNull;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -56,5 +57,7 @@ public interface InstructionResult
    */
   @NotNull
   public Set<Integer> getModifiedDataAddresses();
+
+  public List<SimulationEvent> getEvents();
 
 }

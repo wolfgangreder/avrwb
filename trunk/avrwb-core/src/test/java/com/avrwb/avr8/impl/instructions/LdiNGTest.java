@@ -23,7 +23,6 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.*;
@@ -64,18 +63,17 @@ public class LdiNGTest extends AbstractInstructionTest
     String cmd = "ldi r" + register + ",0x" + Integer.toHexString(k8);
     final Device device = getDevice(cmd);
     final SRAM sram = device.getSRAM();
+
     Set<Integer> expectedChange = new HashSet<>();
     sram.setByteAt(register,
                    ~k8);
-    final ClockStateTestImpl clock = new ClockStateTestImpl();
     device.getCPU().getSREG().setValue(sreg);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
-
-    device.onClock(clock.getAndNext());
+    controller.stepCPU();
     expectedChange.add(register);
-    device.onClock(clock.getAndNext());
+    controller.stepCPU();
     assertTrue(expectedChange.isEmpty(),
                cmd + "|event listener not called");
     assertEquals(sram.getByteAt(register),

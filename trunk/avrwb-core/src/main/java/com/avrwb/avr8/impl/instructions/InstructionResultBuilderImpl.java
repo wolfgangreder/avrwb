@@ -26,6 +26,9 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.api.InstructionResult;
 import com.avrwb.avr8.api.InstructionResultBuilder;
+import com.avrwb.avr8.api.SimulationEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -41,6 +44,7 @@ public final class InstructionResultBuilderImpl implements InstructionResultBuil
   private boolean finished;
   private int nextIP = -1;
   private final SortedSet<Integer> modifiedDataAdresses = new TreeSet<>();
+  private final List<SimulationEvent> events = new ArrayList<>();
   private final Device device;
 
   public InstructionResultBuilderImpl(Device device)
@@ -93,6 +97,14 @@ public final class InstructionResultBuilderImpl implements InstructionResultBuil
   }
 
   @Override
+  public InstructionResultBuilder addSimulationEvent(SimulationEvent event) throws NullPointerException
+  {
+    events.add(Objects.requireNonNull(event,
+                                      "event==null"));
+    return this;
+  }
+
+  @Override
   public InstructionResult build() throws IllegalStateException
   {
     if (finished && nextIP < 0) {
@@ -100,7 +112,8 @@ public final class InstructionResultBuilderImpl implements InstructionResultBuil
     }
     return new InstructionResultImpl(finished,
                                      nextIP,
-                                     modifiedDataAdresses);
+                                     modifiedDataAdresses,
+                                     events);
   }
 
 }

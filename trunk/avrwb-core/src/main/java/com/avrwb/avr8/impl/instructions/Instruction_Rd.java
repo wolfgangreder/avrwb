@@ -22,10 +22,9 @@
 package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -59,9 +58,9 @@ public abstract class Instruction_Rd extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       final int rdAddress = getRdAddress();
@@ -70,17 +69,17 @@ public abstract class Instruction_Rd extends AbstractInstruction
         Logger logger = device.getLogger();
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                    "{0} reading rdVal r{1,number,0}={2}",
-                   new Object[]{getCurrentDeviceMessage(clockState,
+                   new Object[]{getCurrentDeviceMessage(clockDomain,
                                                         device),
                                 rdAddress,
                                 Converter.printHexString(rdVal,
                                                          2)});
       }
-      finishCycle = clockState.getCycleCount() + getCycleCount() - 1;
+      finishCycle = clockDomain.getState().getCycleCount() + getCycleCount() - 1;
     }
   }
 
-  protected void logExecutionResult(ClockState clockState,
+  protected void logExecutionResult(ClockDomain clockDomain,
                                     Device device,
                                     int result,
                                     int rdAddress)
@@ -89,7 +88,7 @@ public abstract class Instruction_Rd extends AbstractInstruction
       device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              ()
                              -> MessageFormat.format("{0} writing result {1} to r{2,number,0}",
-                                                     getCurrentDeviceMessage(clockState,
+                                                     getCurrentDeviceMessage(clockDomain,
                                                                              device),
                                                      Converter.printHexString(result,
                                                                               2),
