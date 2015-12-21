@@ -65,7 +65,6 @@ public class FmulNGTest extends AbstractInstructionTest
 //    final SRAM sram = device.getSRAM();
 //    final SREG sreg = cpu.getSREG();
 //    final Set<Integer> expectedChange = new HashSet<>();
-//    final ClockStateTestImpl cs = new ClockStateTestImpl();
 //
 //    sreg.setValue(sregInit);
 //    sram.setByteAt(rd,
@@ -76,14 +75,14 @@ public class FmulNGTest extends AbstractInstructionTest
 //                                                         expectedChange,
 //                                                         cmd)::onMemoryChanged);
 //
-//    device.onClock(cs.getAndNext());
+//    controller.stepCPU();
 //    if (rdVal != rdExpected) {
 //      expectedChange.add(rd);
 //    }
 //    if (sregExpected != sregInit) {
 //      expectedChange.add(sreg.getMemoryAddress());
 //    }
-//    device.onClock(cs.getAndNext());
+//    controller.stepCPU();
 //    assertSREG(sreg.getValue(),
 //               sregExpected,
 //               cmd);

@@ -27,7 +27,7 @@ import com.avrwb.assembler.AssemblerError;
 import com.avrwb.assembler.NameAlreadyDefinedException;
 import com.avrwb.assembler.SourceContext;
 import com.avrwb.assembler.StandardAssemblerConfig;
-import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;

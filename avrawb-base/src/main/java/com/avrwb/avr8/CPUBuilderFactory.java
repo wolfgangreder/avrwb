@@ -28,6 +28,7 @@ package com.avrwb.avr8;
 public interface CPUBuilderFactory extends ModuleBuilderFactory
 {
 
+  @Override
   public CPUBuilder createBuilder();
 
 }

@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
@@ -44,8 +44,8 @@ import com.avrwb.avr8.impl.instructions.Instruction_Rdh_K7;
 import com.avrwb.avr8.impl.instructions.Instruction_Rdh_Rrh;
 import com.avrwb.avr8.impl.instructions.Instruction_Rdl_K6;
 import com.avrwb.avr8.impl.instructions.Instruction_k12;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.InstructionNotAvailableException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;

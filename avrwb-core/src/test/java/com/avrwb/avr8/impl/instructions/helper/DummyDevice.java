@@ -25,14 +25,13 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
-import com.avrwb.avr8.Module;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.Stack;
-import com.avrwb.avr8.api.ClockState;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
+import com.avrwb.avr8.api.SimulationContext;
 import com.avrwb.avr8.impl.MemoryBuilderImpl;
 import com.avrwb.avr8.impl.MemoryStack;
 import com.avrwb.schema.AvrCore;
@@ -45,6 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import com.avrwb.avr8.Module;
 
 /**
  *
@@ -192,24 +192,12 @@ public class DummyDevice implements Device
   }
 
   @Override
-  public void reset(ResetSource source) throws SimulationException
-  {
-    for (Memory mem : memories) {
-      mem.reset(this,
-                source);
-    }
-    for (Module mod : modules) {
-      mod.reset(this,
-                source);
-    }
-  }
-
-  @Override
-  public void onClock(ClockState clockState) throws SimulationException
+  public void reset(SimulationContext ctx,
+                    ResetSource source)
   {
     for (Module mod : modules) {
-      mod.onClock(clockState,
-                  this);
+      mod.reset(ctx,
+                source);
     }
   }
 
@@ -217,6 +205,18 @@ public class DummyDevice implements Device
   public Map<Integer, Register> getIOSpace()
   {
     return Collections.emptyMap();
+  }
+
+  @Override
+  public ClockDomain getCPUDomain()
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+  }
+
+  @Override
+  public List<ClockDomain> getClockDomains()
+  {
+    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
   }
 
 }

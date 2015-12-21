@@ -28,11 +28,11 @@ import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionResult;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -141,33 +141,34 @@ public abstract class AbstractInstruction implements Instruction
     return mnemonic;
   }
 
-  protected abstract void doExecute(@NotNull ClockState clockState,
+  protected abstract void doExecute(@NotNull ClockDomain clockDomain,
                                     @NotNull Device device,
-                                    @NotNull InstructionResultBuilder resultBuilder) throws SimulationException;
+                                    @NotNull InstructionResultBuilder resultBuilder);
 
-  protected void doPrepare(@NotNull ClockState clockState,
+  protected void doPrepare(@NotNull ClockDomain clockDomain,
                            @NotNull Device device,
-                           @NotNull InstructionResultBuilder resultBuilder) throws SimulationException
+                           @NotNull InstructionResultBuilder resultBuilder)
   {
   }
 
   @Override
   @NotNull
-  public final InstructionResult execute(@NotNull ClockState clockState,
-                                         @NotNull Device device) throws SimulationException
+  public final InstructionResult execute(@NotNull ClockDomain clockDomain,
+                                         @NotNull Device device)
   {
-    Objects.requireNonNull(clockState,
+    Objects.requireNonNull(clockDomain,
                            "clockState==null");
     currentDeviceStateMessage = null;
     InstructionResultBuilder resultBuilder = InstanceFactories.getInstructionResultBuilder(device);
+    final ClockState clockState = clockDomain.getState();
     switch (clockState.getPhase()) {
       case HI:
-        doPrepare(clockState,
+        doPrepare(clockDomain,
                   device,
                   resultBuilder);
         break;
       case LO:
-        doExecute(clockState,
+        doExecute(clockDomain,
                   device,
                   resultBuilder);
     }
@@ -181,26 +182,27 @@ public abstract class AbstractInstruction implements Instruction
    * Erzeugt einen formatierten String der die aktuelle Taktphase beschreibt.
    *
    * @param device device
-   * @param clockState clockState
+   * @param clockDomain clockDomain
    * @return Loggingstring
    * @throws NullPointerException wenn {@code clockState==null} oder {@code device==null}
    */
   @NotNull
-  protected String getCurrentDeviceMessage(@NotNull ClockState clockState,
+  protected String getCurrentDeviceMessage(@NotNull ClockDomain clockDomain,
                                            @NotNull Device device) throws NullPointerException
   {
     if (currentDeviceStateMessage == null) {
-      Objects.requireNonNull(clockState,
+      Objects.requireNonNull(clockDomain,
                              "clockState==null");
       Objects.requireNonNull(device,
                              "device==null");
+      ClockState clockState = clockDomain.getState();
       currentDeviceStateMessage = MessageFormat.format("Exec \"{0}\" @ {1} | IP={2}, #CY={5,number,#.###}, PH={3}|",
                                                        toString(),
                                                        device.getName(),
                                                        Converter.printHexString(device.getCPU().getIP(),
                                                                                 device.getFlash().getHexAddressStringWidth()),
                                                        clockState.getPhase().name(),
-                                                       clockState.getCurrentNanos(),
+                                                       clockDomain.getCurrentTime(),
                                                        clockState.getCycleCount());
     }
     return currentDeviceStateMessage;

@@ -27,11 +27,11 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.OperationNotSupportedException;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.SimulationWarning;
+import org.openide.util.NbBundle.Messages;
 
 /**
  *
@@ -43,6 +43,7 @@ import com.avrwb.avr8.helper.SimulationException;
   @InstructionImplementation(opcodeMask = 0xfe0f,
                              opcodes = {0x9006, 0x9007}
   )})
+@Messages({"Elpm_error_rampz_not_found=RAMPZ not implemented"})
 public final class Elpm extends AbstractInstruction
 {
 
@@ -105,26 +106,27 @@ public final class Elpm extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       Register rz = device.getCPU().getRAMP(Pointer.Z);
       if (rz == null) {
-        throw new OperationNotSupportedException(toString());
+        resultBuilder.addSimulationEvent(new SimulationWarning(clockState,
+                                                               () -> Bundle.Elpm_error_rampz_not_found()));
       }
       z = device.getSRAM().getPointer(Pointer.Z);
-      rampz = rz.getValue();
+      rampz = rz != null ? rz.getValue() : 0;
       rdVal = device.getSRAM().getByteAt(rdAddress);
       finishCycle = clockState.getCycleCount() + 2;
     }
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (clockState.getCycleCount() == finishCycle) {
       final SRAM sram = device.getSRAM();

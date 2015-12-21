@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.*;
@@ -87,7 +86,6 @@ public class CpseNGTest extends AbstractInstructionTest
     final SREG sreg = cpu.getSREG();
     final SRAM sram = device.getSRAM();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     sram.setByteAt(rd,
                    rdVal);
@@ -98,7 +96,7 @@ public class CpseNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < (cyclesExpected * 2); ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     assertSREG(sreg.getValue(),
                sregInit,

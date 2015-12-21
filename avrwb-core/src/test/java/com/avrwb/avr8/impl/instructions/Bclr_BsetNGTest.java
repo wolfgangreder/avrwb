@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.*;
@@ -90,16 +89,16 @@ public class Bclr_BsetNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final CPU cpu = device.getCPU();
     final SREG sreg = cpu.getSREG();
-    sreg.setValue(sregInit);
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final Set<Integer> expectedChange = new HashSet<>();
+
+    sreg.setValue(sregInit);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
 
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     expectedChange.add(sreg.getMemoryAddress());
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertSREG(sreg.getValue(),
                expected,
                cmd);

@@ -23,7 +23,6 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import static org.testng.Assert.assertEquals;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -91,11 +90,10 @@ public class Sbic_SbisNGTest extends AbstractInstructionTest
     final Device device = getDevice(cmd,
                                     list);
     final Register io = device.getIOSpace().get(ioPort);
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     io.setValue(ioPortInit);
     for (int i = 0; i < (expectedCycles * 2); ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     assertEquals(device.getCPU().getIP(),
                  expectedIp,
@@ -154,11 +152,10 @@ public class Sbic_SbisNGTest extends AbstractInstructionTest
     final Device device = getDevice(cmd,
                                     list);
     final Register io = device.getIOSpace().get(ioPort);
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     io.setValue(ioPortInit);
     for (int i = 0; i < (expectedCycles * 2); ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     assertEquals(device.getCPU().getIP(),
                  expectedIp,

@@ -25,7 +25,6 @@ import com.avrwb.annotations.Invariants;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NullAllowed;
 import com.avrwb.avr8.api.MemoryChangeListener;
-import com.avrwb.avr8.api.Resetable;
 import com.avrwb.io.MemoryChunk;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
  *
  * @author Wolfgang Reder
  */
-public interface Memory extends Resetable
+public interface Memory
 {
 
   @NotNull

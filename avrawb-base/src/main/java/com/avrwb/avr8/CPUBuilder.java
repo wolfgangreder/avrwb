@@ -22,7 +22,7 @@
 package com.avrwb.avr8;
 
 import com.avrwb.annotations.NotNull;
-import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.api.ItemNotFoundException;
 
 /**
  *

@@ -21,11 +21,9 @@
  */
 package com.avrwb.avr8.impl.instructions;
 
-import com.avrwb.avr8.impl.instructions.Brbs_Brbc;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.*;
@@ -117,16 +115,15 @@ public class BranchInstructionNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     sreg.setValue(sregInit);
-    cpu.setIP(device,
+    cpu.setIP(context,
               ip);
     device.getSRAM().addMemoryChangeListener(new MemoryChangeHandler(device.getSRAM(),
                                                                      expectedChange,
                                                                      cmd)::onMemoryChanged);
     for (int i = 0; i < numCycles * 2; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     assertSREG(sreg.getValue(),
                sregInit,
@@ -183,16 +180,15 @@ public class BranchInstructionNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     sreg.setValue(sregInit);
-    cpu.setIP(device,
+    cpu.setIP(context,
               ip);
     device.getSRAM().addMemoryChangeListener(new MemoryChangeHandler(device.getSRAM(),
                                                                      expectedChange,
                                                                      cmd)::onMemoryChanged);
     for (int i = 0; i < numCycles * 2; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     assertSREG(sreg.getValue(),
                sregInit,

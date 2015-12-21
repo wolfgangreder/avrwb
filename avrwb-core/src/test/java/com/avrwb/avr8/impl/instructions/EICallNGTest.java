@@ -29,7 +29,6 @@ import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.assembler;
 import static com.avrwb.avr8.impl.instructions.AbstractInstructionTest.part;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
@@ -111,9 +110,8 @@ public class EICallNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final int spInit = sram.getSize() - 1;
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
-    cpu.setIP(device,
+    cpu.setIP(context,
               ip);
     cpu.getEIND().setValue(eind);
     sp.setValue(spInit);
@@ -133,7 +131,7 @@ public class EICallNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((expectedCycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     for (int i = 0; i < sp.getSize(); ++i) {
       expectedChange.add(sp.getMemoryAddress() + i);
@@ -141,7 +139,7 @@ public class EICallNGTest extends AbstractInstructionTest
     for (int i = 0; i < expectedPush; ++i) {
       expectedChange.add(spInit - i);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(cpu.getEIND().getValue(),
                  eind,
                  cmd);

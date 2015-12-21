@@ -22,10 +22,9 @@
 package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -66,16 +65,16 @@ public abstract class Instruction_Rd_K8 extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     rdVal = device.getSRAM().getByteAt(rdAddress);
     if (AVRWBDefaults.isDebugLoggingActive()) {
       Logger logger = device.getLogger();
       logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                  "{0} reading rdVal r{1,number,0}={2}",
-                 new Object[]{getCurrentDeviceMessage(clockState,
+                 new Object[]{getCurrentDeviceMessage(clockDomain,
                                                       device),
                               rdAddress,
                               Converter.printHexString(rdVal,
@@ -83,7 +82,7 @@ public abstract class Instruction_Rd_K8 extends AbstractInstruction
     }
   }
 
-  protected void logExecutionResult(ClockState clockState,
+  protected void logExecutionResult(ClockDomain clockDomain,
                                     Device device,
                                     int result,
                                     int rdAddress)
@@ -92,7 +91,7 @@ public abstract class Instruction_Rd_K8 extends AbstractInstruction
       device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              ()
                              -> MessageFormat.format("{0} writing result {1} to r{2,number,0}",
-                                                     getCurrentDeviceMessage(clockState,
+                                                     getCurrentDeviceMessage(clockDomain,
                                                                              device),
                                                      Converter.printHexString(result,
                                                                               2),

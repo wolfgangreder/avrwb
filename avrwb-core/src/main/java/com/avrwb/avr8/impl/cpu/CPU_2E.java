@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
@@ -31,23 +31,26 @@ import com.avrwb.avr8.RegisterBuilder;
 import com.avrwb.avr8.ResetSource;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.Instruction;
 import com.avrwb.avr8.api.InstructionDecoder;
+import com.avrwb.avr8.api.InstructionNotAvailableException;
 import com.avrwb.avr8.api.InstructionResult;
-import com.avrwb.avr8.helper.InstructionNotAvailableException;
-import com.avrwb.avr8.helper.ItemNotFoundException;
-import com.avrwb.avr8.helper.NotFoundStrategy;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.api.NotFoundStrategy;
+import com.avrwb.avr8.api.SimulationContext;
+import com.avrwb.avr8.api.SimulationError;
+import com.avrwb.avr8.impl.SREGImpl;
+import com.avrwb.avr8.impl.instructions.Nop;
 import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.AvrCore;
 import com.avrwb.schema.ModuleClass;
 import com.avrwb.schema.XmlDevice;
 import com.avrwb.schema.XmlModule;
 import com.avrwb.schema.XmlRegister;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -64,7 +67,7 @@ public class CPU_2E implements CPU
   private Instruction currentInstruction;
   private final SREG sreg;
   private final Register sp;
-  private final List<Register> register;
+  private final Map<Integer, Register> register;
   private final CPU_2EInstructionDecoder instructionDecoder;
   private final AvrCore version;
   private final Register rampd;
@@ -72,6 +75,7 @@ public class CPU_2E implements CPU
   private final Register rampy;
   private final Register rampz;
   private final Register eind;
+  private long executionCounter;
 
   CPU_2E(@NotNull XmlDevice device,
          @NotNull XmlModule module,
@@ -91,7 +95,7 @@ public class CPU_2E implements CPU
     }
     this.name = module.getName();
     final RegisterBuilder registerBuilder = InstanceFactories.getRegisterBuilder().sram(sram);
-    final List<Register> tmpRegister = new ArrayList<>();
+    final Map<Integer, Register> tmpRegister = new HashMap<>();
     SREG tmpSREG = null;
     Register tmpSP = null;
     Register tmprampd = null;
@@ -108,38 +112,46 @@ public class CPU_2E implements CPU
           } else {
             tmpSREG = new SREGImpl(reg);
           }
-          tmpRegister.add(tmpSREG);
+          tmpRegister.put(tmpSREG.getIOAddress(),
+                          tmpSREG);
           break;
         case "SP":
           tmpSP = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         case "RAMPD":
           tmprampd = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         case "RAMPX":
           tmprampx = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         case "RAMPY":
           tmprampy = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         case "RAMPZ":
           tmprampz = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         case "EIND":
           tmpeind = reg;
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
         default:
-          tmpRegister.add(reg);
+          tmpRegister.put(reg.getIOAddress(),
+                          reg);
           break;
       }
     }
-    this.register = Collections.unmodifiableList(tmpRegister);
+    this.register = Collections.unmodifiableMap(tmpRegister);
     this.sreg = tmpSREG;
     this.sp = tmpSP;
     this.rampd = tmprampd;
@@ -168,17 +180,25 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public void setIP(Device device,
-                    int newIP) throws IllegalArgumentException, NullPointerException, InstructionNotAvailableException
+  public void setIP(SimulationContext ctx,
+                    int newIP) throws IllegalArgumentException, NullPointerException
   {
-    Objects.requireNonNull(device,
-                           "device==null");
+    Objects.requireNonNull(ctx,
+                           "ctx==null");
     if (newIP < 0) {
       throw new IllegalArgumentException("ip<0");
     }
     this.ip = newIP;
-    currentInstruction = instructionDecoder.getInstruction(device,
-                                                           newIP * 2);
+    try {
+      currentInstruction = instructionDecoder.getInstruction(ctx.getDevice(),
+                                                             newIP * 2);
+    } catch (InstructionNotAvailableException ex) {
+      currentInstruction = Nop.getInstance(ctx.getDevice().getDeviceKey(),
+                                           newIP,
+                                           newIP);
+      ctx.addEvent(new SimulationError(ctx.getCPUDomain(),
+                                       ex));
+    }
   }
 
   @Override
@@ -200,24 +220,25 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public List<Register> getRegister()
+  public Map<Integer, Register> getRegister()
   {
     return register;
   }
 
   @Override
-  public void reset(Device device,
-                    ResetSource source) throws SimulationException
+  public void reset(SimulationContext ctx,
+                    ResetSource source)
   {
-    Objects.requireNonNull(device,
-                           "device==null");
+    Objects.requireNonNull(ctx,
+                           "ctx==null");
     Objects.requireNonNull(source,
                            "source==null");
-    for (Register r : register) {
+    for (Register r : register.values()) {
       r.setValue(0);
     }
-    setIP(device,
+    setIP(ctx,
           0);
+    executionCounter = 0;
   }
 
   @Override
@@ -227,19 +248,28 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public void onClock(ClockState clockState,
-                      Device device) throws SimulationException
+  public void onClock(SimulationContext ctx,
+                      ClockDomain clockDomain)
   {
-    InstructionResult result = currentInstruction.execute(clockState,
+    final Device device = Objects.requireNonNull(ctx,
+                                                 "ctx==null").getDevice();
+    InstructionResult result = currentInstruction.execute(clockDomain,
                                                           device);
     Set<Integer> changedAddresses = result.getModifiedDataAddresses();
     if (!changedAddresses.isEmpty()) {
       device.getSRAM().fireMemoryChanged(changedAddresses);
     }
     if (result.isExecutionFinished()) {
-      setIP(device,
+      ++executionCounter;
+      setIP(ctx,
             result.getNextIP());
     }
+  }
+
+  @Override
+  public long getExecutionCounter()
+  {
+    return executionCounter;
   }
 
   @Override
@@ -261,7 +291,8 @@ public class CPU_2E implements CPU
   }
 
   @Override
-  public Register getRAMP(Pointer ptr)
+  public Register getRAMP(Pointer ptr
+  )
   {
     Objects.requireNonNull(ptr,
                            "ptr==null");

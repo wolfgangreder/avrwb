@@ -24,10 +24,9 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.annotations.NotNull;
 import com.avrwb.annotations.NotThreadSave;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 import java.util.logging.Logger;
@@ -72,10 +71,10 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
   /**
    * List die Werte der Register Rr und Rd in den Zwischenspeicher {@code rdVal} und {@code rrVal}
    *
-   * @param clockState clockState
+   * @param clockDomain clockDomain
    * @param device device
    */
-  protected void readValues(@NotNull ClockState clockState,
+  protected void readValues(@NotNull ClockDomain clockDomain,
                             @NotNull Device device)
   {
     rdVal = device.getSRAM().getByteAt(rdAddress);
@@ -84,14 +83,14 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
       Logger logger = device.getLogger();
       logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                  "{0} reading rdVal r{1,number,0}={2}",
-                 new Object[]{getCurrentDeviceMessage(clockState,
+                 new Object[]{getCurrentDeviceMessage(clockDomain,
                                                       device),
                               rdAddress,
                               Converter.printHexString(rdVal,
                                                        2)});
       logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                  "{0} reading rrVal r{1}={2}",
-                 new Object[]{getCurrentDeviceMessage(clockState,
+                 new Object[]{getCurrentDeviceMessage(clockDomain,
                                                       device),
                               rrAddress,
                               Converter.printHexString(rrVal,
@@ -100,15 +99,15 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
-    readValues(clockState,
+    readValues(clockDomain,
                device);
   }
 
-  protected void logExecutionResult(ClockState clockState,
+  protected void logExecutionResult(ClockDomain clockDomain,
                                     Device device,
                                     int result,
                                     int rdAddress)
@@ -117,7 +116,7 @@ public abstract class Instruction_Rd_Rr extends AbstractInstruction
       device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              ()
                              -> MessageFormat.format("{0} writing result {1} to r{2,number,0}",
-                                                     getCurrentDeviceMessage(clockState,
+                                                     getCurrentDeviceMessage(clockDomain,
                                                                              device),
                                                      Converter.printHexString(result,
                                                                               2),

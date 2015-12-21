@@ -22,7 +22,7 @@
 package com.avrwb.avr8.impl;
 
 import com.avrwb.avr8.Stack;
-import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.util.Converter;
 import java.util.ArrayDeque;
 import java.util.Deque;

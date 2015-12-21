@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.assertEquals;
@@ -69,7 +68,6 @@ public class PushNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final Register sp = cpu.getStackPointer();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
     final int newSp = spPtrInit - 1;
 
     sp.setValue(spPtrInit);
@@ -81,7 +79,7 @@ public class PushNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < 3; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     if (rdVal != spVal) {
       expectedChange.add(spPtrInit);
@@ -96,7 +94,7 @@ public class PushNGTest extends AbstractInstructionTest
     if (sp.getSize() > 3 && (spPtrInit & 0xff000000) != (newSp & 0xff000000)) {
       expectedChange.add(sp.getMemoryAddress() + 3);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdVal,
                  cmd);

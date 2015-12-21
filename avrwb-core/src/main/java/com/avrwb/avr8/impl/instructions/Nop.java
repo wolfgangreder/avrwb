@@ -23,10 +23,10 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
 
 /**
  *
@@ -36,15 +36,16 @@ import com.avrwb.avr8.helper.AvrDeviceKey;
 public final class Nop extends AbstractInstruction
 {
 
+  public static final Nop INSTANCE = new Nop(null,
+                                             0,
+                                             0);
   public static final int OPCODE = 0x0000;
 
   public static Nop getInstance(AvrDeviceKey deviceKey,
                                 int opcode,
                                 int nextOpcode)
   {
-    return new Nop(deviceKey,
-                   opcode,
-                   nextOpcode);
+    return INSTANCE;
   }
 
   private Nop(AvrDeviceKey deviceKey,
@@ -56,7 +57,7 @@ public final class Nop extends AbstractInstruction
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {

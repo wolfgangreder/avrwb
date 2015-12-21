@@ -23,10 +23,9 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AvrDeviceKey;
 
 /**
  *
@@ -63,23 +62,23 @@ public final class Movw extends Instruction_Rdh_Rrh
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       rdVal = device.getSRAM().getWordAt(rdlAddress);
       rrVal = device.getSRAM().getWordAt(rrlAddress);
-      finishCycle = clockState.getCycleCount();
+      finishCycle = clockDomain.getState().getCycleCount();
     }
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
-    if (finishCycle == clockState.getCycleCount()) {
+    if (finishCycle == clockDomain.getCycleCount()) {
       if (rdVal != rrVal) {
         resultBuilder.addModifiedDataAddresses(rdlAddress);
         resultBuilder.addModifiedDataAddresses(rdlAddress + 1);

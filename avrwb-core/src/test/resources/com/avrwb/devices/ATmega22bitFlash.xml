@@ -217,6 +217,22 @@ MA 02110-1301  USA
       neg nop or ori out pop push rcall ret reti rjmp rol ror sbc sbci sbi sbic sbis sbiw sbr sbrc sbrs sec seh sei sen ser ses
       set sev sez sleep spm st std sts sub subi swap tst wdr      
     </avr:instructions>
+    <avr:clock-domains>
+      <avr:clock-domain xml:id="WD">
+        <avr:name>Watchdog</avr:name>
+        <avr:implementation>CLOCKDOMAIN_WATCHDOG</avr:implementation>
+        <avr:speed-max>128000</avr:speed-max>
+        <avr:speed-min>128000</avr:speed-min>
+        <avr:speed-default>128000</avr:speed-default>
+      </avr:clock-domain>
+      <avr:clock-domain xml:id="EXT">
+        <avr:name>External</avr:name>
+        <avr:implementation>CLOCKDOMAIN_DEFAULT</avr:implementation>
+        <avr:speed-max>20000000</avr:speed-max>
+        <avr:speed-min>1</avr:speed-min>
+        <avr:speed-default>20000000</avr:speed-default>
+      </avr:clock-domain>      
+    </avr:clock-domains>
 
 
   </avr:device>

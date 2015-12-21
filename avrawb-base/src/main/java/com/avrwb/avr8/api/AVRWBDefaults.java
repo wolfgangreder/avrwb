@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
 
 import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.api.ClockPhase;
@@ -96,5 +96,7 @@ public final class AVRWBDefaults
   public static final int PORT_ADDRESS_OFFSET = 0x20;
   public static final ClockPhase PHASE_PREPARE = ClockPhase.HI;
   public static final ClockPhase PHASE_EXECUTE = ClockPhase.LO;
+
+  public static final String IMPID_CD_WATCHDOG = "CLOCKDOMAIN_WATCHDOG";
 
 }

@@ -19,7 +19,7 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.helper;
+package com.avrwb.avr8.api;
 
 import java.util.logging.Level;
 import org.openide.util.NbBundle;

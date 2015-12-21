@@ -25,7 +25,6 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.*;
@@ -77,7 +76,6 @@ public class AdcNGTest extends AbstractInstructionTest
     final CPU cpu = device.getCPU();
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     sreg.setValue(sregInit);
     sram.setByteAt(rd,
@@ -87,15 +85,14 @@ public class AdcNGTest extends AbstractInstructionTest
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
-
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     if (rdVal != rdExpected) {
       expectedChange.add(rd);
     }
     if (expectSREGChange) {
       expectedChange.add(sreg.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(sram.getByteAt(rd),
                  rdExpected,
                  cmd);

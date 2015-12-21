@@ -24,13 +24,14 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -53,19 +54,22 @@ public final class Bclr_Bset extends AbstractInstruction
     return baseOpcode | (bit << 4) | (setBit ? 0x0 : 0x80);
   }
 
-  public static Bclr_Bset getInstance(AvrDeviceKey deviceKey,
-                                      int opcode,
-                                      int nextOpcode)
-  {
-    return new Bclr_Bset(deviceKey,
-                         opcode,
-                         nextOpcode);
-  }
-
+  private static final Map<Integer, Bclr_Bset> INSTANCES = new ConcurrentHashMap<>();
   public static final int OPCODE_BCLR = 0x9488;
   public static final int OPCODE_BSET = 0x9408;
   private final boolean setBit;
   private final int bitOffset;
+
+  public static Bclr_Bset getInstance(AvrDeviceKey deviceKey,
+                                      int opcode,
+                                      int nextOpcode)
+  {
+    return INSTANCES.computeIfAbsent(opcode,
+                                     (Integer op)
+                                     -> new Bclr_Bset(deviceKey,
+                                                      op,
+                                                      0));
+  }
 
   private Bclr_Bset(AvrDeviceKey deviceKey,
                     int opcode,
@@ -146,9 +150,9 @@ public final class Bclr_Bset extends AbstractInstruction
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     final SREG sreg = device.getCPU().getSREG();
     if (sreg.setBit(bitOffset,

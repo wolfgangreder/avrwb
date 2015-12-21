@@ -25,10 +25,9 @@ import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Pointer;
 import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.AvrFamily;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
@@ -198,9 +197,9 @@ public abstract class Instruction_LdSt extends AbstractInstruction
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockDomain,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       SRAM sram = device.getSRAM();
@@ -242,20 +241,20 @@ public abstract class Instruction_LdSt extends AbstractInstruction
             finishDelta = 2;
         }
       }
-      finishCycle = clockState.getCycleCount() + finishDelta;
+      finishCycle = clockDomain.getState().getCycleCount() + finishDelta;
       if (AVRWBDefaults.isDebugLoggingActive()) {
         final Logger logger = device.getLogger();
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                    ()
                    -> MessageFormat.format("{0} reading 0x{1,number,0} from r{2,number,0}",
-                                           getCurrentDeviceMessage(clockState,
+                                           getCurrentDeviceMessage(clockDomain,
                                                                    device),
                                            rdVal,
                                            rdAddress));
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                    ()
                    -> MessageFormat.format("{0} pointer {1} points to {2}",
-                                           getCurrentDeviceMessage(clockState,
+                                           getCurrentDeviceMessage(clockDomain,
                                                                    device),
                                            ptr.name(),
                                            Converter.printHexString(ptrVal,
@@ -263,7 +262,7 @@ public abstract class Instruction_LdSt extends AbstractInstruction
         logger.log(AVRWBDefaults.getInstructionTraceLevel(),
                    ()
                    -> MessageFormat.format("{0} reading 0x{1} from sram @{2}{3}",
-                                           getCurrentDeviceMessage(clockState,
+                                           getCurrentDeviceMessage(clockDomain,
                                                                    device),
                                            Integer.toHexString(pointeeVal),
                                            Converter.printHexString(ptrVal,

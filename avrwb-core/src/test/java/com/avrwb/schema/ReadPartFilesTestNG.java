@@ -21,7 +21,7 @@
  */
 package com.avrwb.schema;
 
-import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.io.IOException;
 import java.io.InputStream;
@@ -279,7 +279,7 @@ public class ReadPartFilesTestNG
     }
   }
 
-  @Test(dataProvider = "failPartFiles")
+  @Test(dataProvider = "failPartFiles", enabled = false)
   public void testFailPartFiles(Path partFile,
                                 DeviceStreamer.Version schemaVersion)
   {

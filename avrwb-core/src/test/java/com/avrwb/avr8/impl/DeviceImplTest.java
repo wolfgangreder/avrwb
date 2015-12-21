@@ -25,7 +25,7 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.DeviceBuilder;
 import com.avrwb.avr8.spi.InstanceFactories;
-import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.api.ItemNotFoundException;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import static org.testng.AssertJUnit.*;

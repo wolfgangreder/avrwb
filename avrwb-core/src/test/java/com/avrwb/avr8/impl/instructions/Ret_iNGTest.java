@@ -27,7 +27,6 @@ import com.avrwb.avr8.Register;
 import com.avrwb.avr8.SRAM;
 import com.avrwb.avr8.SREG;
 import com.avrwb.avr8.Stack;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
 import java.util.HashSet;
@@ -92,7 +91,6 @@ public class Ret_iNGTest extends AbstractInstructionTest
     final SRAM sram = device.getSRAM();
     final int spInit = sram.getSize() - 1;
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
 
     sp.setValue(spInit);
     for (int i = 0; i < expectedPop; ++i) {
@@ -102,7 +100,7 @@ public class Ret_iNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     final int spNew = sp.getValue();
     expectedChange.add(sp.getMemoryAddress());
@@ -115,7 +113,7 @@ public class Ret_iNGTest extends AbstractInstructionTest
     if (sp.getSize() > 3 && (spNew & 0xff000000) != (spInit & 0xff000000)) {
       expectedChange.add(sp.getMemoryAddress() + 3);
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertEquals(cpu.getIP(),
                  returnIp,
                  cmd);
@@ -145,7 +143,7 @@ public class Ret_iNGTest extends AbstractInstructionTest
     final int spInit = sram.getSize() - 1;
     final SREG sreg = cpu.getSREG();
     final Set<Integer> expectedChange = new HashSet<>();
-    final ClockStateTestImpl cs = new ClockStateTestImpl();
+
     sreg.setValue(sregInit);
     sp.setValue(spInit);
     for (int i = 0; i < expectedPop; ++i) {
@@ -155,7 +153,7 @@ public class Ret_iNGTest extends AbstractInstructionTest
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
     for (int i = 0; i < ((cycles - 1) * 2) + 1; ++i) {
-      device.onClock(cs.getAndNext());
+      controller.stepCPU();
     }
     final int spNew = sp.getValue();
     expectedChange.add(sp.getMemoryAddress());
@@ -171,7 +169,7 @@ public class Ret_iNGTest extends AbstractInstructionTest
     if (sregInit != sregExpected) {
       expectedChange.add(sreg.getMemoryAddress());
     }
-    device.onClock(cs.getAndNext());
+    controller.stepCPU();
     assertSREG(sreg.getValue(),
                sregExpected,
                cmd);

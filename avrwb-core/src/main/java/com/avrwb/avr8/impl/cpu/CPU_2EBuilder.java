@@ -19,39 +19,44 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
-import com.avrwb.annotations.ProvidedModule;
-import com.avrwb.annotations.ProvidedModules;
+import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.CPUBuilder;
-import com.avrwb.avr8.CPUBuilderFactory;
-import com.avrwb.avr8.ModuleBuilderFactory;
-import com.avrwb.schema.AvrFamily;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.impl.AbstractModuleBuilder;
 import com.avrwb.schema.ModuleClass;
-import org.openide.util.lookup.ServiceProvider;
+import com.avrwb.schema.XmlModule;
 
 /**
  *
  * @author Wolfgang Reder
  */
-@ServiceProvider(service = ModuleBuilderFactory.class, path = "avrwb")
-@ProvidedModules({
-  @ProvidedModule(family = AvrFamily.MEGA,
-                  core = {"V2E"},
-                  moduleClass = ModuleClass.CPU,
-                  value = {"CPU"}),
-  @ProvidedModule(family = AvrFamily.TINY,
-                  core = {"V2"},
-                  moduleClass = ModuleClass.CPU,
-                  value = {"CPU"})
-})
-public final class CPU_2EBuilderFactory implements CPUBuilderFactory
+final class CPU_2EBuilder extends AbstractModuleBuilder<CPU_2EBuilder> implements CPUBuilder<CPU_2EBuilder>
 {
 
   @Override
-  public CPUBuilder createBuilder()
+  protected CPU_2EBuilder getThis()
   {
-    return new CPU_2EBuilder();
+    return this;
+  }
+
+  @Override
+  protected XmlModule checkModuleClass(XmlModule module) throws IllegalArgumentException
+  {
+    if (module.getClazz() != ModuleClass.CPU) {
+      throw new IllegalArgumentException("module" + module.getId() + " is no cpu");
+    }
+    return module;
+  }
+
+  @Override
+  public CPU build() throws IllegalStateException, ItemNotFoundException, NullPointerException
+  {
+    return new CPU_2E(device,
+                      module,
+                      sram,
+                      nfStrategy);
   }
 
 }

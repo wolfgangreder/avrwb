@@ -23,9 +23,9 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import java.text.MessageFormat;
 
 /**
@@ -47,7 +47,7 @@ public abstract class AbstractCp extends Instruction_Rd_Rr
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockDomain,
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
@@ -65,7 +65,7 @@ public abstract class AbstractCp extends Instruction_Rd_Rr
     if (AVRWBDefaults.isDebugLoggingActive()) {
       device.getLogger().log(AVRWBDefaults.getInstructionTraceLevel(),
                              () -> MessageFormat.format("{0} compared r{1,number,0} with r{2,number,0} -> {3}",
-                                                        getCurrentDeviceMessage(clockState,
+                                                        getCurrentDeviceMessage(clockDomain,
                                                                                 device),
                                                         rdAddress,
                                                         rrAddress,

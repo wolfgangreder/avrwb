@@ -21,9 +21,10 @@
  */
 package com.avrwb.avr8.impl;
 
+import com.avrwb.annotations.NotNull;
 import com.avrwb.avr8.ModuleBuilder;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.helper.NotFoundStrategy;
+import com.avrwb.avr8.api.NotFoundStrategy;
 import com.avrwb.schema.XmlDevice;
 import com.avrwb.schema.XmlModule;
 import java.util.Objects;
@@ -69,12 +70,14 @@ public abstract class AbstractModuleBuilder<B extends ModuleBuilder> implements 
     return getThis();
   }
 
+  @NotNull
+  protected abstract XmlModule checkModuleClass(@NotNull XmlModule module) throws IllegalArgumentException;
+
   @Override
   public B moduleDescriptor(XmlModule module) throws NullPointerException, IllegalArgumentException
   {
-    Objects.requireNonNull(module,
-                           "module==null");
-    this.module = module;
+    this.module = checkModuleClass(Objects.requireNonNull(module,
+                                                          "module==null"));
     return getThis();
   }
 

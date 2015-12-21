@@ -23,7 +23,6 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.SRAM;
-import com.avrwb.avr8.impl.instructions.helper.ClockStateTestImpl;
 import java.util.HashSet;
 import java.util.Set;
 import static org.testng.Assert.assertEquals;
@@ -70,17 +69,16 @@ public class MovNGTest extends AbstractInstructionTest
                    0);
     sram.setByteAt(rr,
                    0xff);
-    final ClockStateTestImpl clock = new ClockStateTestImpl();
     device.getCPU().getSREG().setValue(sreg);
     sram.addMemoryChangeListener(new MemoryChangeHandler(sram,
                                                          expectedChange,
                                                          cmd)::onMemoryChanged);
 
-    device.onClock(clock.getAndNext());
+    controller.stepCPU();
     if (rd != rr) {
       expectedChange.add(rd);
     }
-    device.onClock(clock.getAndNext());
+    controller.stepCPU();
     assertTrue(expectedChange.isEmpty(),
                cmd + "|event listener not called");
     assertEquals(sram.getByteAt(rd),

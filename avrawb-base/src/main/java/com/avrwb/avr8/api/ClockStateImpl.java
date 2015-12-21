@@ -32,27 +32,20 @@ public final class ClockStateImpl implements ClockState
 
   private final ClockPhase phase;
   private final long cycleCount;
-  private final long frequency;
 
-  public ClockStateImpl(long frequency)
+  public ClockStateImpl()
   {
     this(ClockPhase.HI,
-         0,
-         frequency);
+         0);
   }
 
   public ClockStateImpl(ClockPhase phase,
-                        long cycleCount,
-                        long frequency)
+                        long cycleCount)
   {
     Objects.requireNonNull(phase,
                            "phase==null");
-    if (frequency <= 0) {
-      throw new IllegalArgumentException("frequency<=0");
-    }
     this.phase = phase;
     this.cycleCount = cycleCount;
-    this.frequency = frequency;
   }
 
   @Override
@@ -67,26 +60,6 @@ public final class ClockStateImpl implements ClockState
     return cycleCount;
   }
 
-  @Override
-  public long getClockFrequency()
-  {
-    return frequency;
-  }
-
-  @Override
-  public long getCurrentNanos()
-  {
-    switch (phase) {
-      case FALLING:
-      case LO:
-        return (cycleCount + 1) * 1000L - 500;
-      case RISING:
-      case HI:
-        return cycleCount * 1000;
-    }
-    return 0;
-  }
-
   public ClockStateImpl next()
   {
     ClockPhase nextPhase;
@@ -99,13 +72,12 @@ public final class ClockStateImpl implements ClockState
       ++nextCycleCount;
     }
     return new ClockStateImpl(nextPhase,
-                              nextCycleCount,
-                              frequency);
+                              nextCycleCount);
   }
 
   public ClockStateImpl reset()
   {
-    return new ClockStateImpl(frequency);
+    return new ClockStateImpl();
   }
 
   @Override
@@ -114,7 +86,6 @@ public final class ClockStateImpl implements ClockState
     int hash = 7;
     hash = 79 * hash + Objects.hashCode(this.phase);
     hash = 79 * hash + (int) (this.cycleCount ^ (this.cycleCount >>> 32));
-    hash = 79 * hash + (int) (this.frequency ^ (this.frequency >>> 32));
     return hash;
   }
 
@@ -132,9 +103,6 @@ public final class ClockStateImpl implements ClockState
     }
     final ClockStateImpl other = (ClockStateImpl) obj;
     if (this.cycleCount != other.cycleCount) {
-      return false;
-    }
-    if (this.frequency != other.frequency) {
       return false;
     }
     return this.phase == other.phase;

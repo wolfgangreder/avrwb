@@ -23,9 +23,12 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.Immutable;
 import com.avrwb.avr8.api.InstructionResult;
+import com.avrwb.avr8.api.SimulationEvent;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -39,10 +42,12 @@ final class InstructionResultImpl implements InstructionResult
   private final boolean finished;
   private final int nextIP;
   private final Set<Integer> modifiedDataAddresses;
+  private final List<SimulationEvent> events;
 
   public InstructionResultImpl(boolean finished,
                                int nextIP,
-                               Collection<Integer> modifiedDataAddresses)
+                               Collection<Integer> modifiedDataAddresses,
+                               Collection<? extends SimulationEvent> events)
   {
     this.finished = finished;
     this.nextIP = nextIP;
@@ -50,6 +55,11 @@ final class InstructionResultImpl implements InstructionResult
       this.modifiedDataAddresses = Collections.emptySet();
     } else {
       this.modifiedDataAddresses = Collections.unmodifiableSet(new HashSet<>(modifiedDataAddresses));
+    }
+    if (events == null || events.isEmpty()) {
+      this.events = Collections.emptyList();
+    } else {
+      this.events = Collections.unmodifiableList(new ArrayList<>(events));
     }
   }
 
@@ -69,6 +79,12 @@ final class InstructionResultImpl implements InstructionResult
   public Set<Integer> getModifiedDataAddresses()
   {
     return modifiedDataAddresses;
+  }
+
+  @Override
+  public List<SimulationEvent> getEvents()
+  {
+    return events;
   }
 
 }

@@ -23,7 +23,7 @@ package com.avrwb.avr8.impl;
 
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.MemoryBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
+import com.avrwb.avr8.api.AVRWBDefaults;
 import com.avrwb.schema.XmlAddressSpace;
 import java.nio.ByteOrder;
 import java.util.Objects;

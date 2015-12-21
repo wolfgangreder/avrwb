@@ -24,11 +24,12 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.Instruction;
+import com.avrwb.avr8.api.InstructionNotAvailableException;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.SimulationError;
 
 /**
  *
@@ -63,17 +64,27 @@ public final class Sbic_Sbis extends Instruction_P_b
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       super.doPrepare(clockState,
                       device,
                       resultBuilder);
       final CPU cpu = device.getCPU();
-      Instruction i = cpu.getInstructionDecoder().getInstruction(device,
-                                                                 cpu.getIP() + 2);
+      Instruction i;
+      try {
+        i
+                = cpu.getInstructionDecoder().getInstruction(device,
+                                                             cpu.getIP() + 2);
+      } catch (InstructionNotAvailableException ex) {
+        resultBuilder.addSimulationEvent(new SimulationError(clockState,
+                                                             ex));
+        i = Nop.getInstance(device.getDeviceKey(),
+                            0,
+                            0);
+      }
       skip = ((port.getValue() & getBitMask()) != 0) == bitState;
       if (skip) {
         if (i.getSize() > 2) {
@@ -91,9 +102,9 @@ public final class Sbic_Sbis extends Instruction_P_b
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == clockState.getCycleCount()) {
       resultBuilder.finished(true,

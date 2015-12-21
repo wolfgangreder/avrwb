@@ -19,46 +19,41 @@
  * MA 02110-1301  USA
  *
  */
-package com.avrwb.avr8.impl;
+package com.avrwb.avr8.impl.cpu;
 
-import com.avrwb.avr8.CPU;
+import com.avrwb.annotations.ProvidedModule;
+import com.avrwb.annotations.ProvidedModules;
 import com.avrwb.avr8.CPUBuilder;
-import com.avrwb.avr8.helper.ItemNotFoundException;
+import com.avrwb.avr8.CPUBuilderFactory;
+import com.avrwb.avr8.ModuleBuilderFactory;
+import com.avrwb.schema.AvrFamily;
 import com.avrwb.schema.ModuleClass;
-import com.avrwb.schema.XmlModule;
-import java.util.Objects;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Wolfgang Reder
  */
-final class CPU_2EBuilder extends AbstractModuleBuilder<CPU_2EBuilder> implements CPUBuilder<CPU_2EBuilder>
+@ServiceProvider(service = ModuleBuilderFactory.class, path = "avrwb")
+@ProvidedModules({
+  @ProvidedModule(family = AvrFamily.MEGA,
+                  core = {"V2E"},
+                  moduleClass = ModuleClass.CPU,
+                  value = {"CPU"},
+                  implementationId = "V2E-CPU-0"),
+  @ProvidedModule(family = AvrFamily.TINY,
+                  core = {"V2"},
+                  moduleClass = ModuleClass.CPU,
+                  value = {"CPU"},
+                  implementationId = "V2-CPU-0")
+})
+public final class CPU_2EBuilderFactory implements CPUBuilderFactory
 {
 
   @Override
-  protected CPU_2EBuilder getThis()
+  public CPUBuilder createBuilder()
   {
-    return this;
-  }
-
-  @Override
-  public CPU_2EBuilder moduleDescriptor(XmlModule module) throws NullPointerException, IllegalArgumentException
-  {
-    Objects.requireNonNull(module,
-                           "moduel==null");
-    if (module.getClazz() != ModuleClass.CPU) {
-      throw new IllegalArgumentException("module" + module.getId() + " is no cpu");
-    }
-    return super.moduleDescriptor(module);
-  }
-
-  @Override
-  public CPU build() throws IllegalStateException, ItemNotFoundException, NullPointerException
-  {
-    return new CPU_2E(device,
-                      module,
-                      sram,
-                      nfStrategy);
+    return new CPU_2EBuilder();
   }
 
 }

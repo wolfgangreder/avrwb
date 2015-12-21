@@ -23,10 +23,9 @@ package com.avrwb.avr8.impl.instructions;
 
 import com.avrwb.annotations.InstructionImplementation;
 import com.avrwb.avr8.Device;
-import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 
 /**
  *
@@ -56,9 +55,9 @@ public final class Bld extends Instruction_Rd_b
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     final int oldRdVal = rdVal;
     rdVal = (rdVal & ~bitMask);

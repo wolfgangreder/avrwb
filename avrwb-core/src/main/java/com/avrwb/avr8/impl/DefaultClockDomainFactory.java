@@ -19,13 +19,36 @@
  * MA 02110-1301  USA
  *
  */
-
 package com.avrwb.avr8.impl;
+
+import com.avrwb.avr8.api.ClockDomain;
+import com.avrwb.avr8.api.ClockDomainFactory;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.spi.AbstractClockDomain;
+import com.avrwb.schema.XmlClockDomain;
+import java.util.Objects;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author wolfi
  */
-public class XmegaInstructionDecoder {
+@ServiceProvider(service = ClockDomainFactory.class, path = "avrwb")
+public final class DefaultClockDomainFactory implements ClockDomainFactory
+{
+
+  @Override
+  public String getImplementationId()
+  {
+    return "CLOCKDOMAIN_DEFAULT";
+  }
+
+  @Override
+  public ClockDomain createDomain(XmlClockDomain domainSettings) throws ItemNotFoundException
+  {
+    return new AbstractClockDomain(Objects.requireNonNull(domainSettings,
+                                                          "domainSettings==null"),
+                                   getImplementationId());
+  }
 
 }

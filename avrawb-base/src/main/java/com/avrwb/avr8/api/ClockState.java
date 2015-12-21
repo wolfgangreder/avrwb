@@ -50,18 +50,4 @@ public interface ClockState
    */
   public long getCycleCount();
 
-  /**
-   * Bestimmt die eingestellte Taktfrequenz in Herz.
-   *
-   * @return Aktuelle Taktfrequenz
-   */
-  public long getClockFrequency();
-
-  /**
-   * Bestimmt die Zeit in Nanosekunden seit Reset.
-   *
-   * @return Zeit seit letztem Reset
-   */
-  public long getCurrentNanos();
-
 }

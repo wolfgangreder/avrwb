@@ -26,11 +26,10 @@ import com.avrwb.avr8.CPU;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
 import com.avrwb.avr8.api.InstructionResultBuilder;
-import com.avrwb.avr8.helper.AVRWBDefaults;
-import com.avrwb.avr8.helper.AvrDeviceKey;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.AVRWBDefaults;
+import com.avrwb.avr8.api.AvrDeviceKey;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.schema.util.Converter;
 import java.text.MessageFormat;
 
@@ -62,9 +61,9 @@ public final class Mul extends Instruction_Rd_Rr
   }
 
   @Override
-  protected void doPrepare(ClockState clockState,
+  protected void doPrepare(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == -1) {
       super.doPrepare(clockState,
@@ -74,9 +73,9 @@ public final class Mul extends Instruction_Rd_Rr
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockState,
                            Device device,
-                           InstructionResultBuilder resultBuilder) throws SimulationException
+                           InstructionResultBuilder resultBuilder)
   {
     if (finishCycle == clockState.getCycleCount()) {
       final Memory sram = device.getSRAM();

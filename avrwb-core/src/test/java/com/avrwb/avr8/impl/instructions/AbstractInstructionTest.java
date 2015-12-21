@@ -27,11 +27,14 @@ import com.avrwb.assembler.AssemblerResult;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.ResetSource;
-import com.avrwb.avr8.impl.instructions.helper.StringAssemblerSource;
-import com.avrwb.avr8.helper.ItemNotFoundException;
-import com.avrwb.avr8.helper.NotFoundStrategy;
-import com.avrwb.avr8.helper.SimulationException;
+import com.avrwb.avr8.api.ItemNotFoundException;
+import com.avrwb.avr8.api.NotFoundStrategy;
+import com.avrwb.avr8.api.SimulationContext;
+import com.avrwb.avr8.api.SimulationController;
+import com.avrwb.avr8.api.SimulationException;
 import com.avrwb.avr8.impl.SREGImpl;
+import com.avrwb.avr8.impl.StandardSimulationContext;
+import com.avrwb.avr8.impl.instructions.helper.StringAssemblerSource;
 import com.avrwb.avr8.spi.InstanceFactories;
 import com.avrwb.schema.XmlPart;
 import com.avrwb.schema.util.DeviceStreamer;
@@ -49,6 +52,8 @@ public class AbstractInstructionTest
 
   protected static Assembler assembler;
   protected static XmlPart part;
+  protected SimulationContext context;
+  protected SimulationController controller;
 
   protected static class MemoryChangeHandler
   {
@@ -138,8 +143,11 @@ public class AbstractInstructionTest
         asr.getList(w);
       }
     }
+    context = new StandardSimulationContext(result);
+    controller = context.getController();
     result.getFlash().initialize(asr.getCSEG());
-    result.reset(ResetSource.POWER_UP);
+    result.reset(context,
+                 ResetSource.POWER_UP);
     return result;
   }
 

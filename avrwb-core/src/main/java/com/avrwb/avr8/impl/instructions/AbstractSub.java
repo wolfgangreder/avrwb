@@ -24,7 +24,7 @@ package com.avrwb.avr8.impl.instructions;
 import com.avrwb.avr8.Device;
 import com.avrwb.avr8.Memory;
 import com.avrwb.avr8.SREG;
-import com.avrwb.avr8.api.ClockState;
+import com.avrwb.avr8.api.ClockDomain;
 import com.avrwb.avr8.api.InstructionResultBuilder;
 
 /**
@@ -46,7 +46,7 @@ public abstract class AbstractSub extends Instruction_Rd_Rr
   }
 
   @Override
-  protected void doExecute(ClockState clockState,
+  protected void doExecute(ClockDomain clockDomain,
                            Device device,
                            InstructionResultBuilder resultBuilder)
   {
@@ -69,7 +69,7 @@ public abstract class AbstractSub extends Instruction_Rd_Rr
                                result);
     resultBuilder.finished(true,
                            device.getCPU().getIP() + 1);
-    logExecutionResult(clockState,
+    logExecutionResult(clockDomain,
                        device,
                        result,
                        rdAddress);
