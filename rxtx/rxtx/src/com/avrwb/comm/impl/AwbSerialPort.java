@@ -28,6 +28,7 @@ import com.avrwb.comm.SerialPort;
 import com.avrwb.comm.SerialPortEventListener;
 import com.avrwb.comm.StopBits;
 import com.avrwb.comm.UnsupportedCommOperationException;
+import gnu.io.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -41,21 +42,23 @@ import java.util.TooManyListenersException;
 public final class AwbSerialPort extends SerialPort
 {
 
-  private final AwbCommDriver driver;
-  private final long peer;
+  static {
+    System.load(Utils.findNativeLibrary("rxtxSerial"));
+  }
+
+  private long fd = -1;
 
   public AwbSerialPort(String portName) throws IOException
   {
     super(portName);
-    driver = AwbCommDriver.getInstance();
-    peer = nativeOpen(portName);
+    fd = nativeOpen(portName);
   }
 
   private native long nativeOpen(String portName) throws IOException;
 
   public boolean isOpen()
   {
-    return peer != 0;
+    return fd != -1;
   }
 
   @Override
@@ -101,13 +104,12 @@ public final class AwbSerialPort extends SerialPort
   }
 
   @Override
-  public void setSerialPortParams(int baudrate,
-                                  DataBits dataBits,
-                                  StopBits stopBits,
-                                  Parity parity) throws UnsupportedCommOperationException
-  {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-  }
+  public native void setSerialPortParams(int baudrate,
+                                         DataBits dataBits,
+                                         StopBits stopBits,
+                                         Parity parity);
+
+  public native void sendBytes(byte[] data) throws IOException;
 
   @Override
   public void setDTR(boolean dtr)
@@ -244,10 +246,10 @@ public final class AwbSerialPort extends SerialPort
   @Override
   public void close()
   {
-    nativeClose();
+    fd = nativeClose(fd);
   }
 
-  private native void nativeClose();
+  private native long nativeClose(long fd);
 
   @Override
   public void enableReceiveThreshold(int thresh) throws UnsupportedCommOperationException

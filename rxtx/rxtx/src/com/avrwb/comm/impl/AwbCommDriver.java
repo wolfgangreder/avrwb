@@ -58,10 +58,7 @@ public final class AwbCommDriver implements CommDriver
   public final void initialize()
   {
     System.load(Utils.findNativeLibrary("rxtxSerial"));
-//    nativeInit();
   }
-
-  private native void nativeInit();
 
   @Override
   public CommPort getCommPort(String portName,

@@ -4,11 +4,9 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.h</itemPath>
       <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.h</itemPath>
       <itemPath>Globals.h</itemPath>
       <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/RXTXPort.h</itemPath>
-      <itemPath>SerialPeer.h</itemPath>
       <itemPath>config.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -18,11 +16,9 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.cpp</itemPath>
       <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp</itemPath>
       <itemPath>Globals.cpp</itemPath>
       <itemPath>/home/wolfi/projects/avrwb/rxtx/rxtxSerial/RXTXPort.cpp</itemPath>
-      <itemPath>SerialPeer.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -57,16 +53,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp"
             ex="false"
             tool="1"
@@ -90,10 +76,6 @@
       <item path="Globals.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Globals.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SerialPeer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SerialPeer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -127,16 +109,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp"
             ex="false"
             tool="1"
@@ -160,10 +132,6 @@
       <item path="Globals.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Globals.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="SerialPeer.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="SerialPeer.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config.h" ex="false" tool="3" flavor2="0">
       </item>
