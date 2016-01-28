@@ -7,42 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#undef com_avrwb_comm_impl_AwbSerialPort_debug
-#define com_avrwb_comm_impl_AwbSerialPort_debug 0L
-#undef com_avrwb_comm_impl_AwbSerialPort_DATABITS_5
-#define com_avrwb_comm_impl_AwbSerialPort_DATABITS_5 5L
-#undef com_avrwb_comm_impl_AwbSerialPort_DATABITS_6
-#define com_avrwb_comm_impl_AwbSerialPort_DATABITS_6 6L
-#undef com_avrwb_comm_impl_AwbSerialPort_DATABITS_7
-#define com_avrwb_comm_impl_AwbSerialPort_DATABITS_7 7L
-#undef com_avrwb_comm_impl_AwbSerialPort_DATABITS_8
-#define com_avrwb_comm_impl_AwbSerialPort_DATABITS_8 8L
-#undef com_avrwb_comm_impl_AwbSerialPort_PARITY_NONE
-#define com_avrwb_comm_impl_AwbSerialPort_PARITY_NONE 0L
-#undef com_avrwb_comm_impl_AwbSerialPort_PARITY_ODD
-#define com_avrwb_comm_impl_AwbSerialPort_PARITY_ODD 1L
-#undef com_avrwb_comm_impl_AwbSerialPort_PARITY_EVEN
-#define com_avrwb_comm_impl_AwbSerialPort_PARITY_EVEN 2L
-#undef com_avrwb_comm_impl_AwbSerialPort_PARITY_MARK
-#define com_avrwb_comm_impl_AwbSerialPort_PARITY_MARK 3L
-#undef com_avrwb_comm_impl_AwbSerialPort_PARITY_SPACE
-#define com_avrwb_comm_impl_AwbSerialPort_PARITY_SPACE 4L
-#undef com_avrwb_comm_impl_AwbSerialPort_STOPBITS_1
-#define com_avrwb_comm_impl_AwbSerialPort_STOPBITS_1 1L
-#undef com_avrwb_comm_impl_AwbSerialPort_STOPBITS_2
-#define com_avrwb_comm_impl_AwbSerialPort_STOPBITS_2 2L
-#undef com_avrwb_comm_impl_AwbSerialPort_STOPBITS_1_5
-#define com_avrwb_comm_impl_AwbSerialPort_STOPBITS_1_5 3L
-#undef com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_NONE
-#define com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_NONE 0L
-#undef com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_RTSCTS_IN
-#define com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_RTSCTS_IN 1L
-#undef com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_RTSCTS_OUT
-#define com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_RTSCTS_OUT 2L
-#undef com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_XONXOFF_IN
-#define com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_XONXOFF_IN 4L
-#undef com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_XONXOFF_OUT
-#define com_avrwb_comm_impl_AwbSerialPort_FLOWCONTROL_XONXOFF_OUT 8L
 /*
  * Class:     com_avrwb_comm_impl_AwbSerialPort
  * Method:    nativeOpen
@@ -50,13 +14,30 @@ extern "C" {
  */
 JNIEXPORT jlong JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_nativeOpen
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    setSerialPortParams
+ * Signature: (ILcom/avrwb/comm/DataBits;Lcom/avrwb/comm/StopBits;Lcom/avrwb/comm/Parity;)V
+ */
+JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_setSerialPortParams
+  (JNIEnv *, jobject, jint, jobject, jobject, jobject);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    sendBytes
+ * Signature: ([B)V
+ */
+JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_sendBytes
+  (JNIEnv *, jobject, jbyteArray);
+
 /*
  * Class:     com_avrwb_comm_impl_AwbSerialPort
  * Method:    nativeClose
- * Signature: (V)V
+ * Signature: (J)J
  */
-JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_nativeClose
-  (JNIEnv *, jobject);
+JNIEXPORT jlong JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_nativeClose
+  (JNIEnv *, jobject, jlong);
 
 #ifdef __cplusplus
 }

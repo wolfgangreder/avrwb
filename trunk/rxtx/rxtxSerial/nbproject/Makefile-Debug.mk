@@ -35,11 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/7077a4e0/AwbCommDriver.o \
 	${OBJECTDIR}/_ext/7077a4e0/AwbSerialPort.o \
 	${OBJECTDIR}/_ext/7077a4e0/RXTXPort.o \
-	${OBJECTDIR}/Globals.o \
-	${OBJECTDIR}/SerialPeer.o
+	${OBJECTDIR}/Globals.o
 
 
 # C Compiler Flags
@@ -66,11 +64,6 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/librxtxSerial.${CND_DLIB_EXT}: ${OBJE
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/librxtxSerial.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
 
-${OBJECTDIR}/_ext/7077a4e0/AwbCommDriver.o: /home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/7077a4e0
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/usr/java/latest/include -I/usr/java/latest/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/7077a4e0/AwbCommDriver.o /home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbCommDriver.cpp
-
 ${OBJECTDIR}/_ext/7077a4e0/AwbSerialPort.o: /home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/7077a4e0
 	${RM} "$@.d"
@@ -85,11 +78,6 @@ ${OBJECTDIR}/Globals.o: Globals.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/usr/java/latest/include -I/usr/java/latest/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Globals.o Globals.cpp
-
-${OBJECTDIR}/SerialPeer.o: SerialPeer.cpp 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/usr/java/latest/include -I/usr/java/latest/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/SerialPeer.o SerialPeer.cpp
 
 # Subprojects
 .build-subprojects:

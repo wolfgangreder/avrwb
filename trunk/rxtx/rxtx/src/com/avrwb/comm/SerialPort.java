@@ -21,6 +21,7 @@
  */
 package com.avrwb.comm;
 
+import java.io.IOException;
 import java.util.Set;
 
 /**
@@ -107,12 +108,13 @@ public abstract class SerialPort extends CommPort
    * parameters will revert to the values before the call was made.
    * <p>
    * DEFAULT: 9600 baud, 8 data bits, 1 stop bit, no parity</p>
+   * @throws java.io.IOException
    */
   public abstract void setSerialPortParams(int baudrate,
                                            DataBits dataBits,
                                            StopBits stopBits,
                                            Parity parity)
-          throws UnsupportedCommOperationException;
+          throws UnsupportedCommOperationException, IOException;
 
   /**
    * Sets or clears the DTR (Data Terminal Ready) bit in the UART, if supported by the underlying implementation.
