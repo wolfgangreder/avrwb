@@ -109,6 +109,7 @@
     <module>avrawb-base</module>
     <module>assembler</module>
     <module>avrasm-plugin</module>
+    <module>programmer</module>
   </modules>
 
   <properties>
