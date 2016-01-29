@@ -188,11 +188,11 @@ JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_setSerialPortParam
   speed_t c_speed = getSpeedParamenter(speed);
   if (c_speed == -1) { // custom speed
     serinfo.flags |= ASYNC_SPD_CUST;
-    if (cfsetispeed(&termios, CBAUDEX) < 0) {
+    if (cfsetispeed(&termios, CBAUDEX|B38400) < 0) {
       throwIOException(env);
       return;
     }
-    if (cfsetospeed(&termios, CBAUDEX) < 0) {
+    if (cfsetospeed(&termios, CBAUDEX|B38400) < 0) {
       throwIOException(env);
       return;
     }

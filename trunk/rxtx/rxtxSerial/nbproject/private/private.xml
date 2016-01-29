@@ -11,8 +11,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group name="/home/wolfi/projects/avrwb">
             <file>file:/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp</file>
-            <file>file:/home/wolfi/projects/avrwb/rxtx/rxtxSerial/SerialPeer.cpp</file>
             <file>file:/home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.h</file>
+            <file>file:/home/wolfi/projects/avrwb/rxtx/rxtxSerial/Globals.h</file>
+            <file>file:/home/wolfi/projects/avrwb/rxtx/rxtxSerial/Globals.cpp</file>
         </group>
     </open-files>
 </project-private>
