@@ -25,6 +25,9 @@
               </includes>
             </nbmResource>
           </nbmResources>
+          <publicPackages>
+            <publicPackage>com.avrwb.comm</publicPackage>
+          </publicPackages>
         </configuration>
       </plugin>
       <plugin>
@@ -76,6 +79,11 @@
       <groupId>${project.groupId}</groupId>
       <artifactId>base</artifactId>
       <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.netbeans.api</groupId>
+      <artifactId>org-openide-modules</artifactId>
+      <version>RELEASE81</version>
     </dependency>
   </dependencies>
   <properties>

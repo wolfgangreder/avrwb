@@ -19,34 +19,41 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.comm;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
+import java.io.Serializable;
 
-#include <jni.h>
+/**
+ * Thrown when the specified port is in use.
+ *
+ * @author Jagane Sundar
+ * @author wolfi
+ */
+public class PortInUseException extends Exception implements Serializable
+{
 
-class Globals {
-public:
+  private final String currentOwner;
 
-  static JavaVM* getJVM() {
-    return vm;
+  public PortInUseException(String currentOwner)
+  {
+    this.currentOwner = currentOwner;
   }
 
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
+  public PortInUseException(String currentOwner,
+                            String message)
+  {
+    super(message);
+    this.currentOwner = currentOwner;
   }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
 
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
+  /**
+   * Describes the current owner of the communications port.
+   *
+   * @return currentOwner
+   */
+  public String getCurrentOwner()
+  {
+    return currentOwner;
+  }
 
-#endif /* GLOBALS_H */
-
+}

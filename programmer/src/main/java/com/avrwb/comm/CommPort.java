@@ -76,9 +76,8 @@ public abstract class CommPort implements AutoCloseable
    * <p>
    * The read behaviour of the input stream returned by {@code getInputStream} depends on combination of the threshold and timeout
    * values. The possible behaviours are described in the table below:
-   * </p><p>
    * </p><table border="1">
-   * <caption></caption>
+   * <caption>&nbsp;</caption>
    * <tbody>
    * <tr><th colspan="2">Threshold</th><th colspan="2">Timeout</th><th rowspan="2">Read Buffer Size</th><th rowspan="2">Read
    * Behaviour</th></tr>
@@ -118,7 +117,7 @@ public abstract class CommPort implements AutoCloseable
    * Closes the communications port. The application must call {@code close} when it is done with the port. Notification of this
    * ownership change will be propagated to all classes registered using {@code addPortOwnershipListener}.
    *
-   * @throws java.io.IOException
+   * @throws java.io.IOException if any
    */
   @Override
   public abstract void close() throws IOException;

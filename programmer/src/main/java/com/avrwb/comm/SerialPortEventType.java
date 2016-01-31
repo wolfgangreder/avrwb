@@ -19,34 +19,53 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.comm;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
-
-#include <jni.h>
-
-class Globals {
-public:
-
-  static JavaVM* getJVM() {
-    return vm;
-  }
-
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
-  }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
-
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
-
-#endif /* GLOBALS_H */
-
+/**
+ *
+ * @author wolfi
+ */
+public enum SerialPortEventType
+{
+  /**
+   * Break interrupt.
+   */
+  BI,
+  /**
+   * Carrier detect.
+   */
+  CD,
+  /**
+   * Clear to send.
+   */
+  CTS,
+  /**
+   * Data available at the serial port. This event will be generated once when new data arrive at the serial port. Even if the
+   * user doesn't read the data, it won't be generated again until next time new data arrive.
+   */
+  DATA_AVAILABLE,
+  /**
+   * Data set ready.
+   */
+  DSR,
+  /**
+   * Framing error.
+   */
+  FE,
+  /**
+   * Overrun error.
+   */
+  OE,
+  /**
+   * Output buffer is empty. The event will be generated after a write is completed, when the system buffer becomes empty again.
+   */
+  OUTPUT_BUFFER_EMPTY,
+  /**
+   * Parity error.
+   */
+  PE,
+  /**
+   * Parity error.
+   */
+  RI;
+}

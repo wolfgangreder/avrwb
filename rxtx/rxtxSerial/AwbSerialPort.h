@@ -17,6 +17,14 @@ JNIEXPORT jlong JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_nativeOpen
 
 /*
  * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    readPortParams
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_readPortParams
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
  * Method:    setSerialPortParams
  * Signature: (ILcom/avrwb/comm/DataBits;Lcom/avrwb/comm/StopBits;Lcom/avrwb/comm/Parity;)V
  */
@@ -25,11 +33,43 @@ JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_setSerialPortParam
 
 /*
  * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    sendByte
+ * Signature: (I)V
+ */
+JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_sendByte
+  (JNIEnv *, jobject, jint);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
  * Method:    sendBytes
- * Signature: ([B)V
+ * Signature: ([BII)V
  */
 JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_sendBytes
-  (JNIEnv *, jobject, jbyteArray);
+  (JNIEnv *, jobject, jbyteArray, jint, jint);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    readBytes
+ * Signature: ([BIII)I
+ */
+JNIEXPORT jint JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_readBytes
+  (JNIEnv *, jobject, jbyteArray, jint, jint, jint);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    flush
+ * Signature: ()V
+ */
+JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_flush
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     com_avrwb_comm_impl_AwbSerialPort
+ * Method:    bytesAvailable
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_bytesAvailable
+  (JNIEnv *, jobject);
 
 /*
  * Class:     com_avrwb_comm_impl_AwbSerialPort
@@ -39,6 +79,30 @@ JNIEXPORT void JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_sendBytes
 JNIEXPORT jlong JNICALL Java_com_avrwb_comm_impl_AwbSerialPort_nativeClose
   (JNIEnv *, jobject, jlong);
 
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class com_avrwb_comm_impl_AwbSerialPort_MyInputStream */
+
+#ifndef _Included_com_avrwb_comm_impl_AwbSerialPort_MyInputStream
+#define _Included_com_avrwb_comm_impl_AwbSerialPort_MyInputStream
+#ifdef __cplusplus
+extern "C" {
+#endif
+#undef com_avrwb_comm_impl_AwbSerialPort_MyInputStream_MAX_SKIP_BUFFER_SIZE
+#define com_avrwb_comm_impl_AwbSerialPort_MyInputStream_MAX_SKIP_BUFFER_SIZE 2048L
+#ifdef __cplusplus
+}
+#endif
+#endif
+/* Header for class com_avrwb_comm_impl_AwbSerialPort_MyOutputStream */
+
+#ifndef _Included_com_avrwb_comm_impl_AwbSerialPort_MyOutputStream
+#define _Included_com_avrwb_comm_impl_AwbSerialPort_MyOutputStream
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifdef __cplusplus
 }
 #endif

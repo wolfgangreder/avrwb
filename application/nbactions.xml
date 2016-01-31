@@ -2,7 +2,6 @@
 <actions>
         <action>
             <actionName>run</actionName>
-            <preAction>build-with-dependencies</preAction>
             <packagings>
                 <packaging>nbm-application</packaging>
             </packagings>
@@ -39,6 +38,20 @@
             <properties>
                 <jpda.listen>true</jpda.listen>
                 <netbeans.run.params.debug>-J-Xdebug -J-Xrunjdwp:transport=dt_socket,suspend=n,server=n,address=${jpda.address} -J-Dat.avrwb.debuglogging=true -J-Dsun.awt.disablegrab=true</netbeans.run.params.debug>
+                <skipTests>true</skipTests>
+            </properties>
+        </action>
+        <action>
+            <actionName>CUSTOM-Run (skip test)</actionName>
+            <displayName>Run (skip test)</displayName>
+            <preAction>build-with-dependencies</preAction>
+            <goals>
+                <goal>nbm:cluster-app</goal>
+                <goal>nbm:run-platform</goal>
+            </goals>
+            <properties>
+                <skipTests>true</skipTests>
+                <netbeans.run.params.debug>-J-Dat.avrwb.debuglogging=true</netbeans.run.params.debug>
             </properties>
         </action>
     </actions>
