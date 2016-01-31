@@ -21,6 +21,7 @@
  */
 package com.avrwb.comm.impl;
 
+import com.avrwb.avr8.helper.Utils;
 import com.avrwb.comm.DataBits;
 import com.avrwb.comm.FlowControl;
 import com.avrwb.comm.Parity;
@@ -28,7 +29,6 @@ import com.avrwb.comm.SerialPort;
 import com.avrwb.comm.SerialPortEventListener;
 import com.avrwb.comm.StopBits;
 import com.avrwb.comm.UnsupportedCommOperationException;
-import gnu.io.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

@@ -19,34 +19,38 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.programmer;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
+import com.avrwb.io.MemoryChunkOutputStream;
+import java.io.IOException;
+import java.util.Map;
 
-#include <jni.h>
+/**
+ *
+ * @author wolfi
+ */
+public interface AvrProgrammer extends AutoCloseable
+{
 
-class Globals {
-public:
+  /**
+   * Map der Unterstützten Controller.
+   * <p>
+   * Der Key entrspicher der Signatur (LSB -&lt; Signaturadresse 0).
+   * </p>
+   *
+   * @return Map der Unterstützten Controller
+   */
+  public Map<Long, String> getSupportedDevices();
 
-  static JavaVM* getJVM() {
-    return vm;
-  }
+  public Long enterProgramMode() throws IOException;
 
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
-  }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
+  public Long readSignature() throws IOException;
 
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
+  public void leaveProgramMode() throws IOException;
 
-#endif /* GLOBALS_H */
+  public void readDevice(MemoryChunkOutputStream stream) throws IOException;
 
+  @Override
+  public void close() throws IOException;
+
+}

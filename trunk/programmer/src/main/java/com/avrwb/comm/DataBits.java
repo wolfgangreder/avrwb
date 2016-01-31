@@ -19,34 +19,17 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.comm;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
-
-#include <jni.h>
-
-class Globals {
-public:
-
-  static JavaVM* getJVM() {
-    return vm;
-  }
-
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
-  }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
-
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
-
-#endif /* GLOBALS_H */
-
+/**
+ *
+ * @author wolfi
+ */
+public enum DataBits
+{
+  DATA_5,
+  DATA_6,
+  DATA_7,
+  DATA_8,
+  DATA_9;
+}

@@ -19,34 +19,22 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.comm;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
+import java.util.EventListener;
 
-#include <jni.h>
+/**
+ *
+ * @author wolfi
+ */
+public interface SerialPortEventListener extends EventListener
+{
 
-class Globals {
-public:
+  /**
+   * Propagates a SerialPortEvent event.
+   *
+   * @param ev event
+   */
+  public void serialEvent(SerialPortEvent ev);
 
-  static JavaVM* getJVM() {
-    return vm;
-  }
-
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
-  }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
-
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
-
-#endif /* GLOBALS_H */
-
+}

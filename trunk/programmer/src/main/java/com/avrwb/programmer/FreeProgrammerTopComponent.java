@@ -21,18 +21,18 @@
  */
 package com.avrwb.programmer;
 
-import gnu.io.Raw;
-import gnu.io.RawPortEvent;
-import gnu.io.SerialPort;
+import com.avrwb.io.IntelHexOutputStream;
+import com.avrwb.programmer.impl.AN303Programmer;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStreamWriter;
+import java.io.OutputStream;
+import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.RequestProcessor;
 import org.openide.windows.TopComponent;
 
 /**
@@ -80,11 +80,14 @@ public final class FreeProgrammerTopComponent extends TopComponent
 
     javax.swing.JLabel jLabel1 = new javax.swing.JLabel();
     jButton1 = new javax.swing.JButton();
+    jScrollPane1 = new javax.swing.JScrollPane();
+    jTextArea1 = new javax.swing.JTextArea();
 
     jLabel1.setLabelFor(edPort);
     org.openide.awt.Mnemonics.setLocalizedText(jLabel1, org.openide.util.NbBundle.getMessage(FreeProgrammerTopComponent.class, "FreeProgrammerTopComponent.jLabel1.text")); // NOI18N
 
     edPort.setText(org.openide.util.NbBundle.getMessage(FreeProgrammerTopComponent.class, "FreeProgrammerTopComponent.edPort.text")); // NOI18N
+    edPort.setToolTipText(org.openide.util.NbBundle.getMessage(FreeProgrammerTopComponent.class, "FreeProgrammerTopComponent.edPort.toolTipText")); // NOI18N
 
     org.openide.awt.Mnemonics.setLocalizedText(jButton1, org.openide.util.NbBundle.getMessage(FreeProgrammerTopComponent.class, "FreeProgrammerTopComponent.jButton1.text")); // NOI18N
     jButton1.addActionListener(new java.awt.event.ActionListener()
@@ -95,6 +98,11 @@ public final class FreeProgrammerTopComponent extends TopComponent
       }
     });
 
+    jTextArea1.setColumns(20);
+    jTextArea1.setFont(new java.awt.Font("Courier New", 0, 14)); // NOI18N
+    jTextArea1.setRows(5);
+    jScrollPane1.setViewportView(jTextArea1);
+
     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
     this.setLayout(layout);
     layout.setHorizontalGroup(
@@ -104,9 +112,13 @@ public final class FreeProgrammerTopComponent extends TopComponent
         .addComponent(jLabel1)
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-          .addComponent(jButton1)
-          .addComponent(edPort, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
-        .addContainerGap(540, Short.MAX_VALUE))
+          .addGroup(layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jButton1)
+              .addComponent(edPort, javax.swing.GroupLayout.PREFERRED_SIZE, 211, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(0, 528, Short.MAX_VALUE))
+          .addComponent(jScrollPane1))
+        .addContainerGap())
     );
     layout.setVerticalGroup(
       layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -117,7 +129,9 @@ public final class FreeProgrammerTopComponent extends TopComponent
           .addComponent(edPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
         .addComponent(jButton1)
-        .addContainerGap(445, Short.MAX_VALUE))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 427, Short.MAX_VALUE)
+        .addContainerGap())
     );
   }// </editor-fold>//GEN-END:initComponents
 
@@ -129,6 +143,8 @@ public final class FreeProgrammerTopComponent extends TopComponent
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private final javax.swing.JTextField edPort = new javax.swing.JTextField();
   private javax.swing.JButton jButton1;
+  private javax.swing.JScrollPane jScrollPane1;
+  private javax.swing.JTextArea jTextArea1;
   // End of variables declaration//GEN-END:variables
   @Override
   public void componentOpened()
@@ -157,51 +173,42 @@ public final class FreeProgrammerTopComponent extends TopComponent
     // TODO read your settings according to their version
   }
 
+  private static class ToTextAreaOutputStream extends OutputStream
+  {
+
+    private final JTextArea a;
+
+    public ToTextAreaOutputStream(JTextArea a)
+    {
+      this.a = a;
+    }
+
+    @Override
+    public void write(int b) throws IOException
+    {
+      SwingUtilities.invokeLater(() -> {
+        a.append(Character.toString((char) b));
+      });
+
+    }
+
+  }
+
   private void doProgram()
   {
-    try (Raw port = new Raw(edPort.getText())) {
-      port.setRawPortParams(250_000,
-                            SerialPort.DATABITS_8,
-                            SerialPort.STOPBITS_1,
-                            SerialPort.PARITY_NONE);
-      //int baudBase = port.getBaudBase();
-//      int divisor = baudBase / 250_000;
-//      port.setDivisor(divisor);
-//      baudBase = port.getBaudRate();
-//      divisor = port.getDivisor();
-//      port.addEventListener((SerialPortEvent ev) -> {
-//        if (ev.getEventType() == SerialPortEvent.DATA_AVAILABLE) {
-//          try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(port.getInputStream()))) {
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//              System.out.println(line);
-//            }
-//          } catch (IOException ex) {
-//            Exceptions.printStackTrace(ex);
-//
-//          }
-//        }
-//      });
-      port.addEventListener((RawPortEvent ev) -> {
-        if (ev.getEventType() == RawPortEvent.DATA_AVAILABLE) {
-          try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(port.getInputStream()))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-              System.out.println(line);
-            }
-          } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-
-          }
+    RequestProcessor.getDefault().post(() -> {
+      try (AN303Programmer programmer = new AN303Programmer(edPort.getText())) {
+        Long signature = programmer.enterProgramMode();
+        if (signature != null) {
+          System.out.println("Signature: 0x" + Long.toHexString(signature));
+          ToTextAreaOutputStream os = new ToTextAreaOutputStream(jTextArea1);
+          programmer.readDevice(new IntelHexOutputStream(os));
         }
-      });
-      port.notifyOnDataAvailable(true);
-      try (OutputStreamWriter out = new OutputStreamWriter(port.getOutputStream())) {
-        out.write('h');
+      } catch (Error | Exception ex) {
+        Exceptions.printStackTrace(ex);
       }
-    } catch (Error | Exception ex) {
-      Exceptions.printStackTrace(ex);
-    }
+      System.out.println("done");
+    });
   }
 
 }

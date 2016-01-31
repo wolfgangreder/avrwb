@@ -31,6 +31,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
 JavaVM* Globals::vm;
 jclass Globals::clazzIOException;
 jclass Globals::classAwbSerialPort;
+jclass Globals::clazzUnsupportedCommOpException;
 
 void Globals::setJVM(JavaVM* pvm)
 {
@@ -45,6 +46,10 @@ void Globals::setJVM(JavaVM* pvm)
       clazzIOException = env->FindClass("java/io/IOException");
       if (clazzIOException != NULL) {
         clazzIOException = reinterpret_cast<jclass> (env->NewWeakGlobalRef(clazzIOException));
+      }
+      clazzUnsupportedCommOpException = env->FindClass("com/avrwb/comm/UnsupportedCommOperationException");
+      if (clazzUnsupportedCommOpException != NULL) {
+        clazzUnsupportedCommOpException = reinterpret_cast<jclass> (env->NewWeakGlobalRef(clazzUnsupportedCommOpException));
       }
     }
   }
@@ -69,4 +74,9 @@ void Globals::throwException(JNIEnv* env, jclass clazz, const char* msg)
   if (clazz != NULL) {
     env->ThrowNew(clazz, msg);
   }
+}
+
+void Globals::throwUnsupportedCommOperationException(JNIEnv* env, const char* msg)
+{
+  throwException(env, clazzUnsupportedCommOpException, msg);
 }

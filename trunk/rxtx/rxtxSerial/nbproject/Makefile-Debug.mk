@@ -36,7 +36,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/7077a4e0/AwbSerialPort.o \
-	${OBJECTDIR}/_ext/7077a4e0/RXTXPort.o \
 	${OBJECTDIR}/Globals.o
 
 
@@ -68,11 +67,6 @@ ${OBJECTDIR}/_ext/7077a4e0/AwbSerialPort.o: /home/wolfi/projects/avrwb/rxtx/rxtx
 	${MKDIR} -p ${OBJECTDIR}/_ext/7077a4e0
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -I/usr/java/latest/include -I/usr/java/latest/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/7077a4e0/AwbSerialPort.o /home/wolfi/projects/avrwb/rxtx/rxtxSerial/AwbSerialPort.cpp
-
-${OBJECTDIR}/_ext/7077a4e0/RXTXPort.o: /home/wolfi/projects/avrwb/rxtx/rxtxSerial/RXTXPort.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/7077a4e0
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -I/usr/java/latest/include -I/usr/java/latest/include/linux -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/7077a4e0/RXTXPort.o /home/wolfi/projects/avrwb/rxtx/rxtxSerial/RXTXPort.cpp
 
 ${OBJECTDIR}/Globals.o: Globals.cpp 
 	${MKDIR} -p ${OBJECTDIR}

@@ -19,34 +19,35 @@
  * MA 02110-1301  USA
  *
  */
+package com.avrwb.comm;
 
-#ifndef GLOBALS_H
-#define GLOBALS_H
+import java.io.Serializable;
 
-#include <jni.h>
+/**
+ * Thrown when a driver doesn't allow the specified operation.
+ *
+ * @author Jagane Sundar
+ * @author wolfi
+ * @see CommPort
+ */
+public class UnsupportedCommOperationException extends Exception implements Serializable
+{
 
-class Globals {
-public:
-
-  static JavaVM* getJVM() {
-    return vm;
+  /**
+   * Constructs {@code an UnsupportedCommOperationException} with no detail message.
+   */
+  public UnsupportedCommOperationException()
+  {
   }
 
-  static jclass getAwbSerialPortClass() {
-    return classAwbSerialPort;
+  /**
+   * Constructs an {@code UnsupportedCommOperationException} with the specified detail message.
+   *
+   * @param message the detail message.
+   */
+  public UnsupportedCommOperationException(String message)
+  {
+    super(message);
   }
-  static void setJVM(JavaVM* vm);
-  static void throwJavaException(JNIEnv* env, const char* clazzName, const char* msg);
-  static void throwIOException(JNIEnv* env, const char* msg);
-  static void throwUnsupportedCommOperationException(JNIEnv* env, const char* msg);
-private:
-  static JavaVM* vm;
-  static jclass clazzIOException;
-  static jclass clazzUnsupportedCommOpException;
-  static jclass classAwbSerialPort;
 
-  static void throwException(JNIEnv* env, jclass clazz, const char* msg);
-};
-
-#endif /* GLOBALS_H */
-
+}
